@@ -137,6 +137,7 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ; ;from lens5_index.ncl
   ; f1   = addfile(diri+"lens5/PDI/"+MODEL(ia)+"_"+EXP+"_"+ENSN(ia)+"_PDI_"+yrs+"-"+yrl+".nc", "r") 
   ; pc  = f1->index
+  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
 
   ;global external forcing mode
   ;from mme_eof_cmip6.ncl 
@@ -154,7 +155,6 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ; pc_sea2!0 = "time"
   delete([/xx/]);,xa_sea,pc_sea /])
   
-; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
 
 ; ???
 pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)

@@ -47,26 +47,21 @@ diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 
 
 VAR = "TS" ;"od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ; 
-EXP =  "" ;"xlulc" ; "xghg"; "xaer" ; "xlulc"; "xbmb"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA"; 
 AA =  ""
 
-VAR = "TS" ;"netsw" ;"ts" ;"netcssw" ;"cloudeffect" ;"psl" ; "tas"
-
 MODEL = "cesm1_le";"cesm2_cmip5_forcing" ;
-EXP =  (/"xghg", "xaer" , "xlulc", "xbmb"/); "" ;"xlulc" ; 
+EXP =  (/"xghg", "xaer" , "xlulc", "xbmb"/);"" ;
 
 nm = dimsizes(EXP)
 
-
-istart = 0
-do im = istart,nsa-1
+do im = 0,nm-1
 
 if (MODEL.eq."cesm2_cmip5_forcing") then
 locs = systemfunc("ls "+diri2+"*"+MODEL+"*"+VAR+"*.nc") 
 else 
 locs = systemfunc("ls "+diri1+"*"+EXP(im)+"*"+VAR+"*.nc") 
-end do 
+end if 
 print(locs)
 nsa = dimsizes(locs)
 
@@ -138,28 +133,29 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ;---------read output---------------
   
 
-  ; ;;some index
-  ; ;from lens5_index.ncl
-  ; if (MODEL.eq."cesm2_cmip5_forcing") then
-  ;   f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+ENSN(im)+"_PDI_"+yrs+"-"+yrl+".nc", "r") 
-  ; else
-  ;   f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+EXP+"_"+ENSN(im)+"_PDI_"+yrs+"-"+yrl+".nc", "r") 
-  ; end if 
-  ; pc  = f1->index
-
-  ;global external forcing mode
-  ;from mme_eof_cmip6.ncl 
+  ;;some index
+  ;from lens5_index.ncl
   if (MODEL.eq."cesm2_cmip5_forcing") then
-    ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_*_PDI_"+yrs+"-"+yrl+".nc") 
+    f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+ENSN(ia)+"_PDI_"+yrs+"-"+yrl+".nc", "r") 
   else
-    ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_"+EXP+"_*_PDI_"+yrs+"-"+yrl+".nc") 
+    f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_PDI_"+yrs+"-"+yrl+".nc", "r") 
   end if 
-  f1   = addfiles(ff, "r") 
-  ListSetType (f1, "join")       
-  pc0  = f1[:]->index
-  pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions 
-  pc_ft = dim_avg_n_Wrap(pc, 0)
-  delete([/ff,pc0/])
+  pc  = f1->index
+  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
+
+  ; ;global external forcing mode
+  ; ;from mme_eof_cmip6.ncl 
+  ; if (MODEL.eq."cesm2_cmip5_forcing") then
+  ;   ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_*_PDI_"+yrs+"-"+yrl+".nc") 
+  ; else
+  ;   ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_*_PDI_"+yrs+"-"+yrl+".nc") 
+  ; end if 
+  ; f1   = addfiles(ff, "r") 
+  ; ListSetType (f1, "join")       
+  ; pc0  = f1[:]->index
+  ; pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions 
+  ; pc_ft = dim_avg_n_Wrap(pc, 0)
+  ; delete([/ff,pc0/])
 
   ; pc_annual = month_to_annual(pc, 1)
   ; pc_sea = month_to_seasonN(pc, SEASON)
@@ -167,11 +163,10 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ; pc_sea2!0 = "time"
   delete([/xx/]);,xa_sea,pc_sea /])
   
-; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
 
 ; ???
 pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
-
+printVarSummary(pc_ft)
 ;---------interpolate---------------------
 ;change resolution for MODELS to the same 144*72
     zz = xa
@@ -202,9 +197,11 @@ rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:EL
 
 ;--------output-------------
 if (MODEL.eq."cesm2_cmip5_forcing") then
-fon=diri+"lens5/"+MODEL+"_"+ENSN(im)+"_reg_mme_"+IND+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_reg_"+IND+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+; fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 else
-fon=diri+"lens5/"+MODEL+"_"+EXP+"_"+ENSN(im)+"_reg_mme_"+IND+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_reg_"+IND+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+; fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 end if 
 system("rm -f "+fon)
 fo=addfile(fon,"c")
@@ -226,7 +223,7 @@ rp1!0 = "ensemble"
 delete([/locs/]);,x_Lead1
 
 print("regression done for "+MODEL(0))
-delete([/MODEL,ENSN,aa,rp1/])
+delete([/ENSN,aa,rp1/])
 
 end do 
 

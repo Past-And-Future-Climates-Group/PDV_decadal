@@ -1,6 +1,8 @@
 begin
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/"
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/"
+diri = "/glade/work/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/data/" ;
+dirip = "/glade/u/home/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/pic/" ;
+
+setfileoption("nc","SuppressClose",False)
 
   yrs = 1861;1950;
   yrl = 2004
@@ -41,7 +43,7 @@ mrc1(im,:,:)  =  dim_avg_n_Wrap(f[:]->rc, 0)
 
 delete([/fils,f/])
 end do
-printVarSummary(crc1)
+printVarSummary(rc1)
 printVarSummary(mrc1)
 
 ;;;;;;;;;;;;;;;CESM;;;;;;;;;;;;;;;;;;;;
@@ -58,13 +60,13 @@ mrc2 = new((/nex,72,144/),"float")
 
 do ia = 0,nex-1
 ;cesm1_le_xaer_020_reg_mme_PDI_TS_1920-2004
-fils = systemfunc("ls "+diri+"lens5/cesm1_le_"+EXP2(ia)+"*"+IND+"_"+VAR2+"*.nc")
+fils = systemfunc("ls "+diri+"lens5/cesm1_le_"+EXP2(ia)+"*reg_"+IND+"_"+VAR2+"*.nc")
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
-crc2(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
+rc2(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
 
-fils = systemfunc("ls "+diri+"lens5/cesm1_le_"+EXP2(ia)+"*mme_"+IND+"_"+VAR2+"*.nc")
+fils = systemfunc("ls "+diri+"lens5/cesm1_le_"+EXP2(ia)+"*reg_mme_"+IND+"_"+VAR2+"*.nc")
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
@@ -76,17 +78,18 @@ printVarSummary(mrc2)
 
 ;;;CESM2 with CMIP5 forcing;;;;;;;;;;;;;;
 ;cesm2_cmip5_forcing_001_reg_mme_PDI_TS_1850-2004
-fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing*"+IND+"_"+VAR2+"*.nc")
+fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing*reg_"+IND+"_"+VAR2+"*.nc")
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
-crc3  = dim_avg_n_Wrap(f[:]->rc, 0)
+rc3  = dim_avg_n_Wrap(f[:]->rc, 0)
 
-fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing*mme_"+IND+"_"+VAR2+"*.nc")
+fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing*reg_mme_"+IND+"_"+VAR2+"*.nc")
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
 mrc3  = dim_avg_n_Wrap(f[:]->rc, 0)
+delete([/fils,f/])
 
 
 ;;;;;;;;;;;;;;;CMIP6 LE;;;;;;;;;;;;;;;;;;;;
@@ -100,19 +103,20 @@ nens6 = (/32,30,25,12,11, 10, 10,\;10,
           ; 3,3,3,\
           ; 3,3,3 /) ;ensemble number 5,
 nm6 = dimsizes(MODEL6)
+IND2 = "PDI2"
 
 rc4 = new((/nm6,72,144/),"float")
 mrc4 = new((/nm6,72,144/),"float")
 
 do ia = 0,nm6-1
 ;NorCPM1_r24i1p1f1_reg_mme_PDI2_historical_ts_1850-2014.nc
-fils = systemfunc("ls "+diri+"lens6/"+MODEL6(ia)+"*"+IND+"_historical_"+VAR+"*.nc")
+fils = systemfunc("ls "+diri+"lens6/"+MODEL6(ia)+"*reg_"+IND2+"_historical_"+VAR+"*.nc")
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
-crc4(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
+rc4(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
 
-fils = systemfunc("ls "+diri+"lens6/"+MODEL6(ia)+"*mme_"+IND+"_historical_"+VAR+"*.nc")
+fils = systemfunc("ls "+diri+"lens6/"+MODEL6(ia)+"*reg_mme_"+IND2+"_historical_"+VAR+"*.nc")
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
@@ -126,7 +130,7 @@ printVarSummary(mrc4)
 
 
 ; ;-------t-test---------------------------------
-; pra_std = dim_stddev_n_Wrap(crc, 0)
+; pra_std = dim_stddev_n_Wrap(rc, 0)
 
 ; df = pra_avg_p1
 ; df = nens(im)
@@ -197,7 +201,7 @@ res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 do im = 0,nm5-1
     res2@gsnLeftString = "internal variability"
     res2@gsnRightString = MODEL5(im)
-    plot(im) = gsn_csm_contour_map_ce(wks, crc1(im,:,:), res2)
+    plot(im) = gsn_csm_contour_map_ce(wks, rc1(im,:,:), res2)
     res2@gsnLeftString = "external response"
     plot1(im) = gsn_csm_contour_map_ce(wks, mrc1(im,:,:), res2)
 end do
@@ -205,7 +209,7 @@ end do
 do im = 0,nm6-1
   res2@gsnLeftString = "internal variability"
   res2@gsnRightString = MODEL6(im)
-  plot2(im) = gsn_csm_contour_map_ce(wks, crc4(im,:,:), res2)
+  plot2(im) = gsn_csm_contour_map_ce(wks, rc4(im,:,:), res2)
   res2@gsnLeftString = "external response"
   plot3(im) = gsn_csm_contour_map_ce(wks, mrc4(im,:,:), res2)
 end do
@@ -213,16 +217,16 @@ end do
 do im = 0,nex-1
   res2@gsnLeftString = "internal variability"
   res2@gsnRightString = EXP2(im)+" in CESM1"
-  plot4(im) = gsn_csm_contour_map_ce(wks, crc2(im,:,:), res2)
+  plot4(im) = gsn_csm_contour_map_ce(wks, rc2(im,:,:), res2)
   res2@gsnLeftString = "external response"
   plot5(im) = gsn_csm_contour_map_ce(wks, mrc2(im,:,:), res2)
 end do
 
 res2@gsnLeftString = "internal variability"
 res2@gsnRightString = "CESM2 with CMIP5 forcing"
-plot4(nex) = gsn_csm_contour_map_ce(wks, crc3, res2)
+plot4(nex) = gsn_csm_contour_map_ce(wks, rc3, res2)
 res2@gsnLeftString = "external response"
-plot5(nex) = gsn_csm_contour_map_ce(wks, mrc4, res2)
+plot5(nex) = gsn_csm_contour_map_ce(wks, mrc3, res2)
 
 resk = True
 ;resk@txFontHeightF = 0.03
@@ -239,11 +243,13 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ;resk@pmLabelBarHeightF = 0.2
 ;resk@pmLabelBarParallelPosF = 0.3 ;default 0.5
 ;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
-; resk@txString = VAR+" regressed onto "+IND+" "+yrs+"-"+yrl
+resk@txString = VAR+" regressed onto "+IND+" CMIP5 LENS"
 gsn_panel(wks,plot,(/5,2/),resk)
 gsn_panel(wks,plot1,(/5,2/),resk)
+resk@txString = VAR+" regressed onto "+IND+" CMIP6 LENS"
 gsn_panel(wks,plot2,(/5,2/),resk)
 gsn_panel(wks,plot3,(/5,2/),resk)
+resk@txString = VAR+" regressed onto "+IND+" CMIP5 forcings"
 gsn_panel(wks,plot4,(/5,2/),resk)
 gsn_panel(wks,plot5,(/5,2/),resk)
 

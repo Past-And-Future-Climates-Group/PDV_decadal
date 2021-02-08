@@ -133,27 +133,26 @@ do ia = 0,nsa-1
   ; f1   = addfile(diri+"cmip6/pdv/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_pdv_1850-2014.nc", "r")
   ; pc  = f1->pc(0,(yrs-1850)*12:)
 
-  ; ;;some index
-  ; ;from cmip_index.ncl
-  ; f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
-  ; ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
-  ; pc  = tofloat(f1->index((yrs-1850)*12:))
-  ; ; pc  = dtrend(pc, 0)
-  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
+  ;;some index
+  ;from cmip_index.ncl
+  f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
+  ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
+  pc  = tofloat(f1->index((yrs-1850)*12:))
+  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ; ;global external forcing mode
   ; ; from mme_eof_cmip6.ncl
   ;   f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
   ;   pc  = f1->pc(1,:)
 
-  ;Each model's MME index
-  ff = systemfunc("ls "+diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_*_"+IND+"_1850-2014.nc")
-  f1   = addfiles(ff, "r")
-  ListSetType (f1, "join")
-  pc0  = f1[:]->index
-  pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions
-  pc_ft = dim_avg_n_Wrap(pc, 0)
-  delete([/ff,pc0/])
+  ; ;Each model's MME index
+  ; ff = systemfunc("ls "+diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_*_"+IND+"_1850-2014.nc")
+  ; f1   = addfiles(ff, "r")
+  ; ListSetType (f1, "join")
+  ; pc0  = f1[:]->index
+  ; pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions
+  ; pc_ft = dim_avg_n_Wrap(pc, 0)
+  ; delete([/ff,pc0/])
 
   ; pc_sea = month_to_seasonN(pc, SEASON)
   ; pc_sea2 = ndtooned(pc_sea)
@@ -174,7 +173,8 @@ copy_VarCoords(xa(0,:,:), aa(ia,:,:))
 rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
 
 ;--------output-------------
-fon=diri+"cmip6/lens/"+MODEL6(im)+"_"+ENSN+"reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+; fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_mme_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->rc = aa(ia,:,:)

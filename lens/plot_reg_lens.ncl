@@ -1,111 +1,132 @@
 begin
-diri = "/glade/work/chenxing/enso/"
-dirip = "/glade/u/home/chenxing/enso/"
-
-NLAT =  70; 65; 5; 60;
-SLAT =  20;-70;-5;-60;
-WLON =  100;120;
-ELON =  300;290;
-
-;read obs IPO results
-;from obs_ipo.ncl
-f0   = addfile(diri+"obs_pdv_1880-2018.nc", "r") ;obs_pdv_1854-2019.nc
-rco  = f0->rc(0,:,:)
-pco  = f0->pc
-pcvaro  = f0->pcvar
-printVarSummary(rco)
-
-  fref = systemfunc("ls "+diri+"cmip5/tos.pdv/cmip5_historical_ACCESS1-0_r1i1p1_pdv_1861-2004.nc")
-  print(fref)
-  fr   = addfile(fref(0), "r")  ;multiple files
-  rref = fr->rc({SLAT:NLAT},{WLON:ELON})
-
-;change resolution for obs to fit with model (to do pattern correlation)
-    aa = rco({SLAT:NLAT},{WLON:ELON})
-   ; r_lon = 360./dimsizes(xam&lon)
-    ; r_lat = 180./dimsizes(xam&lat)
-    lat = aa&lat
-    lon = aa&lon
-    nlat = dimsizes(rref&lat) ;target dimension size
-    nlon = dimsizes(rref&lon) ;target dimension size
-    klon = fspan(WLON, ELON, nlon) ;target dimension
-    klat = fspan(SLAT, NLAT, nlat) ;target dimension
-    rco_r= linint2_Wrap(lon, lat, aa, True, klon, klat, 0)
-    rco_r&LAT@units="degrees_north"
-    rco_r&LON@units="degrees_east"
-    printVarSummary(rco_r)
-    delete([/lat,lon,klat,klon,aa/]);xa0
+diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/"
+dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/"
 
   yrs = 1861;1950;
   yrl = 2004
   ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
-diri1 = "/glade/collections/cmip/cmip5/"
-diri2 = "/glade/work/chenxing/CMIP5/historical/remap/tos/"
-;from cdo_cmip_data.ncl
-diri3 = "/glade/scratch/chenxing/cmip5/"
-SEASON = (/"DJF","MAM","JJA","SON" /)
-
-
-
-diri1 = "/glade/work/chenxing/enso/E3SM/"
-diri2 = "/gpfs/fs1/collections/cdg/data/CLIVAR_LE/"
-SEASON = (/"DJF","MAM","JJA","SON" /)
-
-MODEL_LOCS = (/"cesm_lens","canesm2_lens","csiro_mk36_lens",\;"ec_earth_lens",
-  "gfdl_cm3_lens","gfdl_esm2m_lens","mpi_lens" /)
-MODEL_NAME = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
+MODEL5 = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
   "GFDL-CM3","GFDL-ESM2M","MPI-ESM" /)
+nens5 = (/"40","50","30","20","30","100" /)
 
-nm = dimsizes(MODEL_LOCS)
+nm5 = dimsizes(MODEL5)
 
 VAR = "ts" ;"od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
-IND = "PDI2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
-AA =  ""
+IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 
-nens_all = 10
+rc1 = new((/nm5,72,144/),"float")
+mrc1 = new((/nm5,72,144/),"float")
 
-;from reg_pdi_lens5.ncl
-
-
+do im = 0,nm5-1
 ;---------read output---------------
-f1   = addfile(diri+"cmip5_reg_all_PDI2_historical_tas_1861-2004.nc", "r")
-ccr1  = f1->ccr1
 
-f2   = addfile(diri+"cmip6_reg_all_PDI2_historical_ts_1850-2014.nc", "r")
-ccr2  = f2->ccr1
+;;;;;;;;;;;;;;;LENS;;;;;;;;;;;;;;;;;;;;
+;from reg_pdi_lens5.ncl
+;;;CMIP5 LENS;;;;;;;;;;;;;;
+;CanESM2_r4i1p1_reg_mme_PDI_historical_ts_1950-2004
+fils = systemfunc("ls "+diri+"lens5/"+MODEL5(im)+"*reg_"+IND+"*"+VAR+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+rc1(im,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
+
+fils = systemfunc("ls "+diri+"lens5/"+MODEL5(im)+"*reg_mme_"+IND+"*"+VAR+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+mrc1(im,:,:)  =  dim_avg_n_Wrap(f[:]->rc, 0)
+
+delete([/fils,f/])
+end do
+printVarSummary(crc1)
+printVarSummary(mrc1)
+
+;;;;;;;;;;;;;;;CESM;;;;;;;;;;;;;;;;;;;;
+;from reg_pdi_cesm.ncl
+;;;CESM1 single forcing;;;;;;;;;;;;;;
+MODEL2 = "cesm1_le";"cesm2_cmip5_forcing" ;
+EXP2 =  (/"xghg", "xaer" , "xlulc", "xbmb"/);"" ;
+nens2 = (/"20","20","5","15" /) ;"7"
+nex = dimsizes(EXP2)
+VAR2 = "TS"
+
+rc2 = new((/nex,72,144/),"float")
+mrc2 = new((/nex,72,144/),"float")
+
+do ia = 0,nex-1
+;cesm1_le_xaer_020_reg_mme_PDI_TS_1920-2004
+fils = systemfunc("ls "+diri+"lens5/cesm1_le_"+EXP2(ia)+"*"+IND+"_"+VAR2+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+crc2(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
+
+fils = systemfunc("ls "+diri+"lens5/cesm1_le_"+EXP2(ia)+"*mme_"+IND+"_"+VAR2+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+mrc2(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
+
+delete([/fils,f/])
+end do
+printVarSummary(mrc2)
+
+;;;CESM2 with CMIP5 forcing;;;;;;;;;;;;;;
+;cesm2_cmip5_forcing_001_reg_mme_PDI_TS_1850-2004
+fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing*"+IND+"_"+VAR2+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+crc3  = dim_avg_n_Wrap(f[:]->rc, 0)
+
+fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing*mme_"+IND+"_"+VAR2+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+mrc3  = dim_avg_n_Wrap(f[:]->rc, 0)
 
 
-f1   = addfile(diri+"cmip5_reg_mmemmeeof2_historical_tas_1861-2004.nc", "r")
-mcr1  = f1->ccr1
+;;;;;;;;;;;;;;;CMIP6 LE;;;;;;;;;;;;;;;;;;;;
+MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0","MIROC6",\;"GISS-E2-1-H",
+  "MPI-ESM1-2-LR","MPI-ESM1-2-HR"/);,"MRI-ESM2-0","E3SM-1-0",\
+    ; "BCC-CSM2-MR","CESM2-FV2","CESM2-WACCM-FV2",\
+    ;      "CESM2-WACCM","FIO-ESM-2-0","NorESM2-LM" /) ;large ensemble model in CMIP6 "NESM3",
 
-f2   = addfile(diri+"cmip6_reg_mmemmeeof2_historical_ts_1850-2014.nc", "r")
-mcr2  = f2->ccr1
+nens6 = (/32,30,25,12,11, 10, 10,\;10,
+          10,7/);,5,5,\
+          ; 3,3,3,\
+          ; 3,3,3 /) ;ensemble number 5,
+nm6 = dimsizes(MODEL6)
 
-printVarSummary(ccr1)
-printVarSummary(mcr1)
-printVarSummary(mcr2)
-;;----------composite-----------------
-;MME
-com_ccr = dim_avg_n_Wrap(ccr1 , 0)
-printVarSummary(com_ccr)
-com_ccr_y = dim_avg_n_Wrap(ccr1(i5y,:,:) , 0)
-com_ccr_n = dim_avg_n_Wrap(ccr1(i5n,:,:) , 0)
-com_mcr = dim_avg_n_Wrap(mcr1 , 0)
-printVarSummary(com_mcr)
-com_mcr_y = dim_avg_n_Wrap(mcr1(i5y,:,:) , 0)
-com_mcr_n = dim_avg_n_Wrap(mcr1(i5n,:,:) , 0)
+rc4 = new((/nm6,72,144/),"float")
+mrc4 = new((/nm6,72,144/),"float")
 
-;CMIP6
-com_ccr6 = dim_avg_n_Wrap(ccr2 , 0)
-com_mcr6 = dim_avg_n_Wrap(mcr2 , 0)
+do ia = 0,nm6-1
+;NorCPM1_r24i1p1f1_reg_mme_PDI2_historical_ts_1850-2014.nc
+fils = systemfunc("ls "+diri+"lens6/"+MODEL6(ia)+"*"+IND+"_historical_"+VAR+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+crc4(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
 
-printMinMax(com_ccr, 0)
-printMinMax(com_mcr, 0)
+fils = systemfunc("ls "+diri+"lens6/"+MODEL6(ia)+"*mme_"+IND+"_historical_"+VAR+"*.nc")
+print(fils)
+f   = addfiles(fils, "r")  ;multiple files
+ListSetType (f, "join")
+mrc4(ia,:,:)  = dim_avg_n_Wrap(f[:]->rc, 0)
+
+delete([/fils,f/])
+end do
+
+printVarSummary(mrc4)
+
+
+
 ; ;-------t-test---------------------------------
-; pra_std = dim_stddev_n_Wrap(ccr, 0)
+; pra_std = dim_stddev_n_Wrap(crc, 0)
 
 ; df = pra_avg_p1
 ; df = nens(im)
@@ -122,11 +143,13 @@ printMinMax(com_mcr, 0)
 ; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
 
 ;--------------plot-------------------
-wks = gsn_open_wks("ps", dirip+"fig2_pdi_reg");
-plot = new(30,graphic)                ; create graphic array
-plot1 = new(30,graphic)                ; create graphic array
-plot2 = new(30,graphic)                ; create graphic array
-plot3 = new(30,graphic)                ; create graphic array
+wks = gsn_open_wks("png", "pdi_reg");dirip+
+plot = new(10,graphic)                ; create graphic array
+plot1 = new(10,graphic)                ; create graphic array
+plot2 = new(10,graphic)                ; create graphic array
+plot3 = new(10,graphic)                ; create graphic array
+plot4 = new(10,graphic)                ; create graphic array
+plot5 = new(10,graphic)                ; create graphic array
 gsn_define_colormap(wks, "NCV_blu_red")
 
 
@@ -170,17 +193,36 @@ res2@cnMaxLevelValF        =  0.5
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 
-    res2@gsnLeftString = "internal variability"
-    res2@gsnRightString = "CMIP5"
-    plot(0) = gsn_csm_contour_map_ce(wks, com_ccr, res2)
-    res2@gsnRightString = "CMIP6"
-    plot(1) = gsn_csm_contour_map_ce(wks, com_ccr6, res2)
-    res2@gsnLeftString = "external response"
-    res2@gsnRightString = "CMIP5"
-    plot1(0) = gsn_csm_contour_map_ce(wks, com_mcr, res2)
-    res2@gsnRightString = "CMIP6"
-    plot1(1) = gsn_csm_contour_map_ce(wks, com_mcr6, res2)
 
+do im = 0,nm5-1
+    res2@gsnLeftString = "internal variability"
+    res2@gsnRightString = MODEL5(im)
+    plot(im) = gsn_csm_contour_map_ce(wks, crc1(im,:,:), res2)
+    res2@gsnLeftString = "external response"
+    plot1(im) = gsn_csm_contour_map_ce(wks, mrc1(im,:,:), res2)
+end do
+
+do im = 0,nm6-1
+  res2@gsnLeftString = "internal variability"
+  res2@gsnRightString = MODEL6(im)
+  plot2(im) = gsn_csm_contour_map_ce(wks, crc4(im,:,:), res2)
+  res2@gsnLeftString = "external response"
+  plot3(im) = gsn_csm_contour_map_ce(wks, mrc4(im,:,:), res2)
+end do
+
+do im = 0,nex-1
+  res2@gsnLeftString = "internal variability"
+  res2@gsnRightString = EXP2(im)+" in CESM1"
+  plot4(im) = gsn_csm_contour_map_ce(wks, crc2(im,:,:), res2)
+  res2@gsnLeftString = "external response"
+  plot5(im) = gsn_csm_contour_map_ce(wks, mrc2(im,:,:), res2)
+end do
+
+res2@gsnLeftString = "internal variability"
+res2@gsnRightString = "CESM2 with CMIP5 forcing"
+plot4(nex) = gsn_csm_contour_map_ce(wks, crc3, res2)
+res2@gsnLeftString = "external response"
+plot5(nex) = gsn_csm_contour_map_ce(wks, mrc4, res2)
 
 resk = True
 ;resk@txFontHeightF = 0.03
@@ -198,10 +240,12 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ;resk@pmLabelBarParallelPosF = 0.3 ;default 0.5
 ;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
 ; resk@txString = VAR+" regressed onto "+IND+" "+yrs+"-"+yrl
-gsn_panel(wks,plot,(/1,2/),resk)
-gsn_panel(wks,plot1,(/1,2/),resk)
-; gsn_panel(wks,plot,(/2,1/),resk)
-; gsn_panel(wks,plot1,(/2,1/),resk)
+gsn_panel(wks,plot,(/5,2/),resk)
+gsn_panel(wks,plot1,(/5,2/),resk)
+gsn_panel(wks,plot2,(/5,2/),resk)
+gsn_panel(wks,plot3,(/5,2/),resk)
+gsn_panel(wks,plot4,(/5,2/),resk)
+gsn_panel(wks,plot5,(/5,2/),resk)
 
 
 end

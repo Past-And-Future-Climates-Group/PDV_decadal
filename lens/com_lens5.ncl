@@ -51,12 +51,12 @@ diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 ;b.e21.BHIST.f09_g17.cesm2_cmip5_forcing.002.cam.h0.TS.185001-200512.nc
 
 
-VAR = "U" ;"TS" ; "va" ;"psl" ;
+VAR = "TS" ; "va" ;"psl" ;
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
-yrs1 = 1991;1950 ;1991;
-yrl1 = 2014;1990 ;2014;
+yrs1 = 1950 ;1991
+yrl1 = 1990 ;2014
 
 MODEL = "cesm2_cmip5_forcing" ;"cesm1_le";
 EXP =  "" ;(/"xghg", "xaer" , "xlulc", "xbmb"/);
@@ -119,7 +119,7 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR$(0:ymlasts+1,{850},:,:) ;(ymstrts:ymlasts,:,:);
+    xx  = f[:]->$VAR$(0:ymlasts+1,:,:) ;(ymstrts:ymlasts,:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -204,31 +204,24 @@ pc3 = month_to_annual(pc_ft,1)
 dd = month_to_annual(cc,1)
 printVarSummary(dd)
 printVarSummary(pc3)
-;-----------regression-------------
-a1 = (yrs1-yrs0)*12
-b1 = (yrl1-yrs0+1)*12-1
-pc2 = pc_ft(a1:b1) ;pc3(yrs1-yrs0:yrl1-yrs0+1)
-; ic = ind(pc2.gt.0)
-; print((yrs1+ic)+"")
-; aa(ia,:,:) = dim_avg_n_Wrap(dd(ic,:,:),0)
-aa(ia,:,:) = regCoef(pc2,cc(lat|:,lon|:,time|a1:b1));, tval, df);Y
+;-----------composite-------------
+pc2 = pc3(yrs1-yrs0:yrl1-yrs0+1)
+ic = ind(pc2.gt.0)
+print((yrs1+ic)+"")
+aa(ia,:,:) = dim_avg_n_Wrap(dd(ic,:,:),0)
 
 copy_VarCoords(rref, aa(ia,:,:))
 
-;----pattern correlation---------
-
-rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
 
 ;--------output-------------
 if (MODEL.eq."cesm2_cmip5_forcing") then
-fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_reg_"+IND+"_"+VAR+"_"+yrs1+"-"+yrl1+".nc";
+fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_com_"+IND+"_"+VAR+"_"+yrs1+"-"+yrl1+".nc";
 else
-fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_reg_"+IND+"_"+VAR+"_"+yrs1+"-"+yrl1+".nc";
+fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_com_"+IND+"_"+VAR+"_"+yrs1+"-"+yrl1+".nc";
 end if
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->rc  = aa(ia,:,:)
-fo->par = rp1(ia)
 
 delete([/locs_str,pc,xa,pc_ft,cc,dd,pc2,pc3/]);,pc_sea2,xa_sea2,
 end do

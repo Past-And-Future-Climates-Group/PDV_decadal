@@ -33,7 +33,7 @@ do im = 0,nm-1
 
 diri3 = diri2+MODEL_LOCS(im)+"/Amon/"+VAR+"/"
 
-locs = systemfunc("ls "+diri3+"*rcp85*") 
+locs = systemfunc("ls "+diri3+"*rcp85*")
 printVarSummary(locs)
 print(locs)
 nsa = dimsizes(locs)
@@ -54,16 +54,16 @@ ENSN(ie)  = locs_str(5)
 
 bb = str_split(locs_str(6), "-")
 
-  yrl = 2004
+  yrl = 2014
   ymlast= yrl*100+12
-if(ie.eq.0) then 
+if(ie.eq.0) then
   ymstrt= bb(0)
   yrs = toint(tofloat(bb(0))/100.)
-end if 
+end if
 
 print(ymstrt+", "+yrs)
 print(MODEL(ie)+" ens "+ENSN(ie))
-  
+
   fils = systemfunc("ls "+locs(ie));+"/*.nc")
   print(fils)
   f   = addfiles(fils, "r")  ;multiple files
@@ -81,14 +81,14 @@ print(ymstrts+" <--start end--> "+ymlasts)
 
     xx  = f[:]->$VAR$(ymstrts:ymlasts,:,:);ce;
 
- 
+
 ; ;climatology is 1975-2005
 ; xc = clmMonTLL(f[:]->$VAR$(ycstrts:yclasts,:,:))
 ; xa = calcMonAnomTLL(xx, xc)
 xa = rmMonAnnCycTLL(xx)
 ; xa = dtrend_msg_n(xa&time, xa, True, False, 0)
 
-xa_sea = xa 
+xa_sea = xa
 delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 ; ;-------------------------------------
 ; ;cover land data; do this first!!
@@ -102,13 +102,13 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 ; delete(lsm0)
 
 ;-------------------------
-; Calculating index 
-; Nino 1+2 (0-10S, 90W-80W), Nino 3 (5N-5S, 150W-90W), 
+; Calculating index
+; Nino 1+2 (0-10S, 90W-80W), Nino 3 (5N-5S, 150W-90W),
 ; Nino 3.4/ONI (5N-5S, 170W-120W) and Nino 4 (5N-5S, 160E-150W)
 ; TNI is Nino 1+2 - Nino 4
-; 
-; TNA: Tropical Northern Atlantic Index* Anomaly of the average of the monthly SST from 5.5N to 23.5N and 15W to 57.5W. 
-; Enfield, D.B., A.M. Mestas, D.A. Mayer, and L. Cid-Serrano, 1999: How ubiquitous is the dipole relationship in 
+;
+; TNA: Tropical Northern Atlantic Index* Anomaly of the average of the monthly SST from 5.5N to 23.5N and 15W to 57.5W.
+; Enfield, D.B., A.M. Mestas, D.A. Mayer, and L. Cid-Serrano, 1999: How ubiquitous is the dipole relationship in
 ; tropical Atlantic sea surface temperatures? JGR-O, 104, 7841-7848.AOML and PSL
 
 ; NPGO index: SLP index is over the Hawaiian region (158W–135W;13N–24N)
@@ -120,7 +120,7 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 ; NP cloud effect index: 30-50N, 120E-110W
 
 ; East Asian (EA) SW: 20-40N,110-125E
-; East American (AM) SW: 30-45N,90-75W 
+; East American (AM) SW: 30-45N,90-75W
 
 ; SW_HD net surface SW radiation between Southern and Northern Hemisphere (Southern-Northern)
 
@@ -130,13 +130,13 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
   copy_VarCoords(xa_sea(0,:,0), clat)
   ; go = wgt_areaave_Wrap(x,clat, 1.0, 1)
 
-  NLAT1 =  45. 
-  SLAT1 =  30. 
+  NLAT1 =  45.
+  SLAT1 =  30.
   WLON1 =  145.
   ELON1 =  360.-180;
 
-  NLAT2 =  6. 
-  SLAT2 =  -10.    
+  NLAT2 =  6.
+  SLAT2 =  -10.
   WLON2 =  360.-160.;
   ELON2 =  360.-110.;
 
@@ -157,7 +157,7 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 ; fcb   = -999.
 ; wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
-; gmst = wgt_runave_n_Wrap( gmst, wgt,  -1, 0 )   ;opt < 0 : utilize cyclic conditions 
+; gmst = wgt_runave_n_Wrap( gmst, wgt,  -1, 0 )   ;opt < 0 : utilize cyclic conditions
 
 
 ; gmst = dtrend_msg_n(gmst&time, gmst, True, False, 0)
@@ -171,8 +171,8 @@ fo->index = gmst
 
 delete([/xx, xa,xa_sea,clat,lat/])
 
-end do 
+end do
 delete([/MODEL,ENSN,locs,gmst1,gmst2,gmst /])
-end do 
+end do
 
-end 
+end

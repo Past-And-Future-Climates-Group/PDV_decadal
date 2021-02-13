@@ -53,13 +53,17 @@ MODEL_NAME = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
 
 nm = dimsizes(MODEL_LOCS)
 
-VAR = "ts" ;"od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
+VAR = "ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
+VARn = "ua850"
 EXP = "historical"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
+yrs1 = 1950;1950 ;1991;
+yrl1 = 1990;1990 ;2014;
 
-do im = 0,nm-1
+
+do im = 5,nm-1
 
 diri3 = diri2+MODEL_LOCS(im)+"/Amon/"+VAR+"/"
 
@@ -87,14 +91,14 @@ ENSN(ia)  = locs_str(5)
 
 bb = str_split(locs_str(6), "-")
 
-  yrl = 2004
-  ymlast= yrl*100+12
+  yrl0 = 2014
+  ymlast= yrl0*100+12
 if(ia.eq.0) then
   ymstrt= bb(0)
-  yrs = toint(tofloat(bb(0))/100.)
+  yrs0 = toint(tofloat(bb(0))/100.)
 end if
 
-print(ymstrt+", "+yrs)
+print(ymstrt+", "+yrs0)
 print(MODEL(ia)+" ens "+ENSN(ia))
 
   fils = systemfunc("ls "+locs(ia));+"/*.nc")
@@ -112,7 +116,7 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR$(ymstrts:ymlasts,:,:);ce;
+    xx  = f[:]->$VAR$(ymstrts:ymlasts,{85000},:,:);ce;
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -146,7 +150,7 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
   ;global external forcing mode
   ;from mme_eof_cmip6.ncl
-  ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL(ia)+"_"+EXP+"_*_PDI_"+yrs+"-"+yrl+".nc")
+  ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL(ia)+"_"+EXP+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
   f1   = addfiles(ff, "r")
   ListSetType (f1, "join")
   pc0  = f1[:]->index
@@ -183,7 +187,10 @@ pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
     cc!1 = "lat"
     cc!2 = "lon"
 
-;-----------regression-------------
+;-----------regression-------------;-----------regression-------------
+a1 = (yrs1-yrs0)*12
+b1 = (yrl1-yrs0+1)*12-1
+pc2 = pc_ft(a1:b1) ;pc3(yrs1-yrs0:yrl1-yrs0+1)
 aa(ia,:,:) = regCoef(pc_ft,cc(lat|:,lon|:,time|:));, tval, df);Y
 
 copy_VarCoords(rref, aa(ia,:,:))
@@ -193,7 +200,7 @@ copy_VarCoords(rref, aa(ia,:,:))
 rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
 
 ;--------output-------------
-fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_"+IND+"_"+EXP+"_"+VARn+"_"+yrs0+"-"+yrl0+".nc";
 ; fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")

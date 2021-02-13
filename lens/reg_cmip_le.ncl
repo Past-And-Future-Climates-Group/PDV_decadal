@@ -3,10 +3,10 @@ diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
 
-  yrs = 1850;1950;
-  yrl = 2014
-  ymstrt= yrs*100+1
-  ymlast= yrl*100+12
+  yrs0 = 1850;1950;
+  yrl0 = 2014
+  ymstrt= yrs0*100+1
+  ymlast= yrl0*100+12
 
   NLAT =  70; 65; 5; 60;
   SLAT =  20;-70;-5;-60;
@@ -53,18 +53,23 @@ diri3 = "/glade/scratch/chenxing/cmip6/"
 ;         "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
 ;         "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
 
-MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
-  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
-nens6 = (/32,30,25,12,11, 10,\;10,
-      10,10,7,5,5 /) ;ensemble number 5,
+; MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
+;   "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
+; nens6 = (/32,30,25,12,11, 10,\;10,
+;       10,10,7,5,5 /) ;ensemble number 5,
 
+MODEL6 = (/ "CESM2"/)
 
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VAR = "ts" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
+VAR = "ua" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
 IND = "PDI2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
+
+yrs1 = 1991;1950 ;1991;
+yrl1 = 2014;1990 ;2014;
+
 
 ; note, the max lag should not be more than N/4
 ccr1 = new((/nm6, 72,144 /), "float") ;cross correlation pattern
@@ -111,7 +116,7 @@ do ia = 0,nsa-1
   ymlasts = ind(yyyymm2.eq.ymlast)
   print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
+    xx  = f->$VAR$(ymstrts:ymlasts,{85000},:,:);:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -137,7 +142,7 @@ do ia = 0,nsa-1
   ;from cmip_index.ncl
   f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
   ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
-  pc  = tofloat(f1->index((yrs-1850)*12:))
+  pc  = tofloat(f1->index((yrs0-1850)*12:))
   pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ; ;global external forcing mode
@@ -164,6 +169,10 @@ do ia = 0,nsa-1
 pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
 
 ;-----------regression-------------
+a1 = (yrs1-yrs0)*12
+b1 = (yrl1-yrs0+1)*12-1
+pc2 = pc_ft(a1:b1) ;pc3(yrs1-yrs0:yrl1-yrs0+1)
+
 aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
 
 copy_VarCoords(xa(0,:,:), aa(ia,:,:))
@@ -174,7 +183,7 @@ rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:EL
 
 ;--------output-------------
 ; fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_mme_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
-fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_"+IND+"_"+EXP+"_"+VAR+"850_"+yrs1+"-"+yrl1+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->rc = aa(ia,:,:)

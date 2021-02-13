@@ -1,4 +1,5 @@
-load "./function_bootstrap_mme.ncl"
+; load "./function_bootstrap_mme.ncl"
+load "/Users/xingchen/Documents/project/ENSO/program/function_bootstrap_mme.ncl"
 begin
 
 diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/";
@@ -68,12 +69,12 @@ EXP6 = "historical";"hist-aer";"hist-Nat" ;"hist-GHG" ;
 
 ;don't filter pdv pc, it's already filtered, double filter will shortern data...
 IND = "PDI2" ;"EACSS" ;"EAS" ;"PDI2" ; "NPCSS" ;"NPC" ;"NPS" ;"NPAOD" ;"PDI2";"TPI" ;"NPI" ;"AMO" ;"pdo" ;"nh-sh" ;"GMAOD" ;"GMSW" ;
-MODEL = MODEL5;MODEL6; 
+MODEL = MODEL5;MODEL6;
 nens = nens6
-icmip = 5;6 ; 
+icmip = 5;6 ;
 nens_all = 10;32 ;
 
-yrs = 1861; 
+yrs = 1861;
 yrl = 2004; 2014;
 
 
@@ -110,17 +111,17 @@ do ia = 0,nsa-1
      continue
    else
     ; print(file_name)
-   f   = addfile(file_name, "r") 
+   f   = addfile(file_name, "r")
    end if
 
   pc5_all(im,ia,:)  = f->index;pc(0,:);gmst;
 
 ; print(""+pc5_all(im,ia,(1890-1861)*12))
 
-end do 
-; end if 
+end do
+; end if
 delete(locs)
-end do 
+end do
 printVarSummary(pc5_all)
 
 
@@ -155,16 +156,16 @@ do ia = 0,nsa-1
      continue
    else
     print(file_name)
-   f   = addfile(file_name, "r") 
+   f   = addfile(file_name, "r")
    end if
 
   pc6_all(im,ia,:)  = f->index;pc(0,:);gmst;
 
-end do 
-; end if 
+end do
+; end if
 delete(locs)
 
-end do 
+end do
 
 printVarSummary(pc6_all)
 
@@ -177,13 +178,13 @@ nWgt  = toint(fyr*12*1+1); fyr)+1 ;                           ; odd only
 fca   = 1./(fyr*12)
 fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-pc5_all = wgt_runave_n_Wrap( pc5_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions 
-pc6_all = wgt_runave_n_Wrap( pc6_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions 
+pc5_all = wgt_runave_n_Wrap( pc5_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
+pc6_all = wgt_runave_n_Wrap( pc6_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
 
 
 ;----------composite-------------------
 ;MME
-;ignore model bias 
+;ignore model bias
 ; ndimp = dimsizes(pc5_all)
 ; aa = reshape(pc5_all, (/ndimp(0)*ndimp(1),ndimp(2)/))
 cp5_a = dim_avg_n_Wrap(pc5_all,(/0,1/)); aa, 0)
@@ -193,7 +194,7 @@ cp6_a = dim_avg_n_Wrap(pc6_all,(/0,1/)); aa, 0)
 cp5 = dim_avg_n_Wrap(pc5_all,1)
 cp6 = dim_avg_n_Wrap(pc6_all,1)
 
-; ;1. averaged STD across ensembles 
+; ;1. averaged STD across ensembles
 cs_a = dim_stddev_n_Wrap(pc5_all, (/0,1/)) ;com_std, 0)
 
 
@@ -216,10 +217,10 @@ std_6 = dim_stddev_n_Wrap(pc6_all,(/1/))
 
 
 ; ; ;-----------BootStrap---------------------
-; ; function_bootstrap_mme.ncl 
+; ; function_bootstrap_mme.ncl
 
-; N = 1000 
-; nBoot =   10000    
+; N = 1000
+; nBoot =   10000
 
 
 ; nem5y = num(.not.ismissing(ndtooned(pc5_all(i5y,:,500))))
@@ -253,7 +254,7 @@ std_6 = dim_stddev_n_Wrap(pc6_all,(/1/))
 
 ;--------------plot-------------------
 
-wks = gsn_open_wks("png", dirip+"cmip_index_xy");
+wks = gsn_open_wks("png", "lens6_xy");dirip
 wks2 = gsn_open_wks("png", dirip+"test");
 plot1 = new(10,graphic)                ; create graphic array
 plot2 = new(10,graphic)                ; create graphic array
@@ -279,14 +280,14 @@ plot2 = new(10,graphic)                ; create graphic array
   res@gsnRightString = ""
   res@vpHeightF = 0.3
   res@vpWidthF  = 0.6
- 
+
   res@tmXTOn    = False
   res@tmYROn    = False
   ;res@gsnXYBarChart            = True              ; Create bar plot
   ;res@gsnXYBarChartOutlineOnly = True
 
 
-  res@gsnYRefLine           = 0.0             ; reference line   
+  res@gsnYRefLine           = 0.0             ; reference line
   ; res@gsnAboveYRefLineColor = "red"           ; above ref line fill red
   ; res@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
   ; res@gsnLeftStringFontHeightF  = 0.03
@@ -297,14 +298,14 @@ plot2 = new(10,graphic)                ; create graphic array
   ndim6  = dimsizes(pc6_all)
   x_axis6 = fspan(yrs6, yrl6, ndim6(2))
   x_axis1 = ispan(yrs, yrl, 1)
-  ;res@tmXBMode   = "Explicit"                                                
+  ;res@tmXBMode   = "Explicit"
   ;res@tmXBValues = x_axis;-1
   ;res@tmXBLabels = model
   ;res@tmXBLabelAngleF = 45.
   ;res@tmXBLabelFontHeightF = 0.02
   res@tiYAxisString = ""
   res@tiXAxisString = "year"
-  
+
   res@xyMonoLineColor = False
   res@xyMonoDashPattern = True
 
@@ -324,12 +325,12 @@ do im = 0,nmo5-1
 res@gsnLeftString = IND+" in "+MODEL5(im)+"("+nens5(im)+")"
 plot1(im) = gsn_csm_xy (wks,x_axis5, cp5(im,:) ,res)
 
-end do 
+end do
 
 do im = 0,nmo6-1
 res@gsnLeftString = IND+" in "+MODEL6(im)+"("+nens6(im)+")"
 plot2(im) = gsn_csm_xy (wks,x_axis6, cp6(im,:) ,res)
-end do 
+end do
 
 ;---------shading of STD---------
 
@@ -340,11 +341,11 @@ end do
 
 res@gsnLeftString = ""
 
-do im = 0,nmo5-1 
-  
+do im = 0,nmo5-1
+
   ; STD shading
-  mmz(0,:) = cp5(im,:)+std_5(im,:) 
-  mmz(1,:) = cp5(im,:)-std_5(im,:) 
+  mmz(0,:) = cp5(im,:)+std_5(im,:)
+  mmz(1,:) = cp5(im,:)-std_5(im,:)
 
   res@gsnXYFillOpacities = 0.3
   res@gsnXYFillColors = "grey55"
@@ -352,15 +353,15 @@ do im = 0,nmo5-1
   plota  = gsn_csm_xy (wks,(/x_axis5/),mmz(0:1,:),res)  ; Create filled XY plot.
   overlay(plot1(im), plota)
 
-end do 
+end do
 delete(mmz)
   mmz = cp6(0:1,:)
 
-do im = 0,nmo6-1 
-  
+do im = 0,nmo6-1
+
   ; STD shading
-  mmz(0,:) = cp6(im,:)+std_6(im,:) 
-  mmz(1,:) = cp6(im,:)-std_6(im,:) 
+  mmz(0,:) = cp6(im,:)+std_6(im,:)
+  mmz(1,:) = cp6(im,:)-std_6(im,:)
 
   res@gsnXYFillOpacities = 0.3
   res@gsnXYFillColors = "grey55"
@@ -368,7 +369,7 @@ do im = 0,nmo6-1
   plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res)  ; Create filled XY plot.
   overlay(plot2(im), plota)
 
-end do 
+end do
 
 ;------------------------------------------------
 resk = True

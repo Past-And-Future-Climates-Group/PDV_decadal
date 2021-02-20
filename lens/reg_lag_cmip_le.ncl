@@ -1,7 +1,7 @@
 begin
 diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
-
+SEASON = (/"DJF","MAM","JJA","SON" /)
 
   yrs0 = 1850;1950;
   yrl0 = 2014
@@ -67,29 +67,25 @@ VAR  = (/"ts","psl"/) ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl"
 VARn = (/"ts","psl"/) ; "ua200"
 EXP = "historical"
 IND = "nino34" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
+nlag = 5
 
 yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
 yrl1 = (/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
-do i = 0,1
-
-
-; note, the max lag should not be more than N/4
-ccr1 = new((/nm6, 72,144 /), "float") ;cross correlation pattern
+do iy = 0,dimsizes(yrs1)-1
 
 do im = 0,nm6-1
 
 ;from pdv_cmip6_hist.ncl
-;or from cmip_index.ncl
 ;cmip6_historical_CanESM2_r4i1p1_pdv_1850-2014.nc
 locs = systemfunc("ls "+diri+"cmip6/pdv/cmip6_historical_"+MODEL6(im)+"_*_pdv_1850-2014.nc")
 printVarSummary(locs)
 print(locs)
 nsa = dimsizes(locs)
 
-  aa = new((/nens_all, 72,144 /), "float")
-  rp1 = new((/nens_all/), "float") ;cross correlation pattern
+  aa = new((/nens_all,nlag, 72,144 /), "float")
+  rp1 = new((/nens_all,nlag/), "float") ;cross correlation pattern
 
 do ia = 0,nsa-1
 
@@ -121,7 +117,7 @@ do ia = 0,nsa-1
   ymlasts = ind(yyyymm2.eq.ymlast)
   print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f->$VAR(iv)$(ymstrts:ymlasts,{20000},:,:);:,:);
+    xx  = f->$VAR(iv)$(ymstrts:ymlasts,:,:);{20000},:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -147,8 +143,8 @@ do ia = 0,nsa-1
   ;from cmip_index.ncl
   f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
   ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
-  pc  = tofloat(f1->index((yrs0-1850)*12:))
-  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
+  pc  = tofloat(f1->index((yrs0-1850)*12:)) ;fix to the year we want to start here
+  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ; ;global external forcing mode
   ; ; from mme_eof_cmip6.ncl
@@ -171,43 +167,39 @@ do ia = 0,nsa-1
 
 
 ; normalize
-pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
+pc = dim_standardize_n_Wrap(pc, 0, 0)
 
 ;-----------regression-------------
-a1 = (yrs1(i)-yrs0)*12
-b1 = (yrl1(i)-yrs0+1)*12-1
-pc2 = pc_ft(a1:b1) ;pc3(yrs1(i)-yrs0:yrl1(i)-yrs0+1)
+a1 = yrs1(iy)-yrs0
+b1 = yrl1(iy)-yrs0
 
-aa(ia,:,:) = regCoef(pc2,xa(lat|:,lon|:,time|a1:b1));, tval, df);Y
+xa!0 = "time"
+pc!0 = "time"
+xa_sea = month_to_seasonN(xa,SEASON)
+pc_sea = month_to_seasonN(pc,SEASON)
 
-copy_VarCoords(xa(0,:,:), aa(ia,:,:))
-delete([/pc2/])
-;----pattern correlation---------
+;reg with NINO34 DJF+1
+do is=0,3
+  aa(ia,is,:,:) = regCoef(pc_sea(0,a1+1:b1),xa_sea(season|is,lat|:,lon|:,time|a1:b1-1));, tval, df);Y
+end do
+;lag 0
+aa(ia,4,:,:) = regCoef(pc_sea(0,a1:b1),xa_sea(season|0,lat|:,lon|:,time|a1:b1));, tval, df);Y
 
-rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
+copy_VarCoords(xa(0,:,:), aa(ia,0,:,:))
 
 ;--------output-------------
-; fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_mme_"+IND+"_"+EXP+"_"+VARn+"_"+yrs+"-"+yrl+".nc";
-fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_regLag_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(iy)+"-"+yrl1(iy)+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
-fo->rc = aa(ia,:,:)
-fo->par = rp1(ia)
+fo->rc = aa(ia,:,:,:)
 
 delete([/locs_str,pc/]);,pc_sea2,xa_sea,pc_sea,xa
 end do
-
-
-
-;ensemble mean
-ccr1(im,:,:) = dim_avg_n_Wrap(aa, 0)
 
 delete([/locs/]);,x_Lead1
 
 end do
 
-ccr1!0 = "model"
-printVarSummary(ccr1)
 end do
 end do
 

@@ -1,6 +1,7 @@
 begin
 diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
+SEASON = (/"DJF","MAM","JJA","SON" /)
 
 NLAT =  70; 65; 5; 60;
 SLAT =  20;-70;-5;-60;
@@ -50,16 +51,16 @@ diri1 = "/glade/scratch/chenxing/cesm1_le/"
 diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 ;b.e21.BHIST.f09_g17.cesm2_cmip5_forcing.002.cam.h0.TS.185001-200512.nc
 
-VAR  = (/"U","V"/) ;"TS" ; "va" ;"PSL" ;
-VARn = (/"ua200","va200"/) ;"va850"
-IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
-AA =  ""
+VAR  = (/"TS","PSL" /) ;(/"U","V"/) ;"TS" ; "va" ;"PSL" ;
+VARn = (/"ts","psl"/) ; (/"ua200","va200"/) ;"va850"
+IND = "nino34" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
+nlag = 5
 
 yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
 yrl1 = (/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
-do i = 0,1
+do iy = 0,dimsizes(yrs1)-1
 
 MODEL = "cesm2_cmip5_forcing" ;"cesm1_le";
 EXP =  "" ;(/"xghg", "xaer" , "xlulc", "xbmb"/);
@@ -81,8 +82,7 @@ nsa = dimsizes(locs)
 
 ENSN  = new(nsa, "string")
 
-aa = new((/nsa, 72,144 /), "float")
-rp1 = new(nsa, "float")
+aa = new((/nsa,nlag, 72,144 /), "float")
 
 istart = 0
 do ia = istart,nsa-1
@@ -122,7 +122,7 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR(iv)$(0:ymlasts+1,{200},:,:) ;:,:);(ymstrts:ymlasts,:,:);
+    xx  = f[:]->$VAR(iv)$(0:ymlasts+1,:,:);{200},:,:) ;(ymstrts:ymlasts,:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -151,12 +151,12 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ;;some index
   ;from lens5_index.ncl
   if (MODEL.eq."cesm2_cmip5_forcing") then
-    f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
+    f1   = addfile(diri+"lens5/nino34/"+MODEL+"_"+ENSN(ia)+"_nino34_"+yrs0+"-"+yrl0+".nc", "r")
   else
-    f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
+    f1   = addfile(diri+"lens5/nino34/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_nino34_"+yrs0+"-"+yrl0+".nc", "r")
   end if
   pc  = f1->index
-  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
+  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ; ;global external forcing mode
   ; ;from mme_eof_cmip6.ncl
@@ -180,8 +180,7 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
 
 ; ???
-pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
-printVarSummary(pc_ft)
+pc = dim_standardize_n_Wrap(pc, 0, 0)
 ;---------interpolate---------------------
 ;change resolution for MODELS to the same 144*72
     zz = xa
@@ -201,43 +200,38 @@ printVarSummary(pc_ft)
     cc!1 = "lat"
     cc!2 = "lon"
 
-;-------------month_to_annual-------------
 
-pc3 = month_to_annual(pc_ft,1)
-dd = month_to_annual(cc,1)
-printVarSummary(dd)
-printVarSummary(pc3)
 ;-----------regression-------------
-a1 = (yrs1(i)-yrs0)*12
-b1 = (yrl1(i)-yrs0+1)*12-1
-pc2 = pc_ft(a1:b1) ;pc3(yrs1(i)-yrs0:yrl1(i)-yrs0+1)
-; ic = ind(pc2.gt.0)
-; print((yrs1(i)+ic)+"")
-; aa(ia,:,:) = dim_avg_n_Wrap(dd(ic,:,:),0)
-aa(ia,:,:) = regCoef(pc2,cc(lat|:,lon|:,time|a1:b1));, tval, df);Y
+a1 = yrs1(iy)-yrs0
+b1 = yrl1(iy)-yrs0
 
-copy_VarCoords(rref, aa(ia,:,:))
+cc!0 = "time"
+pc!0 = "time"
+xa_sea = month_to_seasonN(cc,SEASON)
+pc_sea = month_to_seasonN(pc,SEASON)
+;reg with NINO34 DJF+1
+do is=0,3
+  aa(ia,is,:,:) = regCoef(pc_sea(0,a1+1:b1),xa_sea(season|is,lat|:,lon|:,time|a1:b1-1));, tval, df);Y
+end do
+;lag 0
+aa(ia,4,:,:) = regCoef(pc_sea(0,a1:b1),xa_sea(season|0,lat|:,lon|:,time|a1:b1));, tval, df);Y
 
-;----pattern correlation---------
-
-rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
+copy_VarCoords(rref, aa(ia,0,:,:))
 
 ;--------output-------------
 if (MODEL.eq."cesm2_cmip5_forcing") then
-fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_reg_"+IND+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_regLag_"+IND+"_"+VARn(iv)+"_"+yrs1(iy)+"-"+yrl1(iy)+".nc";
 else
-fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_reg_"+IND+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_regLag_"+IND+"_"+VARn(iv)+"_"+yrs1(iy)+"-"+yrl1(iy)+".nc";
 end if
 system("rm -f "+fon)
 fo=addfile(fon,"c")
-fo->rc  = aa(ia,:,:)
-fo->par = rp1(ia)
+fo->rc  = aa(ia,:,:,:)
 
-delete([/locs_str,pc,xa,pc_ft,cc,dd,pc2,pc3/]);,pc_sea2,xa_sea2,
+delete([/locs_str,pc,xa,cc,pc_sea,xa_sea/]);,pc_sea2,xa_sea2,
 end do
 
 aa!0 = "ensemble"
-rp1!0 = "ensemble"
 ; ;--------output-------------
 ; fon=diri+"lens5/"+MODEL(ia)+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 ; system("rm -f "+fon)
@@ -248,7 +242,7 @@ rp1!0 = "ensemble"
 delete([/locs/]);,x_Lead1
 
 print("regression done for "+MODEL(0))
-delete([/ENSN,aa,rp1/])
+delete([/ENSN,aa/])
 
 end do
 

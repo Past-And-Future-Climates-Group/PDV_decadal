@@ -1,6 +1,7 @@
 begin
 diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
+SEASON = (/"DJF","MAM","JJA","SON" /)
 
 NLAT =  70; 65; 5; 60;
 SLAT =  20;-70;-5;-60;
@@ -56,18 +57,17 @@ SEASON = (/"DJF","MAM","JJA","SON" /)
 
 nm = dimsizes(MODEL_LOCS)
 
-VAR  = (/"ua","va"/) ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
-VARn = (/"ua200","va200"/) ; "ua200"
+VAR  = (/"ts","psl"/) ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
+VARn = (/"ts","psl"/) ; "ua200"
 EXP = "historical"
-IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
-AA =  ""
+IND = "nino34" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
+nlag = 5
 
 yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
 yrl1 = (/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
-
-do i = 0,1
+do iy = 0,dimsizes(yrs1)-1
 
 do im = 0,nm-1
 
@@ -81,8 +81,7 @@ nsa = dimsizes(locs)
 MODEL = new(nsa, "string")
 ENSN  = new(nsa, "string")
 
-aa = new((/nsa, 72,144 /), "float")
-rp1 = new(nsa, "float")
+aa = new((/nsa,nlag, 72,144 /), "float")
 
 istart = 0
 do ia = istart,nsa-1
@@ -122,7 +121,7 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR(iv)$(ymstrts:ymlasts,{20000},:,:);{20000},:,:);ce;
+    xx  = f[:]->$VAR(iv)$(ymstrts:ymlasts,:,:);{20000},:,:);ce;
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -150,9 +149,9 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
   ;;some index
   ;from lens5_index.ncl
-  f1   = addfile(diri+"lens5/PDI/"+MODEL(ia)+"_"+EXP+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
+  f1   = addfile(diri+"lens5/nino34/"+MODEL(ia)+"_"+EXP+"_"+ENSN(ia)+"_nino34_"+yrs0+"-"+yrl0+".nc", "r")
   pc  = f1->index
-  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
+  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ;global external forcing mode
   ; ;from mme_eof_cmip6.ncl
@@ -172,7 +171,7 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
 
 ; ???
-pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
+pc = dim_standardize_n_Wrap(pc, 0, 0)
 
 ;---------interpolate---------------------
 ;change resolution for MODELS to the same 144*72
@@ -194,31 +193,34 @@ pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
     cc!2 = "lon"
 
 ;-----------regression-------------;-----------regression-------------
-a1 = (yrs1(i)-yrs0)*12
-b1 = (yrl1(i)-yrs0+1)*12-1
-pc2 = pc_ft(a1:b1) ;pc3(yrs1(i)-yrs0:yrl1(i)-yrs0+1)
-aa(ia,:,:) = regCoef(pc2,cc(lat|:,lon|:,time|a1:b1));, tval, df);Y
+a1 = yrs1(iy)-yrs0
+b1 = yrl1(iy)-yrs0
 
-copy_VarCoords(rref, aa(ia,:,:))
-delete([/pc2/])
+cc!0 = "time"
+pc!0 = "time"
+xa_sea = month_to_seasonN(cc,SEASON)
+pc_sea = month_to_seasonN(pc,SEASON)
 
-;----pattern correlation---------
+;reg with NINO34 DJF+1
+do is=0,3
+  aa(ia,is,:,:) = regCoef(pc_sea(0,a1+1:b1),xa_sea(season|is,lat|:,lon|:,time|a1:b1-1));, tval, df);Y
+end do
+;lag 0
+aa(ia,4,:,:) = regCoef(pc_sea(0,a1:b1),xa_sea(season|0,lat|:,lon|:,time|a1:b1));, tval, df);Y
 
-rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
+copy_VarCoords(rref, aa(ia,0,:,:))
 
 ;--------output-------------
-fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_regLag_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(iy)+"-"+yrl1(iy)+".nc";
 ; fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
-fo->rc  = aa(ia,:,:)
-fo->par = rp1(ia)
+fo->rc  = aa(ia,:,:,:)
 
-delete([/locs_str,pc,xa,pc_ft,cc/]);,pc_sea2,xa_sea2,
+delete([/locs_str,pc,xa,cc,pc_sea,xa_sea/]);,pc_sea2,xa_sea2,
 end do
 
 aa!0 = "ensemble"
-rp1!0 = "ensemble"
 ; ;--------output-------------
 ; fon=diri+"lens5/"+MODEL(ia)+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 ; system("rm -f "+fon)
@@ -229,7 +231,7 @@ rp1!0 = "ensemble"
 delete([/locs/]);,x_Lead1
 
 print("regression done for "+MODEL(0))
-delete([/MODEL,ENSN,aa,rp1/])
+delete([/MODEL,ENSN,aa/])
 
 end do
 end do

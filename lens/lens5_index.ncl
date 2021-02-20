@@ -130,22 +130,22 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
   copy_VarCoords(xa_sea(0,:,0), clat)
   ; go = wgt_areaave_Wrap(x,clat, 1.0, 1)
 
-  NLAT1 =  45.
-  SLAT1 =  30.
-  WLON1 =  145.
-  ELON1 =  360.-180;
+  NLAT1 =  5.
+  SLAT1 =  -5.
+  WLON1 =  360.-170.
+  ELON1 =  360.-120.;
 
-  NLAT2 =  6.
-  SLAT2 =  -10.
-  WLON2 =  360.-160.;
-  ELON2 =  360.-110.;
+  ; NLAT2 =  6.
+  ; SLAT2 =  -10.
+  ; WLON2 =  360.-160.;
+  ; ELON2 =  360.-110.;
 
   gmst1 = wgt_areaave_Wrap(xa_sea(:,{SLAT1:NLAT1},{WLON1:ELON1}),clat({SLAT1:NLAT1}), 1.0, 1)
-  gmst2 = wgt_areaave_Wrap(xa_sea(:,{SLAT2:NLAT2},{WLON2:ELON2}),clat({SLAT2:NLAT2}), 1.0, 1)
+  ; gmst2 = wgt_areaave_Wrap(xa_sea(:,{SLAT2:NLAT2},{WLON2:ELON2}),clat({SLAT2:NLAT2}), 1.0, 1)
 
   gmst = gmst1
-  gmst = gmst2 - gmst1
-  gmst@long_name = "PDI_ts" ;
+  ; gmst = gmst2 - gmst1
+  gmst@long_name = "nino34_ts" ;
 
 
 ; ;------------filter----------------------
@@ -164,7 +164,7 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 
 
 ;--------output-------------
-fon=diri+"lens5/PDI/"+MODEL(ie)+"_"+EXP+"_"+ENSN(ie)+"_PDI_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/nino34/"+MODEL(ie)+"_"+EXP+"_"+ENSN(ie)+"_nino34_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->index = gmst
@@ -172,7 +172,7 @@ fo->index = gmst
 delete([/xx, xa,xa_sea,clat,lat/])
 
 end do
-delete([/MODEL,ENSN,locs,gmst1,gmst2,gmst /])
+delete([/MODEL,ENSN,locs,gmst1,gmst /]);gmst2,
 end do
 
 end

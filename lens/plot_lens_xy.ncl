@@ -17,9 +17,9 @@ dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/e
 neof = 1
 
 MODEL = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
-  "GFDL-CM3","GFDL-ESM2M","MPI-ESM" /)
+  "GFDL-ESM2M","MPI-ESM" /);"GFDL-CM3",
 
-nens5 = (/ 40, 50, 30, 20, 30, 100 /) ;ensemble number
+nens5 = (/ 40, 50, 30, 30,  100 /) ;20, ensemble number
 
 EXP = "historical"
 IND = "PDI"
@@ -154,17 +154,20 @@ pca_cesm2 = pca_cesm2 - avg(pca_cesm2((1920-1850)*12:)) ;consist the clm with ot
 
 ;--------------plot-------------------
 
-wks = gsn_open_wks("png", "lens5_xy");dirip+
+wks = gsn_open_wks("png", "./pic/lens5_xy");dirip+
 plot1 = new(nml5,graphic)                ; create graphic array
 plot2 = new(nec,graphic)                ; create graphic array
 plot3 = new(5,graphic)                ; create graphic array
+plot5 = new(5,graphic)                ; create graphic array
 
 ;*******************************************
 ; time series (principal component) plot
 ;*******************************************
 
-  gsn_define_colormap(wks,"MPL_gist_rainbow")
-  colors = ispan(2, 125, 5)   ; indices into color table
+  ; gsn_define_colormap(wks,"MPL_gist_rainbow")
+  ; colors = (/"coral1","cyan1","darkolivegreen1","gold1","mediumpurple1","grey55" /) ;ispan(2, 125, 30)   ; indices into color table
+  gsn_define_colormap(wks,"seaice_2")
+  colors = ispan(2, 17, 2)   ; indices into color table
   colors1 = ispan(2, 60, 4)   ; indices into color table
   colors2 = ispan(70, 125, 5)   ; indices into color table
 
@@ -234,6 +237,23 @@ do im = 0,nec-1
   ; plota = gsn_csm_xy (wks,x_axis,pc_cesm1(im,:,:),res2)
   ; overlay(plot2(im),plota)
 end do
+
+
+;==========================================================
+; models in one plot
+;==========================================================
+delete(res@xyLineColors)
+
+com_lens5 = dim_avg_n_Wrap(pca_lens5,0)
+
+;MODEL
+res@xyLineThicknessF = 5.0
+  res@xyLineColors = colors
+  res@gsnLeftString = "CMIP5 LENS";
+  plot5(0) = gsn_csm_xy (wks,x_axis,pca_lens5 ,res) ;x_axis2, com_pc
+
+delete(res@xyLineColors)
+
 res@gsnLeftString = ""
 
 ;;;;;;;;;;;; CESM playground;;;;;;;;;;;;;;
@@ -350,9 +370,19 @@ end do
 mmz(0,:) = pca_cesm2+std_cesm2
 mmz(1,:) = pca_cesm2-std_cesm2
 
-res@gsnXYFillColors = "grey85"
+res@gsnXYFillColors = "grey55"
 plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
 overlay(plot3(2), plota)
+
+;---------all lens5---------
+
+com_std_lens5 = dim_avg_n_Wrap(com_std,0)
+
+  mmz(0,:) = com_lens5-com_std_lens5
+  mmz(1,:) = com_lens5+com_std_lens5
+
+  plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
+  overlay(plot5(0), plota)
 
 
 
@@ -412,6 +442,15 @@ overlay(plot3(2), plota)
   nitems4 = dimsizes(labels4)                 ; number of legend items
   lbid4 = gsn_create_legend(wks,nitems4,labels4,lgres)
 
+  delete(lgres@lgLineColors)
+  lgres@vpWidthF           = 0.20           ; width of legend (NDC)
+  lgres@vpHeightF          = 0.30           ; height of legend (NDC)
+  lgres@lgLineColors       = colors;(::-1)
+  labels5 = MODEL+"("+nens5+")"
+  nitems5 = dimsizes(labels5)                 ; number of legend items
+
+  lbid5 = gsn_create_legend(wks,nitems5,labels5,lgres)
+
 ; Use gsn_add_annotation to attach this legend to our existing plot.
 ; This way, if we resize the plot, the legend will stay with the
 ; plot and be resized automatically.
@@ -427,6 +466,9 @@ overlay(plot3(2), plota)
   annoid2 = gsn_add_annotation(plot3(1),lbid2,amres)  ; add legend to plot
   annoid3 = gsn_add_annotation(plot3(2),lbid3,amres)  ; add legend to plot
   annoid4 = gsn_add_annotation(plot3(3),lbid4,amres)  ; add legend to plot
+  amres@amParallelPosF   =  0.5              ; Move legend to right
+  amres@amOrthogonalPosF =  0.5              ; Move legend down.
+  annoid5 = gsn_add_annotation(plot5(0),lbid5,amres)  ; add legend to plot
 
 ;------------------------------------------------
 resk = True
@@ -439,5 +481,6 @@ resk@txString = IND
 gsn_panel(wks,plot1,(/3,2/),resk)
 gsn_panel(wks,plot2,(/3,2/),resk)
 gsn_panel(wks,plot3,(/2,2/),resk)
+gsn_panel(wks,plot5,(/1,1/),resk)
 
 end

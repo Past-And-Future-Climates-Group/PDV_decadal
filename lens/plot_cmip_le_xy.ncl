@@ -38,7 +38,7 @@ MODEL5 = (/"CNRM-CM5", "CSIRO-Mk3-6-0", "GFDL-CM2p1","HadCM3", "CCSM4", \;"GISS-
              "IPSL-CM5A-LR"/);, "CanESM2", "MIROC5","CESM1-CAM5","HadGEM2-ES",\
              ; "ACCESS1-0","ACCESS1-3","bcc-csm1-1","CESM1-FASTCHEM","FGOALS-g2",\
              ; "FGOALS-s2","FIO-ESM","IPSL-CM5A-MR","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MRI-CGCM3","NorESM1-M"/);"GFDL-CM3",
-nens5 = (/10,10,10,8,6,6,6,\
+nens5 = (/10,10,10,8,6,\;6,6,
          6/);,5,5,4,4,\
          ; 3,3,3,3,3,3,3,\
          ; 3,3,3,3,3,3 /);5,
@@ -254,10 +254,11 @@ std_6 = dim_stddev_n_Wrap(pc6_all,(/1/))
 
 ;--------------plot-------------------
 
-wks = gsn_open_wks("png", "lens6_xy");dirip
+wks = gsn_open_wks("png", "./pic/lens6_xy");dirip
 wks2 = gsn_open_wks("png", dirip+"test");
 plot1 = new(10,graphic)                ; create graphic array
 plot2 = new(10,graphic)                ; create graphic array
+plot3 = new(10,graphic)                ; create graphic array
 
 
 ;*******************************************
@@ -266,7 +267,7 @@ plot2 = new(10,graphic)                ; create graphic array
 
   gsn_define_colormap(wks,"seaice_2")
   colors = ispan(2, 17, 1)   ; indices into color table
-  colors2 = ispan(2, 9, 1)   ; indices into color table
+  colors2 = ispan(2, 17, 2)   ; indices into color table
   colors1 = ispan(10, 18, 1)   ; indices into color table
 
 
@@ -332,6 +333,35 @@ res@gsnLeftString = IND+" in "+MODEL6(im)+"("+nens6(im)+")"
 plot2(im) = gsn_csm_xy (wks,x_axis6, cp6(im,:) ,res)
 end do
 
+;==========================================================
+; models in one plot
+;==========================================================
+delete(res@xyLineColors)
+
+com_pc5 = dim_avg_n_Wrap(cp5,0)
+com_pc6 = dim_avg_n_Wrap(cp6,0)
+
+;MODEL
+res@xyLineThicknessF = 5.0
+  res@xyLineColors = colors2
+  res@gsnLeftString = "CMIP5";
+  plot3(0) = gsn_csm_xy (wks,x_axis5, cp5 ,res) ;x_axis2, com_pc
+  delete(res@xyLineColors)
+  res@xyLineColors = colors
+  res@gsnLeftString = "CMIP6";
+  plot3(1) = gsn_csm_xy (wks,x_axis6, cp6,res) ;x_axis2, com_pc
+
+delete(res@xyLineColors)
+res@xyLineThicknessF = 5.0
+res@xyLineColors = "black"
+res@gsnLeftString = ""
+;
+; plota = gsn_csm_xy (wks,x_axis5,com_pc5,res)
+; overlay(plot3(0), plota)
+; plota = gsn_csm_xy (wks,x_axis6,com_pc6,res)
+; overlay(plot3(1), plota)
+
+
 ;---------shading of STD---------
 
   ; delete(res@xyDashPattern)
@@ -363,13 +393,68 @@ do im = 0,nmo6-1
   mmz(0,:) = cp6(im,:)+std_6(im,:)
   mmz(1,:) = cp6(im,:)-std_6(im,:)
 
-  res@gsnXYFillOpacities = 0.3
-  res@gsnXYFillColors = "grey55"
-  res@xyCurveDrawOrder = "PreDraw"
   plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res)  ; Create filled XY plot.
   overlay(plot2(im), plota)
 
 end do
+
+;---------shading of STD---------
+
+com_std6 = dim_avg_n_Wrap(std_6,0)
+
+  mmz(0,:) = com_pc6-com_std6
+  mmz(1,:) = com_pc6+com_std6
+
+  plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res)  ; Create filled XY plot.
+  overlay(plot3(1), plota)
+
+
+  ;---------------------------------
+  ; Set up resources for a customized legend.
+  ;
+    lgres                    = True
+    lgres@lgLineThicknessF   = 2.0
+    lgres@lgItemType         = "Lines"        ; show lines only (default)
+    lgres@lgLabelFontHeightF = .1            ; legend label font thickness
+    lgres@vpWidthF           = 0.20           ; width of legend (NDC)
+    lgres@vpHeightF          = 0.30           ; height of legend (NDC)
+    ; lgres@lgPerimThicknessF  = 2.0            ; thicken the box perimeter
+    lgres@lgPerimOn          = False
+   ; lgres@lgPerimFill = 0
+   ; lgres@lgPerimFillColor = 0
+    lgres@lgPerimFill            = "SolidFill"      ; Fill legend box w/white
+    lgres@lgPerimFillColor       = "white"          ; so it masks XY curves
+
+    lgres@lgMonoDashIndex = True
+    lgres@lgDashIndexes = 0;(/0,0,0,0,0,0,0,0/)
+    lgres@lgLineColors       = colors2;(::-1)
+    labels1 = MODEL5+"("+nens5+")"
+    nitems1 = dimsizes(labels1)                 ; number of legend items
+
+    lbid1 = gsn_create_legend(wks,nitems1,labels1,lgres)
+
+    delete(lgres@lgLineColors )
+    lgres@lgLineColors       = colors;(::-1)
+    labels2 = MODEL6+"("+nens6+")"
+    nitems2 = dimsizes(labels2)                 ; number of legend items
+
+    lbid2 = gsn_create_legend(wks,nitems2,labels2,lgres)
+
+
+  ; Use gsn_add_annotation to attach this legend to our existing plot.
+  ; This way, if we resize the plot, the legend will stay with the
+  ; plot and be resized automatically.
+  ;
+    amres                  = True
+
+    amres@amJust           = "BottomLeft"    ; Use bottom right corner of box
+                                              ; for determining its location.
+    amres@amParallelPosF   =  0.5              ; Move legend to right
+    amres@amOrthogonalPosF =  0.5              ; Move legend down.
+
+    annoid1 = gsn_add_annotation(plot3(0),lbid1,amres)  ; add legend to plot
+    annoid2 = gsn_add_annotation(plot3(1),lbid2,amres)  ; add legend to plot
+
 
 ;------------------------------------------------
 resk = True
@@ -382,5 +467,7 @@ resk@txString = "CMIP5 LE"
 gsn_panel(wks,plot1,(/5,2/),resk)
 resk@txString = "CMIP6 LE"
 gsn_panel(wks,plot2,(/5,2/),resk)
+resk@txString = ""
+gsn_panel(wks,plot3,(/2,1/),resk)
 
 end

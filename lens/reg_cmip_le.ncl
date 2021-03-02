@@ -53,20 +53,20 @@ diri3 = "/glade/scratch/chenxing/cmip6/"
 ;         "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
 ;         "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
 
-; MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
-;   "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
+MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
+  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR"/);,"MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
 ; nens6 = (/32,30,25,12,11, 10,\;10,
 ;       10,10,7,5,5 /) ;ensemble number 5,
 
-MODEL6 = (/ "CESM2"/)
+; MODEL6 = (/ "CESM2"/)
 
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VAR  = (/"ts","psl"/) ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
-VARn = (/"ts","psl"/) ; "ua200"
+VAR = (/"clt"/); ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
+VARn = (/"clt"/); (/"ts","psl"/) ; "ua200"
 EXP = "historical"
-IND = "nino34" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
+IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 
 yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
 yrl1 = (/1990,2014/) ;1990;1990 ;2014;
@@ -121,7 +121,7 @@ do ia = 0,nsa-1
   ymlasts = ind(yyyymm2.eq.ymlast)
   print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f->$VAR(iv)$(ymstrts:ymlasts,{20000},:,:);:,:);
+    xx  = f->$VAR(iv)$(ymstrts:ymlasts,:,:);{20000},:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 

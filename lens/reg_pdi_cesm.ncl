@@ -50,8 +50,8 @@ diri1 = "/glade/scratch/chenxing/cesm1_le/"
 diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 ;b.e21.BHIST.f09_g17.cesm2_cmip5_forcing.002.cam.h0.TS.185001-200512.nc
 
-VAR  = (/"U","V"/) ;"TS" ; "va" ;"PSL" ;
-VARn = (/"ua200","va200"/) ;"va850"
+VAR  = (/"CLDTOT"/) ; (/"U","V"/) ;"TS" ; "va" ;"PSL" ;
+VARn = (/"clt"/) ; (/"ua200","va200"/) ;"va850"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
@@ -122,7 +122,7 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR(iv)$(0:ymlasts+1,{200},:,:) ;:,:);(ymstrts:ymlasts,:,:);
+    xx  = f[:]->$VAR(iv)$(0:ymlasts+1,:,:);{200},:,:) ;(ymstrts:ymlasts,:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 

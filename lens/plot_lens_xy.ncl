@@ -16,6 +16,11 @@ dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/e
 
 neof = 1
 
+yr_calibrate = 1900 ;1920
+yr_calibrate2 = 1940 ;1920
+
+;============CMIP5 LENS==============================
+
 MODEL = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
   "GFDL-ESM2M","MPI-ESM" /);"GFDL-CM3",
 
@@ -61,7 +66,8 @@ printVarSummary(pc)
 
 pca_lens5(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_avg_n_Wrap(pc, 0)
 com_std(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_stddev_n_Wrap(pc, 0)
-pc_lens5(im,:nens5(im)-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
+; pc_lens5(im,:nens5(im)-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
+pca_lens5(im,:) = pca_lens5(im,:) - avg(pca_lens5(im,:(yrs+20-1850)*12)) ;consist the clm with other which started to yr_calibrate
   delete([/locs,pc,f1,bb,locs_str/] )
 end do
 printVarSummary(pca_lens5)
@@ -69,9 +75,10 @@ printVarSummary(pca_lens5)
 
 ;==========================CESM==========================
 
-MODEL2 = (/"CESM1","CESM1","CESM1","CESM1","CESM2 (CMIP5 forcing)"/)
-EXP2 =  (/ "xghg", "xaer" , "xlulc", "xbmb",""/)
-lens2 = (/20,20,5,15,7 /) ;
+MODEL2 = (/"CESM1","CESM1","CESM1","CESM2 (CMIP5 forcing)"/);"CESM1",
+EXP2 =  (/ "xghg", "xaer" ,  "xbmb",""/);"xlulc",
+EXP2_name =  (/ "noGHG", "noAer" ,  "noBMB",""/);"xlulc",
+lens2 = (/20,20,15,7 /) ;5,
 nec = dimsizes(EXP2)
 pca_cesm1 = new((/nec,ntime/), "float")
 pc_cesm1 = new((/nec,max(lens2),ntime/), "float")
@@ -92,8 +99,8 @@ pca_cesm1(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_avg_n_Wrap(pc, 0)
 cesm_std(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_stddev_n_Wrap(pc, 0)
 ndim = dimsizes(pc)
 nens2(im) = ndim(0)
-pca_cesm1(im,:) = pca_cesm1(im,:) - avg(pca_cesm1(im,(1920-1850)*12:)) ;consist the clm with other which started from 1920
-pc_cesm1(im,:toint(lens2(im))-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
+pca_cesm1(im,:) = pca_cesm1(im,:) - avg(pca_cesm1(im,:(yr_calibrate-1850)*12)) ;consist the clm with other which started to yr_calibrate
+; pc_cesm1(im,:toint(lens2(im))-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
 delete([/locs,pc,f1/] )
 
 ;;;;;;;cesm1_le single forcing;;;;;;;;
@@ -124,7 +131,8 @@ printVarSummary(pc)
 printVarSummary(pca_cesm1(im,(yrs-yrs0)*12:))
 pca_cesm1(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_avg_n_Wrap(pc, 0)
 cesm_std(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_stddev_n_Wrap(pc, 0)
-pc_cesm1(im,:toint(lens2(im))-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
+pca_cesm1(im,:) = pca_cesm1(im,:) - avg(pca_cesm1(im,:(yr_calibrate2-1850)*12)) ;consist the clm with other which started to yr_calibrate
+; pc_cesm1(im,:toint(lens2(im))-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
 ndim = dimsizes(pc)
 nens2(im) = ndim(0)
 
@@ -150,11 +158,11 @@ pc_cesm2 = wgt_runave_n_Wrap( pc_cesm2, wgt,  0, 1 )   ;opt < 0 : utilize cyclic
 printVarSummary(pc_cesm2)
 std_cesm2 = dim_stddev_n_Wrap(pc_cesm2,0)
 pca_cesm2 = dim_avg_n_Wrap(pc_cesm2,0)
-pca_cesm2 = pca_cesm2 - avg(pca_cesm2((1920-1850)*12:)) ;consist the clm with other which started from 1920
+pca_cesm2 = pca_cesm2 - avg(pca_cesm2(:(yr_calibrate-1850)*12)) ;consist the clm with other which started to yr_calibrate
 
 ;--------------plot-------------------
 
-wks = gsn_open_wks("png", "./pic/lens5_xy");dirip+
+wks = gsn_open_wks("ps", "./pic/lens5_xy");dirip+
 plot1 = new(nml5,graphic)                ; create graphic array
 plot2 = new(nec,graphic)                ; create graphic array
 plot3 = new(5,graphic)                ; create graphic array
@@ -231,7 +239,7 @@ do im = 0,nml5-1
 end do
 
 do im = 0,nec-1
-  res@gsnLeftString = MODEL2(im)+" "+EXP2(im)+" ("+nens2(im)+")"
+  res@gsnLeftString = MODEL2(im)+" "+EXP2_name(im)+" ("+nens2(im)+")"
   plot2(im) = gsn_csm_xy (wks,x_axis,pca_cesm1(im,:),res)
   ; each ensemble
   ; plota = gsn_csm_xy (wks,x_axis,pc_cesm1(im,:,:),res2)
@@ -261,7 +269,7 @@ res@gsnLeftString = ""
 res@trYMinF               = -1.0
 res@trYMaxF               =  1.0
 
-res@xyLineThicknessF = 8.0
+res@xyLineThicknessF = 3.0
 ;CESM2 LE (pca_cesm2)
 res@xyLineColors = "grey55"
 plot3(0) = gsn_csm_xy (wks,x_axis,pca_cesm2,res)
@@ -280,11 +288,11 @@ plot3(1) = gsn_csm_xy (wks,x_axis,pca_cesm1(1,:),res)
 
 ;CESM2 CMIP5 forcing (pca_cesm1(4,:))
 res@xyLineColors = "gold1"
-plota = gsn_csm_xy (wks,x_axis,pca_cesm1(4,:),res)
+plota = gsn_csm_xy (wks,x_axis,pca_cesm1(nec-1,:),res)
 overlay(plot3(0), plota)
-plot3(2) = gsn_csm_xy (wks,x_axis,pca_cesm1(4,:),res)
+plot3(2) = gsn_csm_xy (wks,x_axis,pca_cesm1(nec-1,:),res)
 overlay(plot3(2),plotc)
-plota = gsn_csm_xy (wks,x_axis,pca_cesm1(4,:),res)
+plota = gsn_csm_xy (wks,x_axis,pca_cesm1(nec-1,:),res)
 overlay(plot3(3),plota)
 
 ;all - xaer in cesm1
@@ -294,11 +302,11 @@ dces1((1920-yrs0)*12:) = pca_lens5(0,(1920-yrs0)*12:) - pca_cesm1(1,(1920-yrs0)*
 ;forcing in cmip6 - in cmip5 in cesm2
 dces2 = pca_cesm2
 dces2 = pca_cesm2@_FillValue
-dces2((1850-yrs0)*12:(2015-yrs0)*12-1) = pca_cesm2((1850-yrs0)*12:(2015-yrs0)*12-1) - pca_cesm1(4,(1850-yrs0)*12:(2015-yrs0)*12-1)
+dces2((1850-yrs0)*12:(2015-yrs0)*12-1) = pca_cesm2((1850-yrs0)*12:(2015-yrs0)*12-1) - pca_cesm1(nec-1,(1850-yrs0)*12:(2015-yrs0)*12-1)
 ;cesm2 - cesm1 with same forcing in cmip5
 dces3 = pca_cesm2
 dces3 = pca_cesm2@_FillValue
-dces3((1920-yrs0)*12:) = pca_cesm1(4,(1920-yrs0)*12:) - pca_lens5(0,(1920-yrs0)*12:)
+dces3((1920-yrs0)*12:) = pca_cesm1(nec-1,(1920-yrs0)*12:) - pca_lens5(0,(1920-yrs0)*12:)
 
 res@xyLineColors = "green"
 plota = gsn_csm_xy (wks,x_axis,dces1,res)
@@ -327,7 +335,7 @@ do im = 0,nml5-1
   mmz(0,:) = pca_lens5(im,:)+com_std(im,:)
   mmz(1,:) = pca_lens5(im,:)-com_std(im,:)
 
-  res@gsnXYFillColors = "grey55"
+  res@gsnXYFillColors = "grey75"
   plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
   overlay(plot1(im), plota)
 
@@ -347,7 +355,7 @@ do im = 0,nec-1
   mmz(0,:) = pca_cesm1(im,:)+cesm_std(im,:)
   mmz(1,:) = pca_cesm1(im,:)-cesm_std(im,:)
 
-  res@gsnXYFillColors = "grey55"
+  res@gsnXYFillColors = "grey75"
   plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
   overlay(plot2(im), plota)
 
@@ -370,7 +378,7 @@ end do
 mmz(0,:) = pca_cesm2+std_cesm2
 mmz(1,:) = pca_cesm2-std_cesm2
 
-res@gsnXYFillColors = "grey55"
+res@gsnXYFillColors = "grey75"
 plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
 overlay(plot3(2), plota)
 
@@ -407,7 +415,7 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
 ; Set up resources for a customized legend.
 ;
   lgres                    = True
-  lgres@lgLineThicknessF   = 5.0
+  lgres@lgLineThicknessF   = 3.0
   lgres@lgItemType         = "Lines"        ; show lines only (default)
   lgres@lgLabelFontHeightF = .1            ; legend label font thickness
   lgres@vpWidthF           = 0.30           ; width of legend (NDC)
@@ -421,7 +429,7 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
 
   lgres@lgMonoDashIndex = True
   lgres@lgDashIndexes = 0;(/0,0,0,0,0,0,0,0/)
-  lgres@lgLineColors       = (/"gold1","pink","grey55"/)
+  lgres@lgLineColors       = (/"gold1","pink","grey75"/)
   labels1 = (/"CESM2(CMIP5forcing| 7)","CESM1(40)","CESM2(11)" /)
   nitems1 = dimsizes(labels1)                 ; number of legend items
 
@@ -432,7 +440,7 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   nitems2 = dimsizes(labels2)                 ; number of legend items
   lbid2 = gsn_create_legend(wks,nitems2,labels2,lgres)
 
-  lgres@lgLineColors       = (/"green","gold1" ,"grey55"/)
+  lgres@lgLineColors       = (/"green","gold1" ,"grey75"/)
   labels3 = (/"Difference(CMIP6/5forcing)","CESM2(CMIP5forcing| 7)","CESM2(11)" /)
   nitems3 = dimsizes(labels3)                 ; number of legend items
   lbid3 = gsn_create_legend(wks,nitems3,labels3,lgres)
@@ -459,8 +467,8 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
 
   amres@amJust           = "BottomLeft"    ; Use bottom right corner of box
                                             ; for determining its location.
-  amres@amParallelPosF   =  -0.5              ; Move legend to right
-  amres@amOrthogonalPosF =  -0.15              ; Move legend down.
+  amres@amParallelPosF   =  -0.44              ; Move legend to right
+  amres@amOrthogonalPosF =  -0.18              ; Move legend down.
 
   annoid1 = gsn_add_annotation(plot3(0),lbid1,amres)  ; add legend to plot
   annoid2 = gsn_add_annotation(plot3(1),lbid2,amres)  ; add legend to plot
@@ -469,6 +477,19 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   amres@amParallelPosF   =  0.5              ; Move legend to right
   amres@amOrthogonalPosF =  0.5              ; Move legend down.
   annoid5 = gsn_add_annotation(plot5(0),lbid5,amres)  ; add legend to plot
+
+; ;************************************************
+; ; Attach text to plot using plot coordinates.
+; ;************************************************
+;   txres               = True                     ; text mods desired
+;   txres@txFontHeightF = 0.02                     ; font smaller. default big
+;
+;   txres@txFontColor  = "darkgreen"
+;   dum1 = gsn_add_text(wks,plot3(2),"Difference(CMIP6/5forcing)",1970,-0.8,txres)
+;   txres@txFontColor  = "darkgoldenrod3"
+;   dum2 = gsn_add_text(wks,plot3(2),"CESM2(CMIP5forcing| 7)",1970,-0.6,txres)
+;   txres@txFontColor  = "grey25"
+;   dum3 = gsn_add_text(wks,plot3(2),"CESM2(11)",1970,-0.4,txres)
 
 ;------------------------------------------------
 resk = True

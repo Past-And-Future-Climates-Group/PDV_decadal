@@ -5,8 +5,6 @@ begin
 diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/";
 dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/";
 
-neof = 1
-
 ; ;CMIP5 MODELS
 ; MODEL5 = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","BNU-ESM","CanESM2","CCSM4","CESM1-BGC",\;
 ;       "CESM1-CAM5","CESM1-FASTCHEM","CESM1-WACCM","CMCC-CESM","CMCC-CM","CMCC-CMS",\
@@ -169,8 +167,60 @@ end do
 
 printVarSummary(pc6_all)
 
+;============CMIP5 LENS==============================
+
+MODEL5le = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
+  "GFDL-ESM2M","MPI-ESM" /);"GFDL-CM3",
+
+nens5le = (/ 40, 50, 30, 30,  100 /) ;20, ensemble number
+
+nml5le = dimsizes(MODEL5le)
+
+EXP = "historical"
+IND2 = "PDI"
+
+yrs0 = 1850
+yrl0 = 2014;2004
+ntime = (yrl0-yrs0+1)*12
+; pc_all = new((/nml5le,100,ntime/), "float")
+; pca_lens5le = new((/nml5le,ntime/), "float")
+pc_lens5le = new((/nml5le,max(nens5le),ntime/), "float")
+com_std5le = new((/nml5le,ntime/), "float")
+
+do im = 0,nml5le-1
+
+locs = systemfunc("ls "+diri+"lens5/"+IND2+"/"+MODEL5le(im)+"_"+EXP+"*")
+ locs_str = str_split(locs(im), "_")
+ print("'" + locs_str + "'")
+
+
+bb = str_split(locs_str(4), "-")
+
+  yrl = 2014
+  yrs= toint(bb(0))
+
+print("yrs = "+yrs)
+
+;---------read output---------------
+;from lens5_index.ncl
+  f1   = addfiles(locs, "r")  ;multiple files
+  ListSetType (f1, "join")        ; concatenate (=default)
+
+  pc  = f1[:]->index
+  ; pc = wgt_runave_n_Wrap( pc, wgt,  0, 1 )
+
+printVarSummary(pc)
+;;----------composite ensemble-----------------
+
+com_std5le(im,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = dim_stddev_n_Wrap(pc, 0)
+pc_lens5le(im,:nens5le(im)-1,(yrs-yrs0)*12:(yrl-yrs0+1)*12-1) = pc
+  delete([/locs,pc,f1,bb,locs_str/] )
+end do
+printVarSummary(pc_lens5le)
+
+
 ;don't filter pdv index twice!!!
-;------------filter----------------------
+;=============filter========================
 fyr   = 8.
 ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
 sigma = 1.0                           ; Lanczos sigma
@@ -180,6 +230,7 @@ fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 pc5_all = wgt_runave_n_Wrap( pc5_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
 pc6_all = wgt_runave_n_Wrap( pc6_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
+pc_lens5le = wgt_runave_n_Wrap( pc_lens5le, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
 
 
 ;----------composite-------------------
@@ -193,6 +244,13 @@ cp6_a = dim_avg_n_Wrap(pc6_all,(/0,1/)); aa, 0)
 ; ;each model mean
 cp5 = dim_avg_n_Wrap(pc5_all,1)
 cp6 = dim_avg_n_Wrap(pc6_all,1)
+
+com_pc5 = dim_avg_n_Wrap(cp5,0)
+com_pc6 = dim_avg_n_Wrap(cp6,0)
+pca_lens5le = dim_avg_n_Wrap(pc_lens5le, 1)
+com_pc5le = dim_avg_n_Wrap(pca_lens5le,0)
+printVarSummary(com_pc5le)
+printVarSummary(pca_lens5le)
 
 ; ;1. averaged STD across ensembles
 cs_a = dim_stddev_n_Wrap(pc5_all, (/0,1/)) ;com_std, 0)
@@ -254,11 +312,12 @@ std_6 = dim_stddev_n_Wrap(pc6_all,(/1/))
 
 ;--------------plot-------------------
 
-wks = gsn_open_wks("png", "./pic/lens6_xy");dirip
+wks = gsn_open_wks("png", "./pic/lens_xy");dirip
 wks2 = gsn_open_wks("png", dirip+"test");
 plot1 = new(10,graphic)                ; create graphic array
 plot2 = new(10,graphic)                ; create graphic array
 plot3 = new(10,graphic)                ; create graphic array
+plot4 = new(10,graphic)                ; create graphic array
 
 
 ;*******************************************
@@ -338,8 +397,6 @@ end do
 ;==========================================================
 delete(res@xyLineColors)
 
-com_pc5 = dim_avg_n_Wrap(cp5,0)
-com_pc6 = dim_avg_n_Wrap(cp6,0)
 
 ;MODEL
 res@xyLineThicknessF = 5.0
@@ -366,10 +423,11 @@ res@gsnLeftString = ""
 
   ; delete(res@xyDashPattern)
   delete(res@xyLineColors)
-  res@xyLineColor     = -1                           ; We don't want the line, so make it trax_axisparent.
+  res2 = res
+  res2@xyLineColor     = -1                           ; We don't want the line, so make it trax_axisparent.
   mmz = cp5(0:1,:)
 
-res@gsnLeftString = ""
+res2@gsnLeftString = ""
 
 do im = 0,nmo5-1
 
@@ -377,10 +435,10 @@ do im = 0,nmo5-1
   mmz(0,:) = cp5(im,:)+std_5(im,:)
   mmz(1,:) = cp5(im,:)-std_5(im,:)
 
-  res@gsnXYFillOpacities = 0.3
-  res@gsnXYFillColors = "grey55"
-  res@xyCurveDrawOrder = "PreDraw"
-  plota  = gsn_csm_xy (wks,(/x_axis5/),mmz(0:1,:),res)  ; Create filled XY plot.
+  res2@gsnXYFillOpacities = 0.3
+  res2@gsnXYFillColors = "grey55"
+  res2@xyCurveDrawOrder = "PreDraw"
+  plota  = gsn_csm_xy (wks,(/x_axis5/),mmz(0:1,:),res2)  ; Create filled XY plot.
   overlay(plot1(im), plota)
 
 end do
@@ -393,7 +451,7 @@ do im = 0,nmo6-1
   mmz(0,:) = cp6(im,:)+std_6(im,:)
   mmz(1,:) = cp6(im,:)-std_6(im,:)
 
-  plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res)  ; Create filled XY plot.
+  plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res2)  ; Create filled XY plot.
   overlay(plot2(im), plota)
 
 end do
@@ -405,8 +463,35 @@ com_std6 = dim_avg_n_Wrap(std_6,0)
   mmz(0,:) = com_pc6-com_std6
   mmz(1,:) = com_pc6+com_std6
 
-  plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res)  ; Create filled XY plot.
+  plota  = gsn_csm_xy (wks,(/x_axis6/),mmz(0:1,:),res2)  ; Create filled XY plot.
   overlay(plot3(1), plota)
+
+  delete(mmz)
+  mmz = cp5(0:1,:)
+  com_std5 = dim_avg_n_Wrap(std_5,0)
+
+    mmz(0,:) = com_pc5-com_std5
+    mmz(1,:) = com_pc5+com_std5
+
+    plota  = gsn_csm_xy (wks,(/x_axis5/),mmz(0:1,:),res2)  ; Create filled XY plot.
+    overlay(plot3(0), plota)
+
+;---------------
+; MME
+;---------------
+
+res@trYMinF               = -0.4
+res@trYMaxF               =  0.4
+
+res@gsnLeftString = ""
+res@xyLineColors = "blue"
+plot4(0) = gsn_csm_xy (wks,x_axis5, com_pc5 ,res)
+res@xyLineColors = "red"
+plota = gsn_csm_xy (wks,x_axis6, com_pc6 ,res)
+overlay(plot4(0),plota)
+res@xyLineColors = "lightblue3"
+plota = gsn_csm_xy (wks,x_axis6, com_pc5le ,res)
+overlay(plot4(0),plota)
 
 
   ;---------------------------------
@@ -456,6 +541,19 @@ com_std6 = dim_avg_n_Wrap(std_6,0)
     annoid2 = gsn_add_annotation(plot3(1),lbid2,amres)  ; add legend to plot
 
 
+;************************************************
+; Attach text to plot using plot coordinates.
+;************************************************
+  txres               = True                     ; text mods desired
+  txres@txFontHeightF = 0.02                     ; font smaller. default big
+
+  txres@txFontColor  = "blue"
+  dum1 = gsn_add_text(wks,plot4(0),"CMIP5 LE",1880,0.3,txres)
+  txres@txFontColor  = "lightblue3"
+  dum1 = gsn_add_text(wks,plot4(0),"CMIP5 LENS",1880,0.2,txres)
+  txres@txFontColor  = "red"
+  dum2 = gsn_add_text(wks,plot4(0),"CMIP6 LE",1880,0.1,txres)
+
 ;------------------------------------------------
 resk = True
 ;resk@txFontHeightF = 0.03
@@ -469,5 +567,6 @@ resk@txString = "CMIP6 LE"
 gsn_panel(wks,plot2,(/5,2/),resk)
 resk@txString = ""
 gsn_panel(wks,plot3,(/2,1/),resk)
+gsn_panel(wks,plot4,(/1,1/),resk)
 
 end

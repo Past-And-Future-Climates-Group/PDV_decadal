@@ -7,7 +7,7 @@ diri6 = "/glade/collections/cmip/CMIP6/"
 diri_cesm2 = "/glade/collections/cdg/data/CMIP6/CMIP/NCAR/"
 ;;;;;;touch here
 nn = 6
-VAR = "zg" ;"rsdscs" ;"rsuscs";"rsut"; "tas" ; "od550aer"
+VAR = "pr" ;"rsdscs" ;"rsuscs";"rsut"; "tas" ; "od550aer"
 diris = "/glade/scratch/chenxing/cmip"+nn+"/historical/"+VAR+"/"
 ;;;;;;touch here
 locs = systemfunc("find "+diri6+" -type d -name "+VAR+" | grep historical/ | grep Amon | grep i1p1f1") ;i1p1 for CMIP5 i1p1f1 for CMIP6

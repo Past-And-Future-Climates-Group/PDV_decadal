@@ -50,8 +50,8 @@ diri1 = "/glade/scratch/chenxing/cesm1_le/"
 diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 ;b.e21.BHIST.f09_g17.cesm2_cmip5_forcing.002.cam.h0.TS.185001-200512.nc
 
-VAR  = (/"CLDTOT"/) ; (/"U","V"/) ;"TS" ; "va" ;"PSL" ;
-VARn = (/"clt"/) ; (/"ua200","va200"/) ;"va850"
+VAR  = (/"PRECT"/) ;(/"Z3"/) ; (/"U","V"/) ;"TS" ; "va" ;"PSL" ;"CLDTOT"
+VARn = (/"pr"/) ;(/"zg300"/) ; (/"ua200","va200"/) ;"va850";"clt"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
@@ -123,7 +123,10 @@ yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
     xx  = f[:]->$VAR(iv)$(0:ymlasts+1,:,:);{200},:,:) ;(ymstrts:ymlasts,:,:);
-
+    if (MODEL.eq."cesm2_cmip5_forcing".and.VAR.eq."PRECT") then
+      xx = xx *1000
+      xx@units = "kg m-2 s-1"
+    end if
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
   xa = rmMonAnnCycTLL(xx)
@@ -211,6 +214,7 @@ printVarSummary(pc3)
 a1 = (yrs1(i)-yrs0)*12
 b1 = (yrl1(i)-yrs0+1)*12-1
 pc2 = pc_ft(a1:b1) ;pc3(yrs1(i)-yrs0:yrl1(i)-yrs0+1)
+print(a1+" "+b1)
 ; ic = ind(pc2.gt.0)
 ; print((yrs1(i)+ic)+"")
 ; aa(ia,:,:) = dim_avg_n_Wrap(dd(ic,:,:),0)

@@ -6,12 +6,12 @@ diri6 = "/glade/collections/cmip/CMIP6/"
 diri_cesm1 = "/glade/collections/cdg/data/cmip5/output1/" ;I skip this one... there are many many similar upload version of CESM!!!
 diri_cesm2 = "/glade/collections/cdg/data/CMIP6/CMIP/NCAR/"
 ;;;;;;touch here
-nn = 6
-VAR = "zg" ;"rsuscs";"rsut"; "tas" ; "od550aer"
+nn = 5
+VAR = "pr" ;"rsuscs";"rsut"; "tas" ; "od550aer"
 diris = "/glade/scratch/chenxing/cmip"+nn+"/historical/"+VAR+"/"
 ; ;;;;;;touch here
-locs = systemfunc("find "+diri_cesm2+" -type d -name "+VAR+" | grep historical/ | grep Amon | grep i1p1f1")
-; print(locs)
+locs = systemfunc("find "+diri_cesm1+" -type d -name "+VAR+" | grep historical/ | grep Amon | grep i1p1") ;f1
+print(locs)
 
 ; locs = (/"/glade/collections/cdg/data/cmip5/output1/NCAR/CCSM4/historical/mon/atmos/Amon/r1i1p1/v20160829/rsut",\
 ; "/glade/collections/cdg/data/cmip5/output1/NCAR/CCSM4/historical/mon/atmos/Amon/r6i1p1/v20160829/rsut",\
@@ -49,11 +49,11 @@ do im = 0,nm-1
 ;;;;;;touch here
 	MODEL = locs_str(7) ; 7 for cesm1 & 2    ;6 for cmip5&6
     EXP = locs_str(8)  ; 8 for cesm1 & 2    ; 7 for cmip6
-	ENS  = locs_str(9); 12 for cesm1; 9 for cesm2     ;11 for cmip5 ; 8 for cmip6 ;
+	ENS  = locs_str(12); 12 for cesm1; 9 for cesm2     ;11 for cmip5 ; 8 for cmip6 ;
 
-    ; system("cdo cat "+locs(im)+"/*.nc "+diris+"bb.nc")
+    system("cdo cat "+locs(im)+"/*.nc "+diris+"bb.nc")
 ;;;;;;touch here for cesm2
-    system("cdo cat "+locs(im)+"/gn/latest/*.nc "+diris+"bb.nc")
+    ; system("cdo cat "+locs(im)+"/gn/latest/*.nc "+diris+"bb.nc")
 	system("cdo remapbil,r144x72 "+diris+"bb.nc "+diris+MODEL+"_"+VAR+"_"+EXP+"_"+ENS+".nc")
 	print(MODEL+"_"+VAR+"_"+EXP+"_"+ENS+".nc is done")
 

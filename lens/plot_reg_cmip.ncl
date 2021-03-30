@@ -13,8 +13,7 @@ SEASON = (/"DJF(-1)","MAM(-1)","JJA(-1)","SON(-1)","DJF(0)" /)
 EXP  = "historical"
 IND  = "PDI" ;"nino34";
 LEV  = "850";"200" ;
-VAR  = "pr" ; "zg300" ;"ts" ;"psl" "ts"
-VAR2 = "pr" ; "zg300" ;"TS" ;"TS" ;"psl" ;
+VAR  = "ts" ; "zg300" ;"ts" ;"psl" "ts"
 LR =  "reg" ;"regLag" ;
 
 yrs = (/1950,1991/)
@@ -43,13 +42,13 @@ do i = 0,dimsizes(yrs)-1
 ; from reg_cmip5.ncl reg_cmip6.ncl
 ;CESM1-CAM5_r6i1p1_reg_PDI_historical_ts_1920-2014.nc
 fils = systemfunc("ls "+diri+MODEL(im)+"_*_"+LR+"_"+IND+"_historical_"+VAR+"_"+yrs(i)+"-"+yrl(i)+".nc");
-print(fils)
+; print(fils)
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 t1 = dim_avg_n_Wrap(f1[:]->rc ,0)
 delete([/fils,f1/])
 
-if (MODEL(im).ne."GFDL-ESM2M".or.MODEL(im).ne."MPI-ESM") then
+if (MODEL(im).ne."GFDL-ESM2M") then
 fils = systemfunc("ls "+diri+MODEL(im)+"_*_"+LR+"_"+IND+"_historical_ua"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
@@ -60,29 +59,31 @@ f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 v1 = dim_avg_n_Wrap(f1[:]->rc ,0)
 delete([/fils,f1/])
-end if
 
 printMinMax(u1,0)
 printMinMax(v1,0)
+end if
 
-;there are some extreme points (maybe distortion calculation)
-u1 = where(u1.ge.5,u1@_FillValue,u1)
-v1 = where(v1.ge.5,v1@_FillValue,v1)
+printMinMax(t1,0)
 
 
 if (i.eq.0) then
 
   ; period difference P2-P1
   dt1 = t1
-  du1 = u1
-  dv1 = v1
+  if (MODEL(im).ne."GFDL-ESM2M") then
+    du1 = u1
+    dv1 = v1
+  end if
 
 else
 
   ; period difference P2-P1 for each of them
   dt1 = t1 - dt1
-  du1 = u1 - du1
-  dv1 = v1 - dv1
+  if (MODEL(im).ne."GFDL-ESM2M") then
+    du1 = u1 - du1
+    dv1 = v1 - dv1
+  end if
 
 end if
 
@@ -167,8 +168,6 @@ res2@gsnLeftString = yrs(i)+"-"+yrl(i)
     res2@gsnRightString = MODEL(im)
     plot(im*3+i) = gsn_csm_contour_map_ce(wks, t1, res2)
 
-  vector= gsn_csm_vector(wks,u1,v1,vcres)
-  overlay(plot(im*3+i),vector)
 
 if (i.eq.1) then
 
@@ -176,11 +175,19 @@ if (i.eq.1) then
     res2@gsnRightString = MODEL(im)
     plot(im*3+2) = gsn_csm_contour_map_ce(wks, dt1, res2)
 
-    vector= gsn_csm_vector(wks,du1,dv1,vcres)
-    overlay(plot(im*3+2),vector)
 
 end if
 
+if (MODEL(im).ne."GFDL-ESM2M") then
+  vector= gsn_csm_vector(wks,u1,v1,vcres)
+  overlay(plot(im*3+i),vector)
+  if (i.eq.1) then
+    vector= gsn_csm_vector(wks,du1,dv1,vcres)
+    overlay(plot(im*3+2),vector)
+  end if
+  delete([/u1,v1/])
+
+end if
   delete([/res2,vcres/])
 end do
 end do

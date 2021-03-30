@@ -164,7 +164,7 @@ pca_cesm2 = pca_cesm2 - avg(pca_cesm2(:(yr_calibrate-1850)*12)) ;consist the clm
 
 wks = gsn_open_wks("ps", "./pic/lens5_xy");dirip+
 plot1 = new(nml5,graphic)                ; create graphic array
-plot2 = new(nec,graphic)                ; create graphic array
+plot2 = new(10,graphic)                ; create graphic array
 plot3 = new(5,graphic)                ; create graphic array
 plot5 = new(5,graphic)                ; create graphic array
 
@@ -215,7 +215,7 @@ plot5 = new(5,graphic)                ; create graphic array
   res@xyMonoLineColor = False
   res@xyMonoDashPattern = True
 
-  res@trXMinF              = yrs0
+  res@trXMinF              = 1920;yrs0
   res@trXMaxF              = yrl0+1
 
   res@trYMinF               = -1.0
@@ -223,13 +223,11 @@ plot5 = new(5,graphic)                ; create graphic array
 
 res2 = res
 ;MODEL
-res@xyLineThicknessF = 5.0
+res@xyLineThicknessF = 3.0
 res@gsnLeftString = "PDV"; 15yr rolling trend"
 res@gsnRightString = pca_lens5@units
   res@xyLineColors = "black"
 
-res2@xyLineThicknessF = 0.5
-res2@xyLineColors = "lightblue"
 do im = 0,nml5-1
   res@gsnLeftString = MODEL(im)+" ("+nens5(im)+")"
   plot1(im) = gsn_csm_xy (wks,x_axis,pca_lens5(im,:),res)
@@ -238,9 +236,38 @@ do im = 0,nml5-1
   ; overlay(plot1(im),plota)
 end do
 
+res2@xyLineThicknessF = 3.0; 0.5
+res2@xyLineColors = "red"
+res@xyLineColors = "blue"
+
+cesm1_le = pca_lens5(0,:)
+
+res@gsnLeftString = "CESM1(40) & CESM2(11)"
+plot2(0) = gsn_csm_xy(wks,x_axis,pca_cesm2, res)
+plota = gsn_csm_xy (wks,x_axis,cesm1_le,res2)
+overlay(plot2(0),plota)
+
+
+res@xyLineColors = "black"
+
+res2@xyLineColors = "green"
+
+dd = pca_cesm2
+dd = pca_cesm1@_FillValue
+dd = pca_cesm2 - cesm1_le
+plota = gsn_csm_xy (wks,x_axis,dd,res2)
+overlay(plot2(0),plota)
+
+
 do im = 0,nec-1
   res@gsnLeftString = MODEL2(im)+" "+EXP2_name(im)+" ("+nens2(im)+")"
-  plot2(im) = gsn_csm_xy (wks,x_axis,pca_cesm1(im,:),res)
+  plot2(im+1) = gsn_csm_xy (wks,x_axis,pca_cesm1(im,:),res)
+
+  dd = pca_cesm1@_FillValue
+  dd = cesm1_le - pca_cesm1(im,:)
+  plota = gsn_csm_xy (wks,x_axis,dd,res2)
+  overlay(plot2(im+1),plota)
+
   ; each ensemble
   ; plota = gsn_csm_xy (wks,x_axis,pc_cesm1(im,:,:),res2)
   ; overlay(plot2(im),plota)
@@ -255,7 +282,7 @@ delete(res@xyLineColors)
 com_lens5 = dim_avg_n_Wrap(pca_lens5,0)
 
 ;MODEL
-res@xyLineThicknessF = 5.0
+res@xyLineThicknessF = 3.0
   res@xyLineColors = colors
   res@gsnLeftString = "CMIP5 LENS";
   plot5(0) = gsn_csm_xy (wks,x_axis,pca_lens5 ,res) ;x_axis2, com_pc
@@ -276,7 +303,7 @@ plot3(0) = gsn_csm_xy (wks,x_axis,pca_cesm2,res)
 plotc = gsn_csm_xy (wks,x_axis,pca_cesm2,res)
 
 ;CESM1 LENS (pca_lens5(0,:))
-; res@xyLineThicknessF = 5.0
+; res@xyLineThicknessF = 3.0
 res@xyLineColors = "lightpink3"
 plot3(3) = gsn_csm_xy (wks,x_axis,pca_lens5(0,:),res)
 plotb = gsn_csm_xy (wks,x_axis,pca_lens5(0,:),res)
@@ -339,7 +366,11 @@ do im = 0,nml5-1
   plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
   overlay(plot1(im), plota)
 
+
   if (im.eq.0) then
+    res@gsnXYFillColors = "lightpink3"
+    plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
+    overlay(plot2(0), plota)
     res@gsnXYFillColors = "pink"
     plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
     overlay(plot3(1), plota)
@@ -357,14 +388,14 @@ do im = 0,nec-1
 
   res@gsnXYFillColors = "grey75"
   plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
-  overlay(plot2(im), plota)
+  overlay(plot2(im+1), plota)
 
   if (im.eq.1) then
     res@gsnXYFillColors = "lightblue"
     plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
     overlay(plot3(1), plota)
   end if
-  if (im.eq.4) then
+  if (im.eq.nec-1) then
     res@gsnXYFillColors = "bisque"
     plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
     overlay(plot3(2), plota)
@@ -381,6 +412,9 @@ mmz(1,:) = pca_cesm2-std_cesm2
 res@gsnXYFillColors = "grey75"
 plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
 overlay(plot3(2), plota)
+res@gsnXYFillColors = "lightblue"
+plota  = gsn_csm_xy (wks,(/x_axis/),mmz(0:1,:),res)  ; Create filled XY plot.
+overlay(plot2(0), plota)
 
 ;---------all lens5---------
 
@@ -450,14 +484,13 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   nitems4 = dimsizes(labels4)                 ; number of legend items
   lbid4 = gsn_create_legend(wks,nitems4,labels4,lgres)
 
-  delete(lgres@lgLineColors)
-  lgres@vpWidthF           = 0.20           ; width of legend (NDC)
-  lgres@vpHeightF          = 0.30           ; height of legend (NDC)
-  lgres@lgLineColors       = colors;(::-1)
-  labels5 = MODEL+"("+nens5+")"
-  nitems5 = dimsizes(labels5)                 ; number of legend items
+  lgres@lgLineColors       = (/"green","blue" ,"red"/)
+  labels6 = (/"Difference(CESM2/1)","CESM2(11)","CESM1(40)" /)
+  nitems6 = dimsizes(labels6)                 ; number of legend items
+  lbid6 = gsn_create_legend(wks,nitems6,labels6,lgres)
 
-  lbid5 = gsn_create_legend(wks,nitems5,labels5,lgres)
+  delete(lgres@lgLineColors)
+
 
 ; Use gsn_add_annotation to attach this legend to our existing plot.
 ; This way, if we resize the plot, the legend will stay with the
@@ -474,6 +507,30 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   annoid2 = gsn_add_annotation(plot3(1),lbid2,amres)  ; add legend to plot
   annoid3 = gsn_add_annotation(plot3(2),lbid3,amres)  ; add legend to plot
   annoid4 = gsn_add_annotation(plot3(3),lbid4,amres)  ; add legend to plot
+  annoid6 = gsn_add_annotation(plot2(0),lbid6,amres)  ; add legend to plot
+
+  lgres@lgLineColors       = (/"green","black"/)
+  do im = 0,nec-1
+    labels = (/"Difference with CESM1",EXP2_name(im)+"" /)
+    nitemsa = dimsizes(labels)                 ; number of legend items
+    label = unique_string("label")
+    plot2@$label$ = gsn_create_legend(wks,nitemsa,labels,lgres)
+    annot = unique_string("annot")
+  plot2@$annot$ = gsn_add_annotation(plot2(im+1),plot2@$label$,amres)  ; add legend to plot
+  end do
+
+  delete(lgres@lgLineColors)
+
+  lgres@vpWidthF           = 0.20           ; width of legend (NDC)
+  lgres@vpHeightF          = 0.30           ; height of legend (NDC)
+  lgres@lgLineColors       = colors;(::-1)
+  labels5 = MODEL+"("+nens5+")"
+  nitems5 = dimsizes(labels5)                 ; number of legend items
+
+  lbid5 = gsn_create_legend(wks,nitems5,labels5,lgres)
+
+  delete(lgres@lgLineColors)
+
   amres@amParallelPosF   =  0.5              ; Move legend to right
   amres@amOrthogonalPosF =  0.5              ; Move legend down.
   annoid5 = gsn_add_annotation(plot5(0),lbid5,amres)  ; add legend to plot
@@ -503,5 +560,6 @@ gsn_panel(wks,plot1,(/3,2/),resk)
 gsn_panel(wks,plot2,(/3,2/),resk)
 gsn_panel(wks,plot3,(/2,2/),resk)
 gsn_panel(wks,plot5,(/1,1/),resk)
+
 
 end

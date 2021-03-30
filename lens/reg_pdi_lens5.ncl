@@ -47,29 +47,29 @@ diri2 = "/gpfs/fs1/collections/cdg/data/CLIVAR_LE/"
 SEASON = (/"DJF","MAM","JJA","SON" /)
 
 MODEL_LOCS = (/"cesm_lens","canesm2_lens","csiro_mk36_lens",\;"ec_earth_lens",
-  "gfdl_cm3_lens","gfdl_esm2m_lens","mpi_lens" /)
+  "gfdl_cm3_lens","mpi_lens" /);"gfdl_esm2m_lens",
 MODEL_NAME = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
-  "GFDL-CM3","GFDL-ESM2M","MPI-ESM" /)
+  "GFDL-CM3","MPI-ESM" /);"GFDL-ESM2M",
 ;
   ; MODEL_LOCS = (/"cesm_lens"/)
   ; MODEL_NAME = (/"CESM1-CAM5" /)
 
 nm = dimsizes(MODEL_LOCS)
 
-VAR  = (/"zg"/); (/"ua","va"/) ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
-VARn = (/"zg300"/); (/"ua200","va200"/) ; "ua200"
+VAR  =  (/"ts"/);(/"ua","va"/) ; (/"zg"/);"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
+VARn = (/"ts"/);(/"ua850","va850"/) ;(/"zg300"/);  "ua200"
 EXP = "historical"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
-yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
-yrl1 = (/1990,2014/) ;1990;1990 ;2014;
+yrs1 = 1950 ;(/1950,1991 /) ;1950;1950 ;1991;
+yrl1 = 2014 ;(/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
 
-do i = 0,1
+do i = 0,dimsizes(yrs1)-1
 
-do im = 0,nm-1
+do im = 0,0;nm-1
 
 diri3 = diri2+MODEL_LOCS(im)+"/Amon/"+VAR(iv)+"/"
 
@@ -122,7 +122,7 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR(iv)$(ymstrts:ymlasts,{30000},:,:);{20000},:,:);ce;
+    xx  = f[:]->$VAR(iv)$(ymstrts:ymlasts,:,:);{20000},:,:);ce;
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 

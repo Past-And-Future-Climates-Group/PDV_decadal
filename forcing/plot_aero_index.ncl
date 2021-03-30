@@ -15,10 +15,14 @@ diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/ens
 dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/"
 
 
-;============CMIP5==============================
+;============read==============================
+;------anthropogenic emission---------------
 
-AER = (/"BC","CO","NH3","NO","OC","SO2" /);"CH4",
-AER2 = (/"BC","CO","NH3","NOx","OC","SO2" /);"CH4",
+AER = (/"BC","CO","NH3","NMVOC","NO","OC","SO2" /);"CH4",
+EMI = (/"emiss_awb","emiss_wst","emiss_dom","emiss_ene","emiss_ind","emiss_tra"/) ;
+AER2 = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
+;0: Agriculture; 1: Energy; 2: Industrial; 3: Transportation; 4: Residential, Commercial, Other
+;5: Solvents production and application; 6: Waste; 7: International Shipping
 
 na = dimsizes(AER)
 
@@ -34,12 +38,13 @@ do im = 0,na-1
 
 ;---------read output---------------
 ;from aero_index_cmip5.ncl
-  f1   = addfile(diri+"aerosol/cmip5_"+AER(im)+"_anthropogenic_EA.nc", "r")
+  f1   = addfile(diri+"aerosol/cmip5_"+AER(im)+"_anthropogenic_NP.nc", "r")
   aer5(im,:)  = f1->index
   ; aer5 = wgt_runave_n_Wrap( aer5, wgt,  0, 1 )
 
-  f1   = addfile(diri+"aerosol/cmip6_"+AER2(im)+"_anthropogenic_EA.nc", "r")
-  aer6(im,:)  = f1->index
+  f1   = addfile(diri+"aerosol/cmip6_"+AER2(im)+"_anthropogenic_NP.nc", "r")
+    aer6(im,:)  =  f1->index
+
 
 end do
 printVarSummary(aer5)
@@ -50,19 +55,47 @@ printVarSummary(aer6)
 x_axis6 = ispan(1850,2014,1)
 printVarSummary(x_axis6)
 
-; f2   = addfile(diri+"aerosol/cmip5_BC_biomassburning_gm.nc", "r") ;1900-2000
-; bb5  = f2->index
-; f2   = addfile(diri+"aerosol/cmip6_BC_biomassburning_gm.nc", "r") ;1850-2015
-; bb6  = f2->index
-; printVarSummary(bb6)
-; printVarSummary(bb5)
-; x_axis5b = ispan(1900,2000,10)
-; x_axis6b = ispan(1850,2015,1)
+aer5 = aer5 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5;*111000*111000
+aer5@units = "Gg/year"
+aer6 = aer6 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5;*111000*111000
+aer6@units = "Gg/year"
+
+;----------------Biomass burning---------------
+
+BBV = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2"/) ;"CH4",
+BBV2 = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
+; EMI = (/"grassfire","forestfire"/);
+
+nab = dimsizes(BBV)
+bb5 = new((/nab,16/), "float")
+bb6 = new((/nab,166/), "float");1850-2014 (bb BC 1850-2015)
+
+do im = 0,nab-1
+
+f2   = addfile(diri+"aerosol/cmip5_"+BBV(im)+"_biomassburning_NP.nc", "r") ;1900-2000
+bb5(im,:)  = dim_avg_n_Wrap( f2->index,0)
+
+f2   = addfile(diri+"aerosol/cmip6_"+BBV2(im)+"_biomassburning_NP.nc", "r") ;1850-2015
+bb6(im,:)  = f2->index
+end do
+
+printVarSummary(bb6)
+printVarSummary(bb5)
+x_axis5b = ispan(1850,2000,10)
+x_axis6b = ispan(1850,2015,1)
+printVarSummary(x_axis5b)
+printVarSummary(x_axis6b)
+
+bb5 = bb5 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5;*111000*111000
+bb5@units = "Gg/year"
+bb6 = bb6 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5;*111000*111000
+bb6@units = "Gg/year"
 
 ;--------------plot-------------------
 
 wks = gsn_open_wks("png", "./aero_xy");dirip+
 plot1 = new(10,graphic)                ; create graphic array
+plot2 = new(10,graphic)                ; create graphic array
 
 ;*******************************************
 ; time series (principal component) plot
@@ -126,7 +159,7 @@ res2@xyLineColors = "black"
 
 do im = 0,na-1
 
-  res@trYMaxF               = max(aer5(im,:))*1.5
+  res@trYMaxF               = max(aer6(im,:))*1.5
 
   res@gsnLeftString = AER(im)
   plot1(im) = gsn_csm_xy (wks,x_axis5,aer5(im,:),res)
@@ -134,7 +167,15 @@ do im = 0,na-1
   overlay(plot1(im),plota)
 end do
 
+do im = 0,nab-1
 
+  res@trYMaxF               = max(bb6(im,:))*1.5
+
+  res@gsnLeftString = AER(im)
+  plot2(im) = gsn_csm_xy (wks,x_axis5b,bb5(im,:),res)
+  plota = gsn_csm_xy (wks,x_axis6b,bb6(im,:),res2)
+  overlay(plot2(im),plota)
+end do
 ;
 ; ;---------------------------------
 ; ; Set up resources for a customized legend.
@@ -222,8 +263,11 @@ resk = True
 resk@gsnPanelLabelBar   = False                 ; add common colorbar
 resk@gsnMaximize = True
 resk@gsnPaperOrientation = "portrait"   ; force portrait
-resk@txString = "EA Anthropogenic aerosol emissions in CMIP5 & CMIP6"
+resk@txString = "NP Anthropogenic aerosol emissions in CMIP5 & CMIP6"
 
-gsn_panel(wks,plot1,(/3,2/),resk)
+gsn_panel(wks,plot1,(/4,2/),resk)
+resk@txString = "NP biomass burning in CMIP5 & CMIP6"
+
+gsn_panel(wks,plot2,(/4,2/),resk)
 
 end

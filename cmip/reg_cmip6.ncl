@@ -3,9 +3,9 @@ diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
 
-  yrs = 1850;1950; 
+  yrs = 1850;1950;
   yrl = 2014
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip6/"
@@ -28,14 +28,14 @@ nens6 = (/32,30,25,12,11, 10, 10,\;10,
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
   i6le(i) = ind(MODEL6.eq.MODEL6_LE(i))
-end do 
+end do
 
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VAR = "netsw" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ; 
+VAR = "pr" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
-IND = "ASRHD" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA"; 
+IND = "mmeeof2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA = "mme" ; "s";
 
 ; note, the max lag should not be more than N/4
@@ -50,10 +50,10 @@ printVarSummary(locs)
 print(locs)
 nsa = dimsizes(locs)
 
-  aa = new((/nens_all, 72,144 /), "float") 
+  aa = new((/nens_all, 72,144 /), "float")
 
 do ia = 0,nsa-1
-  
+
  locs_str = str_split(locs(ia), "_"); "/")
  print("'" + locs_str + "'")
   ENSN  = locs_str(3)
@@ -64,27 +64,27 @@ do ia = 0,nsa-1
     file_name2 = diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc"
     exists = isfilepresent(file_name)
     exists2 = isfilepresent(file_name2)
-  if (AA.ne."mme") then 
+  if (AA.ne."mme") then
     if(.not.exists.or..not.exists2) then
       print(MODEL6(im)+" ens "+ENSN+" file not exist")
       print("Either the file doesn't exist, or NCL does")
       print("not have OPeNDAP cabilities on this system.")
       continue
     else
-  
-    f   = addfile(file_name, "r") 
+
+    f   = addfile(file_name, "r")
     end if
-  else 
+  else
     if(.not.exists) then
       print(MODEL6(im)+" ens "+ENSN+" file not exist")
       print("Either the file doesn't exist, or NCL does")
       print("not have OPeNDAP cabilities on this system.")
       continue
     else
-  
-    f   = addfile(file_name, "r") 
+
+    f   = addfile(file_name, "r")
     end if
-  end if     
+  end if
 
 
   TIME2=f->time
@@ -97,9 +97,14 @@ do ia = 0,nsa-1
     xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
-   
+
+  if(VAR.eq."pr") then
+    xx = xx*24*3600 ;kg/s/m2-->24*3600mm/day
+    xx@units = "mm/day"
+  end if
+
   xa = rmMonAnnCycTLL(xx)
-  
+
   xa_annual = month_to_annual(xa, 1)
   xa_sea = month_to_seasonN(xa, SEASON)
   ;season, year --> season * year one dimension
@@ -109,35 +114,35 @@ do ia = 0,nsa-1
   copy_VarMeta(xa(0,:,:), xa_sea2(0,:,:))
 
   ;---------read output---------------
-  
+
   ; ;PDV
   ; ; from pdv_cmip6_hist.ncl
-  ; f1   = addfile(diri+"cmip6/pdv/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_pdv_1850-2014.nc", "r") 
+  ; f1   = addfile(diri+"cmip6/pdv/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_pdv_1850-2014.nc", "r")
   ; pc  = f1->pc(0,(yrs-1850)*12:)
 
   ; ;;some index
   ; ;from cmip_index.ncl
-  ; f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r") 
+  ; f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
   ; ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
   ; pc  = tofloat(f1->index((yrs-1850)*12:))
   ; ; pc  = dtrend(pc, 0)
 
-  ; ;global external forcing mode
-  ; ; from mme_eof_cmip6.ncl 
-  ;   f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r") 
-  ;   pc  = f1->pc(1,:)
+  ;global external forcing mode
+  ; from mme_eof_cmip6.ncl
+    f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
+    pc  = f1->pc(1,:)
 
-  ; ;MME index 
-  ;from plot_cmip_index_xy.ncl 
-  f1 = addfile(diri+"cmip6_"+EXP+"_"+IND+"_mme.nc","r")
-  pc = f1->cp6_a
+  ; ; ;MME index
+  ; ;from plot_cmip_index_xy.ncl
+  ; f1 = addfile(diri+"cmip6_"+EXP+"_"+IND+"_mme.nc","r")
+  ; pc = f1->cp6_a
 
   pc_annual = month_to_annual(pc, 1)
   ; pc_sea = month_to_seasonN(pc, SEASON)
   ; pc_sea2 = ndtooned(pc_sea)
   ; pc_sea2!0 = "time"
   delete([/xx /])
-  
+
 ;------------filter----------------------
 fyr   = 8.
 ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
@@ -146,7 +151,7 @@ nWgt  = toint(fyr*12*1+1); fyr)+1 ;                           ; odd only
 fca   = 1./(fyr*12)
 fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
+pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
 ; ???
 pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
@@ -155,27 +160,27 @@ pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
 aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
 
 copy_VarCoords(xa(0,:,:), aa(ia,:,:))
-  
+
 delete([/locs_str,pc,xa_sea2/]);,pc_sea2,xa_sea,pc_sea,xa
-end do 
+end do
 
 ;ensemble mean
 ccr1(im,:,:) = dim_avg_n_Wrap(aa, 0)
 
 delete([/locs/]);,x_Lead1
 
-end do 
+end do
 
 ccr1!0 = "model"
 printVarSummary(ccr1)
 ;--------output-------------
 fon=diri+"cmip6_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
-; fon=diri+"cmip6_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+; fon=diri+"cmip6_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->ccr1 = ccr1
 
-exit 
+exit
 
 ;---------read output---------------
 f1   = addfile(diri+"cmip6_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc", "r")
@@ -202,7 +207,7 @@ printMinMax(com_ccr, 0)
 ; delete([/df,b/])
 
 ; sig_pra1 = pra_avg_p1
-; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue) 
+; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
 
 ;--------------plot-------------------
 wks = gsn_open_wks("ps", dirip+"cmip6_reg");
@@ -223,11 +228,11 @@ res2@vpWidthF  = 0.6
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
- ; res2@mpMaxLatF                   = NLAT         ; choose subregion           
+ ; res2@mpMaxLatF                   = NLAT         ; choose subregion
  ; res2@mpMinLatF                   = SLAT
  ; res2@mpMaxLonF                   = ELON
  ; res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False         
+res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
 res2@cnLineLabelsOn = False
@@ -242,12 +247,12 @@ res2@lbLabelStride    = 2
 res2@lbTitleString    = "K"                ; title string
 res2@lbTitlePosition  = "Right"              ; title position
 res2@lbTitleFontHeightF= .015                ; make title smaller
-; res2@lbTitleDirection = "Across"             
+; res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
 res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
-res2@cnLevelSelectionMode  = "ManualLevels"    
+res2@cnLevelSelectionMode  = "ManualLevels"
 res2@cnMinLevelValF        = -2.0
 res2@cnMaxLevelValF        =  2.0
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.

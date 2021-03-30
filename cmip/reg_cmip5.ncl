@@ -4,7 +4,7 @@ dirip = "/glade/u/home/chenxing/enso/"
 
   yrs = 1861;1950;
   yrl = 2004
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip5/"
@@ -64,169 +64,173 @@ nm5 = dimsizes(MODEL5)
 i5y = new(dimsizes(MODEL5_PLUS), "integer")
 do i = 0,dimsizes(MODEL5_PLUS)-1
   i5y(i) = ind(MODEL5.eq.MODEL5_PLUS(i))
-end do 
+end do
 i5n = new(dimsizes(MODEL5_MINUS), "integer")
 do i = 0,dimsizes(MODEL5_MINUS)-1
   i5n(i) = ind(MODEL5.eq.MODEL5_MINUS(i))
-end do 
+end do
 i5le = new(dimsizes(MODEL5_LE), "integer")
 do i = 0,dimsizes(MODEL5_LE)-1
   i5le(i) = ind(MODEL5.eq.MODEL5_LE(i))
-end do 
+end do
 
-VAR = "tas" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ; 
+VAR = "pr" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
-IND = "mmeeof2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA"; 
+IND = "mmeeof2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA = "mme" ; "s";
 
 nens_all = 10
 
 
-; ; note, the max lag should not be more than N/4
-; ccr1 = new((/nm5, 72,144 /), "float") ;cross correlation pattern
+; note, the max lag should not be more than N/4
+ccr1 = new((/nm5, 72,144 /), "float") ;cross correlation pattern
 
-; do im = 0,nm5-1
+do im = 0,nm5-1
 
-; ;from pdv_cmip5_hist.ncl
-; ;cmip5_historical_CanESM2_r4i1p1_pdv_1861-2004.nc
-; locs = systemfunc("ls "+diri+"cmip5/pdv/cmip5_historical_"+MODEL5(im)+"_*_pdv_1861-2004.nc")
-; printVarSummary(locs)
-; print(locs)
-; nsa = dimsizes(locs)
+;from pdv_cmip5_hist.ncl
+;cmip5_historical_CanESM2_r4i1p1_pdv_1861-2004.nc
+locs = systemfunc("ls "+diri+"cmip5/pdv/cmip5_historical_"+MODEL5(im)+"_*_pdv_1861-2004.nc")
+printVarSummary(locs)
+print(locs)
+nsa = dimsizes(locs)
 
-;   aa = new((/nens_all, 72,144 /), "float") 
+  aa = new((/nens_all, 72,144 /), "float")
 
-; do ia = 0,nsa-1
-  
-;  locs_str = str_split(locs(ia), "_"); "/")
-;  print("'" + locs_str + "'")
-;   ENSN  = locs_str(3)
+do ia = 0,nsa-1
 
-;   print(MODEL5(im)+" ens "+ENSN)
-;       file_name = diri3+EXP+"/"+VAR+"/"+MODEL5(im)+"_"+VAR+"_historical_"+ENSN+".nc"
-;       file_name2 = diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc"
-;     exists = isfilepresent(file_name)
-;     exists2 = isfilepresent(file_name2)
-;   if (AA.ne."mme") then 
-;     if(.not.exists.or..not.exists2) then
-;       print(MODEL5(im)+" ens "+ENSN+" file not exist")
-;       print(file_name+" "+exists)
-;       print(file_name2+" "+exists2)
-;       continue
-;     else
-  
-;     f   = addfile(file_name, "r") 
-;     end if
-;   else 
-;     if(.not.exists) then
-;       print(MODEL5(im)+" ens "+ENSN+" file not exist")
-;       continue
-;     else
-  
-;     f   = addfile(file_name, "r") 
-;     end if
-;   end if     
+ locs_str = str_split(locs(ia), "_"); "/")
+ print("'" + locs_str + "'")
+  ENSN  = locs_str(3)
 
-;   TIME2=f->time
-;   yyyymm2=cd_calendar(TIME2, -1)
-;   printMinMax(yyyymm2, True)
-;   ymstrts = ind(yyyymm2.eq.ymstrt)
-;   ymlasts = ind(yyyymm2.eq.ymlast)
-;   print(ymstrts+" <--start end--> "+ymlasts)
+  print(MODEL5(im)+" ens "+ENSN)
+      file_name = diri3+EXP+"/"+VAR+"/"+MODEL5(im)+"_"+VAR+"_historical_"+ENSN+".nc"
+      file_name2 = diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc"
+    exists = isfilepresent(file_name)
+    exists2 = isfilepresent(file_name2)
+  if (AA.ne."mme") then
+    if(.not.exists.or..not.exists2) then
+      print(MODEL5(im)+" ens "+ENSN+" file not exist")
+      print(file_name+" "+exists)
+      print(file_name2+" "+exists2)
+      continue
+    else
 
-;     xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
+    f   = addfile(file_name, "r")
+    end if
+  else
+    if(.not.exists) then
+      print(MODEL5(im)+" ens "+ENSN+" file not exist")
+      continue
+    else
 
-;   delete([/f,TIME2,yyyymm2/]);,lat,lon
-   
-;   xa = rmMonAnnCycTLL(xx)
-  
-;   xa_annual = month_to_annual(xa, 1)
-;   xa_sea = month_to_seasonN(xa, SEASON)
-;   ;season, year --> season * year one dimension
-;   ndim1 = dimsizes(xa_sea)
-;   xa_sea2 = reshape(xa_sea, (/ndim1(0)*ndim1(1),ndim1(2),ndim1(3) /) )
-;   xa_sea2!0 = "time"
-;   copy_VarMeta(xa(0,:,:), xa_sea2(0,:,:))
+    f   = addfile(file_name, "r")
+    end if
+  end if
 
-;   ;---------read output---------------
-  
-;   ; ;PDV
-;   ; ; from pdv_cmip5_hist.ncl
-;   ; f1   = addfile(diri+"cmip5/pdv/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_pdv_1861-2004.nc", "r") 
-;   ; pc  = f1->pc(0,(yrs-1861)*12:)
+  TIME2=f->time
+  yyyymm2=cd_calendar(TIME2, -1)
+  printMinMax(yyyymm2, True)
+  ymstrts = ind(yyyymm2.eq.ymstrt)
+  ymlasts = ind(yyyymm2.eq.ymlast)
+  print(ymstrts+" <--start end--> "+ymlasts)
+
+    xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
+
+  delete([/f,TIME2,yyyymm2/]);,lat,lon
+  if(VAR.eq."pr") then
+    xx = xx*24*3600 ;kg/s/m2-->24*3600mm/day
+    xx@units = "mm/day"
+  end if
+
+  xa = rmMonAnnCycTLL(xx)
+
+  xa_annual = month_to_annual(xa, 1)
+  xa_sea = month_to_seasonN(xa, SEASON)
+  ;season, year --> season * year one dimension
+  ndim1 = dimsizes(xa_sea)
+  xa_sea2 = reshape(xa_sea, (/ndim1(0)*ndim1(1),ndim1(2),ndim1(3) /) )
+  xa_sea2!0 = "time"
+  copy_VarMeta(xa(0,:,:), xa_sea2(0,:,:))
+
+  ;---------read output---------------
+
+  ; ;PDV
+  ; ; from pdv_cmip5_hist.ncl
+  ; f1   = addfile(diri+"cmip5/pdv/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_pdv_1861-2004.nc", "r")
+  ; pc  = f1->pc(0,(yrs-1861)*12:)
 
 
-;   ; ;;some index
-;   ; ;from cmip_index.ncl
-;   ; f1   = addfile(diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc", "r") 
-;   ; ; pc  = tofloat(f1->gmst((yrs-1861)*12:))
-;   ; pc  = tofloat(f1->index((yrs-1861)*12:))
-;   ; ; pc  = dtrend(pc, 0)
+  ; ;;some index
+  ; ;from cmip_index.ncl
+  ; f1   = addfile(diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc", "r")
+  ; ; pc  = tofloat(f1->gmst((yrs-1861)*12:))
+  ; pc  = tofloat(f1->index((yrs-1861)*12:))
+  ; ; pc  = dtrend(pc, 0)
 
-;   ; ;global external forcing mode
-;   ; ;from mme_eof_cmip6.ncl 
-;   ; f1   = addfile(diri+"cmip5/cmip5_historical_mme.eof_1861-2004.nc", "r") 
-;   ; pc  = f1->pc(1,:)
+  ;global external forcing mode
+  ;from mme_eof_cmip6.ncl
+  f1   = addfile(diri+"cmip5/cmip5_historical_mme.eof_1861-2004.nc", "r")
+  pc  = f1->pc(1,:)
 
-;   ; ;MME index 
-;   ;from plot_cmip_index_xy.ncl 
-;   f1 = addfile(diri+"cmip5_"+EXP+"_"+IND+"_mme.nc","r")
-;   if (.not.ismissing(ind(MODEL5_PLUS.eq.MODEL5(im))))then
-;       pc = f1->cp5_plus_a
-;       print(MODEL5(im)+" is PLUS ?")
-;   else if (.not.ismissing(ind(MODEL5_MINUS.eq.MODEL5(im))))then
-;       pc = f1->cp5_minus_a
-;       print(MODEL5(im)+" is MINUS ?")
-;     else
-;   pc = f1->cp5_a
-;   end if 
-;   end if 
+  ; ; ;MME index
+  ; ;from plot_cmip_index_xy.ncl
+  ; f1 = addfile(diri+"cmip5_"+EXP+"_"+IND+"_mme.nc","r")
+  ; if (.not.ismissing(ind(MODEL5_PLUS.eq.MODEL5(im))))then
+  ;     pc = f1->cp5_plus_a
+  ;     print(MODEL5(im)+" is PLUS ?")
+  ; else if (.not.ismissing(ind(MODEL5_MINUS.eq.MODEL5(im))))then
+  ;     pc = f1->cp5_minus_a
+  ;     print(MODEL5(im)+" is MINUS ?")
+  ;   else
+  ; pc = f1->cp5_a
+  ; end if
+  ; end if
 
-;   pc_annual = month_to_annual(pc, 1)
-;   ; pc_sea = month_to_seasonN(pc, SEASON)
-;   ; pc_sea2 = ndtooned(pc_sea)
-;   ; pc_sea2!0 = "time"
-;   delete([/xx/]);,xa_sea,pc_sea /])
-  
-; ;------------filter----------------------
-; fyr   = 8.
-; ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
-; sigma = 1.0                           ; Lanczos sigma
-; nWgt  = toint(fyr*12*1+1); fyr)+1 ;                           ; odd only
-; fca   = 1./(fyr*12)
-; fcb   = -999.
-; wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
+  pc_annual = month_to_annual(pc, 1)
+  ; pc_sea = month_to_seasonN(pc, SEASON)
+  ; pc_sea2 = ndtooned(pc_sea)
+  ; pc_sea2!0 = "time"
+  delete([/xx/]);,xa_sea,pc_sea /])
 
-; ; ???
-; pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
+;------------filter----------------------
+fyr   = 8.
+ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
+sigma = 1.0                           ; Lanczos sigma
+nWgt  = toint(fyr*12*1+1); fyr)+1 ;                           ; odd only
+fca   = 1./(fyr*12)
+fcb   = -999.
+wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
+pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
-; ;-----------regression-------------
-; aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
+; ???
+pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
 
-; copy_VarCoords(xa(0,:,:), aa(ia,:,:))
-  
-; delete([/locs_str,pc,xa_sea2/]);,pc_sea2,xa
-; end do 
+;-----------regression-------------
+aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
 
-; ;ensemble mean
-; ccr1(im,:,:) = dim_avg_n_Wrap(aa, 0)
+copy_VarCoords(xa(0,:,:), aa(ia,:,:))
 
-; delete([/locs/]);,x_Lead1
+delete([/locs_str,pc,xa_sea2/]);,pc_sea2,xa
+end do
 
-; end do 
+;ensemble mean
+ccr1(im,:,:) = dim_avg_n_Wrap(aa, 0)
 
-; ccr1!0 = "model"
-; printVarSummary(ccr1)
+delete([/locs/]);,x_Lead1
 
-; ;--------output-------------
-; ; fon=diri+"cmip5_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
-; fon=diri+"cmip5_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
-; system("rm -f "+fon)
-; fo=addfile(fon,"c")
-; fo->ccr1 = ccr1
+end do
 
-; exit
+ccr1!0 = "model"
+printVarSummary(ccr1)
+
+;--------output-------------
+; fon=diri+"cmip5_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+fon=diri+"cmip5_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
+system("rm -f "+fon)
+fo=addfile(fon,"c")
+fo->ccr1 = ccr1
+
+exit
 ;---------read output---------------
 f1   = addfile(diri+"cmip5_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc", "r")
 ccr1  = f1->ccr1
@@ -282,7 +286,7 @@ printMinMax(com_ua, 0)
 ; delete([/df,b/])
 
 ; sig_pra1 = pra_avg_p1
-; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue) 
+; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
 
 ;--------------plot-------------------
 wks = gsn_open_wks("ps", dirip+"cmip5_reg");
@@ -298,18 +302,18 @@ res2@gsnDraw = False        ;dont draw
 res2@gsnFrame = False        ;dont advance frame
 res2@gsnLeftString = ""
 res2@gsnRightString = ""
-vcres = res2 
+vcres = res2
 
 res2@vpWidthF  = 0.6
 
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
- ; res2@mpMaxLatF                   = NLAT         ; choose subregion           
+ ; res2@mpMaxLatF                   = NLAT         ; choose subregion
  ; res2@mpMinLatF                   = SLAT
  ; res2@mpMaxLonF                   = ELON
  ; res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False         
+res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
 res2@cnLineLabelsOn = False
@@ -324,12 +328,12 @@ res2@lbLabelStride    = 2
 res2@lbTitleString    = ""                ; title string
 res2@lbTitlePosition  = "Right"              ; title position
 res2@lbTitleFontHeightF= .015                ; make title smaller
-; res2@lbTitleDirection = "Across"             
+; res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
 res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
-res2@cnLevelSelectionMode  = "ManualLevels"    
+res2@cnLevelSelectionMode  = "ManualLevels"
 res2@cnMinLevelValF        = -2.0
 res2@cnMaxLevelValF        =  2.0
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
@@ -346,7 +350,7 @@ res2@gsnLeftString = ""
     plot(3) = gsn_csm_contour_map_ce(wks, com_ccr_n, res2)
 
   ; vcres@vcGlyphStyle            = "CurlyVector"    ; turn on curly vectors
-  ; vcres@vcMinFracLengthF        = 0.08 
+  ; vcres@vcMinFracLengthF        = 0.08
   ; vcres@vcMinDistanceF          = 0.02
   vcres@vcRefMagnitudeF         = 0.5            ; define vector ref mag
   vcres@vcRefLengthF            = 0.02              ; define length of vec ref
@@ -355,18 +359,18 @@ res2@gsnLeftString = ""
   vcres@vcRefAnnoPerimOn          = False          ;参考矢量的边框
   vcres@vcRefAnnoString2          = "m/s"            ;not draw the word"reference vector"
   vcres@vcRefAnnoOrthogonalPosF = -.15            ; move ref vector up
-  
-   
+
+
   vcres@lbLabelBarOn = False
   vcres@vcFillArrowFillColor = "black"
 
-  vector= gsn_csm_vector(wks,com_ua6,com_va6,vcres)       
+  vector= gsn_csm_vector(wks,com_ua6,com_va6,vcres)
   overlay(plot(0),vector)
-  vector= gsn_csm_vector(wks,com_ua,com_va,vcres)       
+  vector= gsn_csm_vector(wks,com_ua,com_va,vcres)
   overlay(plot(1),vector)
-  vector= gsn_csm_vector(wks,com_ua_y,com_va_y,vcres)       
+  vector= gsn_csm_vector(wks,com_ua_y,com_va_y,vcres)
   overlay(plot(2),vector)
-  vector= gsn_csm_vector(wks,com_ua_n,com_va_n,vcres)       
+  vector= gsn_csm_vector(wks,com_ua_n,com_va_n,vcres)
   overlay(plot(3),vector)
 
 resk = True

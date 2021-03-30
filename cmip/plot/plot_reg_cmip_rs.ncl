@@ -4,7 +4,7 @@ dirip = "/glade/u/home/chenxing/enso/"
 
   yrs = 1861;1950;
   yrl = 2004
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip5/"
@@ -38,36 +38,19 @@ nens5 = (/10,10,10,8,6,6,6,\
          3,3,3,3,3,3,3,\
          3,3,3,3,3,3 /);5,
 
-; MODEL5_ESM = (/"BNU-ESM","CanESM2","CESM1-BGC",\;"bcc-csm1-1-m",
-;       "CESM1-CAM5","CESM1-FASTCHEM","CESM1-WACCM","CMCC-CESM",\
-;       "FIO-ESM","GFDL-ESM2G",\;"GFDL-ESM2M","GISS-E2-H","GISS-E2-R-CC","GISS-E2-R",
-;       "MIROC-ESM-CHEM","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MPI-ESM-P",\;"MRI-ESM1",
-;       "NorESM1-ME","NorESM1-M"/)
-
-; MODEL5_CM = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1","CCSM4","CMCC-CM","CMCC-CMS",\
-;              "CNRM-CM5","CSIRO-Mk3-6-0","FGOALS-g2","FGOALS-s2","GFDL-CM2p1",\
-;              "GISS-E2-H-CC","HadCM3","HadGEM2-AO","HadGEM2-CC","HadGEM2-ES",\
-;              "inmcm4","IPSL-CM5A-LR","IPSL-CM5A-MR","IPSL-CM5B-LR","MIROC5",\
-;               "MRI-CGCM3"/)
-
-; MODEL5 = (/"CNRM-CM5", "CSIRO-Mk3-6-0", "GFDL-CM2p1","HadCM3", "CCSM4", \;"GISS-E2-H","GISS-E2-R",
-;              "IPSL-CM5A-LR", "CanESM2", "MIROC5","CESM1-CAM5","HadGEM2-ES",\
-;              "ACCESS1-0","ACCESS1-3","bcc-csm1-1","CESM1-FASTCHEM","FGOALS-g2",\
-;              "FGOALS-s2","FIO-ESM","IPSL-CM5A-MR","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MRI-CGCM3","NorESM1-M"/);"GFDL-CM3",
-
 M5_YES = (/"ACCESS1-0","ACCESS1-3","CanESM2","CESM1-CAM5","CNRM-CM5","CSIRO-Mk3-6-0",\;,"GFDL-CM3"
           "HadGEM2-ES","IPSL-CM5A-LR","IPSL-CM5A-MR","MIROC5","MIROC-ESM",\
           "MRI-CGCM3","NorESM1-M"/) ;explicitly have aerosol interaction included in CMIP5
 
-M5_NO = (/"bcc-csm1-1","CCSM4","CESM1-FASTCHEM",\
-          "MPI-ESM-LR"  /) ;explicitly no aerosol interaction included in CMIP5 "GFDL-ESM2M",
+M5_NO = (/"bcc-csm1-1","CCSM4","CESM1-FASTCHEM","FGOALS-s2","FIO-ESM","GFDL-CM2p1","HadCM3",\;
+          "MPI-ESM-LR","MPI-ESM-MR"  /) ;explicitly no aerosol interaction included in CMIP5 "GFDL-ESM2M",
 
-MODEL5_ESM = (/"CanESM2","CESM1-CAM5","CESM1-FASTCHEM",\
-      "FIO-ESM","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","NorESM1-M"/)
-
-MODEL5_CM = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1","CCSM4",\
-             "CNRM-CM5","CSIRO-Mk3-6-0","FGOALS-g2","FGOALS-s2","GFDL-CM2p1",\
-             "HadCM3","HadGEM2-ES","IPSL-CM5A-LR","IPSL-CM5A-MR","MIROC5", "MRI-CGCM3"/)
+; MODEL5_ESM = (/"CanESM2","CESM1-CAM5","CESM1-FASTCHEM",\
+;       "FIO-ESM","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","NorESM1-M"/)
+;
+; MODEL5_CM = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1","CCSM4",\
+;              "CNRM-CM5","CSIRO-Mk3-6-0","FGOALS-g2","FGOALS-s2","GFDL-CM2p1",\
+;              "HadCM3","HadGEM2-ES","IPSL-CM5A-LR","IPSL-CM5A-MR","MIROC5", "MRI-CGCM3"/)
 
 ;; CMIP6 MODELS
 MODEL6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5","BCC-ESM1",
@@ -86,10 +69,12 @@ MODEL6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","AC
 
 
 MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
-  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
+  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0",\
+  "BCC-CSM2-MR","CESM2-FV2","CESM2-WACCM-FV2","CESM2-WACCM","FIO-ESM-2-0","NorESM2-LM" /) ;large ensemble model in CMIP6 "NESM3",
 
 nens6 = (/32,30,25,12,11, 10, 10,\;10,
-          10,7,5,5 /) ;ensemble number 5,
+          10,7,5,5,\
+          3, 3,3,3,3,3/) ;ensemble number 5,
 
 
 
@@ -105,43 +90,26 @@ nm6 = dimsizes(MODEL6)
 i5y = new(dimsizes(M5_YES), "integer")
 do i = 0,dimsizes(M5_YES)-1
   i5y(i) = ind(MODEL5.eq.M5_YES(i))
-end do 
+end do
 i5n = new(dimsizes(M5_NO), "integer")
 do i = 0,dimsizes(M5_NO)-1
   i5n(i) = ind(MODEL5.eq.M5_NO(i))
-end do 
+end do
 print("say yes "+i5y)
 print("say no "+i5n)
 i5le = new(dimsizes(MODEL5_LE), "integer")
 do i = 0,dimsizes(MODEL5_LE)-1
   i5le(i) = ind(MODEL5.eq.MODEL5_LE(i))
-end do 
+end do
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
   i6le(i) = ind(MODEL6.eq.MODEL6_LE(i))
-end do 
+end do
 
-i5esm = new(dimsizes(MODEL5_ESM), "integer")
-do i = 0,dimsizes(MODEL5_ESM)-1
-  i5esm(i) = ind(MODEL5.eq.MODEL5_ESM(i))
-end do 
-i5cm = new(dimsizes(MODEL5_CM), "integer")
-do i = 0,dimsizes(MODEL5_CM)-1
-  i5cm(i) = ind(MODEL5.eq.MODEL5_CM(i))
-end do 
 
-i6esm = new(dimsizes(MODEL6_ESM), "integer")
-do i = 0,dimsizes(MODEL6_ESM)-1
-  i6esm(i) = ind(MODEL6.eq.MODEL6_ESM(i))
-end do 
-i6cm = new(dimsizes(MODEL6_CM), "integer")
-do i = 0,dimsizes(MODEL6_CM)-1
-  i6cm(i) = ind(MODEL6.eq.MODEL6_CM(i))
-end do 
-
-; VAR = "ua" ;"psl" ; 
+; VAR = "ua" ;"psl" ;
 EXP = "historical"
-IND = "mmeeof2" ;"SLPAL" ;"pdv";"TNA"; "AR1Di" ;"AR1varm"; "TNA"; 
+IND = "mmemmeeof2" ;"SLPAL" ;"pdv";"TNA"; "AR1Di" ;"AR1varm"; "TNA";
 
 nens_all = 10
 
@@ -168,7 +136,7 @@ printVarSummary(c6)
 do i=0,nm6-1
     print(i+"")
     printMinMax(c6(i,:,:), 1)
-end do 
+end do
 
 ;cloud effect: all - clearsky
 d5 = r5
@@ -178,31 +146,40 @@ d6 = r6 - c6
 
 ;;----------composite-----------------
 ;MME
-com_r5 = dim_avg_n_Wrap(r5 , 0)
+com_r5 = dim_avg_n_Wrap(r5(i5le,:,:) , 0)
 com_r5_y = dim_avg_n_Wrap(r5(i5y,:,:) , 0)
 com_r5_n = dim_avg_n_Wrap(r5(i5n,:,:) , 0)
 printVarSummary(com_r5)
-com_c5 = dim_avg_n_Wrap(c5 , 0)
+com_c5 = dim_avg_n_Wrap(c5(i5le,:,:) , 0)
 com_c5_y = dim_avg_n_Wrap(c5(i5y,:,:) , 0)
 com_c5_n = dim_avg_n_Wrap(c5(i5n,:,:) , 0)
-com_d5 = dim_avg_n_Wrap(d5 , 0)
+com_d5 = dim_avg_n_Wrap(d5(i5le,:,:) , 0)
 com_d5_y = dim_avg_n_Wrap(d5(i5y,:,:) , 0)
 com_d5_n = dim_avg_n_Wrap(d5(i5n,:,:) , 0)
 
 ;CMIP6
-com_r6 = dim_avg_n_Wrap(r6 , 0)
-com_r6_e = dim_avg_n_Wrap(r6(i6esm,:,:) , 0)
-com_r6_c = dim_avg_n_Wrap(r6(i6cm,:,:) , 0)
-com_c6 = dim_avg_n_Wrap(c6 , 0)
-com_c6_e = dim_avg_n_Wrap(c6(i6esm,:,:) , 0)
-com_c6_c = dim_avg_n_Wrap(c6(i6cm,:,:) , 0)
+com_r6 = dim_avg_n_Wrap(r6(i6le,:,:) , 0)
+com_c6 = dim_avg_n_Wrap(c6(i6le,:,:) , 0)
 
-com_d6 = dim_avg_n_Wrap(d6 , 0)
-com_d6_e = dim_avg_n_Wrap(d6(i6esm,:,:) , 0)
-com_d6_c = dim_avg_n_Wrap(d6(i6cm,:,:) , 0)
+com_d6 = dim_avg_n_Wrap(d6(i6le,:,:) , 0)
 
 
 printMinMax(com_r5, 0)
+
+;difference
+dif_r = com_r5
+dif_r = com_r6 - com_r5
+dif_c = com_c5
+dif_c = com_c6 - com_c5
+dif_d = com_d6
+dif_d = com_d6 - com_d5
+dif_r_y = com_r5
+dif_r_y = com_r6 - com_r5_y
+dif_c_y = com_c5
+dif_c_y = com_c6 - com_c5_y
+dif_d_y = com_d6
+dif_d_y = com_d5_y - com_d5_n
+
 ; ;-------t-test---------------------------------
 ; pra_std = dim_stddev_n_Wrap(ccr, 0)
 
@@ -218,7 +195,7 @@ printMinMax(com_r5, 0)
 ; delete([/df,b/])
 
 ; sig_pra1 = pra_avg_p1
-; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue) 
+; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
 
 ;--------------plot-------------------
 wks = gsn_open_wks("ps", dirip+"cmip_reg");
@@ -240,11 +217,11 @@ vcres = res2
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
- ; res2@mpMaxLatF                   = NLAT         ; choose subregion           
+ ; res2@mpMaxLatF                   = NLAT         ; choose subregion
  ; res2@mpMinLatF                   = SLAT
  ; res2@mpMaxLonF                   = ELON
  ; res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False         
+res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
 res2@cnLineLabelsOn = False
@@ -255,60 +232,72 @@ res2@lbLabelBarOn = False;
 res2@lbOrientation = "Horizontal"
 res2@lbBoxLinesOn  = False
 res2@lbTitleOn        =  True                ; turn on title
-res2@lbLabelStride    = 2
-res2@lbTitleString    = "K"                ; title string
+res2@lbLabelStride    = 4
+res2@lbTitleString    = "W m-2"                ; title string
 res2@lbTitlePosition  = "Right"              ; title position
 res2@lbTitleFontHeightF= .015                ; make title smaller
-; res2@lbTitleDirection = "Across"             
-res2@lbTitleExtentF   = 0.01 ;Default: 0.15
-res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
+res2@lbTitleDirection = "Across"
+; res2@lbTitleExtentF   = 0.01 ;Default: 0.15
+; res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
+res2@lbBoxEndCapStyle = "TriangleBothEnds"
 
-res2@cnLevelSelectionMode  = "ManualLevels"    
+res2@cnLevelSelectionMode  = "ManualLevels"
 res2@cnMinLevelValF        = -1.0
 res2@cnMaxLevelValF        =  1.0
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
-
 
 res2@gsnLeftString = ""
     res2@gsnRightString = "CMIP5"
     plot(0) = gsn_csm_contour_map_ce(wks, com_r5, res2)
     res2@gsnRightString = "CMIP6"
     plot(1) = gsn_csm_contour_map_ce(wks, com_r6, res2)
-    res2@gsnRightString = "CMIP5(plus)"
+    res2@gsnRightString = "CMIP5(PLUS)"
     plot(2) = gsn_csm_contour_map_ce(wks, com_r5_y, res2)
-    res2@gsnRightString = "CMIP5(minus)"
-    plot(4) = gsn_csm_contour_map_ce(wks, com_r5_n, res2)
-    res2@gsnRightString = "CMIP6(ESM)"
-    plot(3) = gsn_csm_contour_map_ce(wks, com_r6_e, res2)
-    res2@gsnRightString = "CMIP6(CM)"
-    plot(5) = gsn_csm_contour_map_ce(wks, com_r6_c, res2)
+    res2@gsnRightString = "CMIP5(MINUS)"
+    plot(3) = gsn_csm_contour_map_ce(wks, com_r5_n, res2)
+    res2@gsnRightString = "Dif(CMIP6-CMIP5)"
+    plot(4) = gsn_csm_contour_map_ce(wks, dif_r, res2)
+    res2@gsnRightString = "Dif(CMIP6-PLUS)"
+    plot(5) = gsn_csm_contour_map_ce(wks, dif_r_y, res2)
 
     res2@gsnRightString = "CMIP5"
     plot1(0) = gsn_csm_contour_map_ce(wks, com_c5, res2)
     res2@gsnRightString = "CMIP6"
     plot1(1) = gsn_csm_contour_map_ce(wks, com_c6, res2)
-    res2@gsnRightString = "CMIP5(plus)"
+    res2@gsnRightString = "CMIP5(PLUS)"
     plot1(2) = gsn_csm_contour_map_ce(wks, com_c5_y, res2)
-    res2@gsnRightString = "CMIP5(minus)"
-    plot1(4) = gsn_csm_contour_map_ce(wks, com_c5_n, res2)
-    res2@gsnRightString = "CMIP6(ESM)"
-    plot1(3) = gsn_csm_contour_map_ce(wks, com_c6_e, res2)
-    res2@gsnRightString = "CMIP6(CM)"
-    plot1(5) = gsn_csm_contour_map_ce(wks, com_c6_c, res2)
+    res2@gsnRightString = "CMIP5(MINUS)"
+    plot1(3) = gsn_csm_contour_map_ce(wks, com_c5_n, res2)
+    ; res2@gsnRightString = "Dif(CMIP6-CMIP5)"
+    ; plot1(4) = gsn_csm_contour_map_ce(wks, dif_c, res2)
+    ; res2@gsnRightString = "Dif(CMIP6-PLUS)"
+    ; plot1(5) = gsn_csm_contour_map_ce(wks, dif_c_y, res2)
 
     res2@gsnRightString = "CMIP5"
     plot2(0) = gsn_csm_contour_map_ce(wks, com_d5, res2)
     res2@gsnRightString = "CMIP6"
     plot2(1) = gsn_csm_contour_map_ce(wks, com_d6, res2)
-    res2@gsnRightString = "CMIP5(plus)"
+    res2@gsnRightString = "CMIP5(PLUS)"
     plot2(2) = gsn_csm_contour_map_ce(wks, com_d5_y, res2)
-    res2@gsnRightString = "CMIP5(minus)"
-    plot2(4) = gsn_csm_contour_map_ce(wks, com_d5_n, res2)
-    res2@gsnRightString = "CMIP6(ESM)"
-    plot2(3) = gsn_csm_contour_map_ce(wks, com_d6_e, res2)
-    res2@gsnRightString = "CMIP6(CM)"
-    plot2(5) = gsn_csm_contour_map_ce(wks, com_d6_c, res2)
+    res2@gsnRightString = "CMIP5(MINUS)"
+    plot2(3) = gsn_csm_contour_map_ce(wks, com_d5_n, res2)
+    res2@gsnRightString = "Dif(CMIP6-CMIP5)"
+    plot2(4) = gsn_csm_contour_map_ce(wks, dif_d, res2)
+    res2@gsnRightString = "Dif(PLUS-MINUS)"
+    plot2(5) = gsn_csm_contour_map_ce(wks, dif_d_y, res2)
+
+    res2@lbLabelBarOn = True;
+    res2@gsnLeftStringFontHeightF = 0.02
+    res2@gsnRightStringFontHeightF = res2@gsnLeftStringFontHeightF
+
+    res2@gsnRightString = "CMIP6"
+    res2@gsnLeftString = "SW"
+    plota = gsn_csm_contour_map_ce(wks, com_r6, res2)
+    res2@gsnLeftString = "clear-sky"
+    plotb = gsn_csm_contour_map_ce(wks, com_c6, res2)
+    res2@gsnLeftString = "cloud effect"
+    plotc = gsn_csm_contour_map_ce(wks, com_d6, res2)
 
 resk = True
 ;resk@txFontHeightF = 0.03
@@ -327,9 +316,13 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 resk@txString = "surface net SW regression onto "+IND
 gsn_panel(wks,plot,(/3,2/),resk)
 resk@txString = "surface net clear-sky SW regression onto "+IND
-gsn_panel(wks,plot1,(/3,2/),resk)
+gsn_panel(wks,plot1,(/2,2/),resk)
 resk@txString = "cloud effect"
 gsn_panel(wks,plot2,(/3,2/),resk)
+resk@txString = ""
+resk@gsnPanelLabelBar   = False                 ; add common colorbar
+gsn_panel(wks,(/plotb,plotc/),(/2,1/),resk)
+
 
 
 end

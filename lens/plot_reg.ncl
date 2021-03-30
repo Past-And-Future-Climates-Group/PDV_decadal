@@ -11,13 +11,12 @@ SEASON = (/"DJF(-1)","MAM(-1)","JJA(-1)","SON(-1)","DJF(0)" /)
 
 EXP  = "historical"
 IND  = "PDI" ;"nino34";
-LEV  = "850";"200" ;
-VAR  = "ts" ;"psl" "ts"
-VAR2 = "TS" ;"TS" ;"psl" ;
-LR =  "reg" ;"regLag" ;
+LEV  = "200";"200" ;
+VAR  = "zg300" ;"pr" ; "zg300" ;"psl" "ts"
+LR =  "reg_mme" ;"regLag" ;"reg"
 
-yrs = (/1950,1991/)
-yrl = (/1990,2014/)
+yrs = 1950 ; (/1950,1991/)
+yrl = 2014 ; (/1990,2014/)
 
 wks = gsn_open_wks("png", dirip+"reg_lens");
 plot = new(30,graphic)                ; create graphic array
@@ -27,44 +26,48 @@ plot3 = new(30,graphic)                ; create graphic array
 
 do i = 0,dimsizes(yrs)-1
 ;---------read output---------------
-; from reg_cmip5.ncl reg_cmip6.ncl
+; from reg_pdi_lens5.ncl
 ;CESM1-CAM5_r6i1p1_reg_PDI_historical_ts_1920-2014.nc
-fils = systemfunc("ls "+diri+"lens5/CESM1-CAM5*_"+LR+"_"+IND+"_historical_"+VAR+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens5/CESM1-CAM5_*_"+LR+"_"+IND+"_historical_"+VAR+"_"+yrs(i)+"-"+yrl(i)+".nc");
 print(fils)
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 t1 = dim_avg_n_Wrap(f1[:]->rc ,0)
+delete([/fils,f1/])
 
-fils = systemfunc("ls "+diri+"lens5/CESM1-CAM5*_"+LR+"_"+IND+"_historical_ua"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens5/CESM1-CAM5_*_"+LR+"_"+IND+"_historical_ua"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 u1 = dim_avg_n_Wrap(f1[:]->rc ,0)
 
-fils = systemfunc("ls "+diri+"lens5/CESM1-CAM5*_"+LR+"_"+IND+"_historical_va"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens5/CESM1-CAM5_*_"+LR+"_"+IND+"_historical_va"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 v1 = dim_avg_n_Wrap(f1[:]->rc ,0)
 
 delete([/fils,f1/])
+; from reg_pdi_lens6.ncl
 ;CESM2_r4i1p1f1_reg_PDI_historical_va200_1991-2014.nc
-fils = systemfunc("ls "+diri+"lens6/CESM2*_"+LR+"_"+IND+"_historical_"+VAR+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens6/CESM2_*_"+LR+"_"+IND+"_historical_"+VAR+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 t2 = dim_avg_n_Wrap(f1[:]->rc ,0)
+delete([/fils,f1/])
 
-fils = systemfunc("ls "+diri+"lens6/CESM2*_"+LR+"_"+IND+"_historical_ua"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens6/CESM2_*_"+LR+"_"+IND+"_historical_ua"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 u2 = dim_avg_n_Wrap(f1[:]->rc ,0)
 
-fils = systemfunc("ls "+diri+"lens6/CESM2*_"+LR+"_"+IND+"_historical_va"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens6/CESM2_*_"+LR+"_"+IND+"_historical_va"+LEV+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 v2 = dim_avg_n_Wrap(f1[:]->rc ,0)
 delete([/fils,f1/])
 
+; from reg_pdi_cesm.ncl
 ;cesm2_cmip5_forcing_007_reg_PDI_ua850_1991-2014.nc
-fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing_*_"+LR+"_"+IND+"_"+VAR2+"_"+yrs(i)+"-"+yrl(i)+".nc");
+fils = systemfunc("ls "+diri+"lens5/cesm2_cmip5_forcing_*_"+LR+"_"+IND+"_"+VAR+"_"+yrs(i)+"-"+yrl(i)+".nc");
 f1   = addfiles(fils, "r")
 ListSetType (f1, "join")
 t0 = dim_avg_n_Wrap(f1[:]->rc ,0)
@@ -88,12 +91,14 @@ printMinMax(u2,0)
 u1 = where(u1.ge.5,u1@_FillValue,u1)
 v1 = where(v1.ge.5,v1@_FillValue,v1)
 
-; printVarSummary(t1)
-; printVarSummary(t2)
-; printVarSummary(u1)
-; printVarSummary(u2)
-; printVarSummary(v1)
-; printVarSummary(v2)
+if (VAR.eq."pr") then
+  t1 = t1 * 3600 *24
+  t2 = t2 * 3600 *24
+  t0 = t0 * 3600 *24
+  t1@units = "mm/day"
+  t2@units = "mm/day"
+  t0@units = "mm/day"
+end if
 
 if (i.eq.0) then
 
@@ -173,6 +178,7 @@ end if
 
 ;--------------plot-------------------
 gsn_define_colormap(wks, "NCV_blu_red")
+; gsn_define_colormap(wks, "MPL_BrBG")
 
 
 res2 = True
@@ -183,6 +189,7 @@ res2@gsnRightString = ""
 res2@vpWidthF  = 0.6
 
 vcres = res2
+res3  = res2
 
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
@@ -212,14 +219,14 @@ res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
 res2@cnLevelSelectionMode  = "ManualLevels"
-res2@cnMinLevelValF        = -0.6;0.6;120
-res2@cnMaxLevelValF        =  0.6;0.6;120
+res2@cnMinLevelValF        = -20.;50.;20.;0.5;
+res2@cnMaxLevelValF        =  20.;50.;20.;0.5;
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 ; vcres@vcGlyphStyle            = "Fillarrow"    ; turn on curly vectors
 vcres@vcMinFracLengthF        = 0.2
 vcres@vcMinDistanceF          = 0.02
-vcres@vcRefMagnitudeF         = 1.0;2.0 ;             ; define vector ref mag
+vcres@vcRefMagnitudeF         = 0.8;1.5 ;0.8;             ; define vector ref mag
 vcres@vcRefLengthF            = 0.04             ; define length of vec ref
 
 vcres@vcRefAnnoOn             = True
@@ -227,25 +234,53 @@ vcres@vcRefAnnoPerimOn          = False          ;参考矢量的边框
 vcres@vcRefAnnoString2          = "m/s"            ;not draw the word"reference vector"
 vcres@vcRefAnnoOrthogonalPosF = -.15            ; move ref vector up
 
-
 vcres@lbLabelBarOn = False
 vcres@vcFillArrowFillColor = "black"
 
-res2@gsnLeftString = yrs(i)+"-"+yrl(i)
+;level@units = "hPa"
+res3@cnFillOn  = False
+res3@cnInfoLabelOn            = False
+;res3@cnLinesOn = True
+;res3@cnLineLabelsOn = True ;
+res3@cnLevelFlags = "LineAndLabel" ;control over whether a line and/or a line label is to appear at each contour level
+res3@cnLineLabelBackgroundColor = -1
+res3@cnLineLabelInterval = 1
+res3@cnLineLabelPlacementMode = "constant"
+res3@cnLineThicknessF = 2.0
+res3@cnLineLabelFontHeightF = 0.01
+res3@cnLevelSpacingF = 0.2
+; res3@cnLevelSelectionMode = "ExplicitLevels"   ; set explicit contour levels
+; res3@cnLevels = (/-6.,-4.,-2.,2.,4.,6.,8.,10./)
+
+
+res2@gsnLeftString = "300hPa Zg"
     res2@gsnRightString = "CESM1"
     plot(i) = gsn_csm_contour_map_ce(wks, t1, res2)
+    res2@gsnRightString = "CESM2 with CMIP5 forcing"
+    plot(i+1) = gsn_csm_contour_map_ce(wks, t0, res2)
     res2@gsnRightString = "CESM2"
     plot(i+2) = gsn_csm_contour_map_ce(wks, t2, res2)
-    res2@gsnRightString = "CESM2 with CMIP5 forcing"
-    plot(i+4) = gsn_csm_contour_map_ce(wks, t0, res2)
 
+;contour
 
-  vector= gsn_csm_vector(wks,u1,v1,vcres)
-  overlay(plot(i),vector)
-  vector= gsn_csm_vector(wks,u2,v2,vcres)
-  overlay(plot(i+2),vector)
-  vector= gsn_csm_vector(wks,u0,v0,vcres)
-  overlay(plot(i+4),vector)
+    plota = gsn_csm_contour(wks, u1, res3)
+    plota = ColorNegDashZeroPosContour(plota,"brown",-1,"green")
+    overlay(plot(i), plota)
+    plota = gsn_csm_contour(wks, u0, res3)
+    plota = ColorNegDashZeroPosContour(plota,"brown",-1,"green")
+    overlay(plot(i+1), plota)
+    plota = gsn_csm_contour(wks, u2, res3)
+    plota = ColorNegDashZeroPosContour(plota,"brown",-1,"green")
+    overlay(plot(i+2), plota)
+
+; ;vector
+;
+;   vector= gsn_csm_vector(wks,u1,v1,vcres)
+;   overlay(plot(i),vector)
+;   vector= gsn_csm_vector(wks,u2,v2,vcres)
+;   overlay(plot(i+1),vector)
+;   vector= gsn_csm_vector(wks,u0,v0,vcres)
+;   overlay(plot(i+2),vector)
 
 if (i.eq.1) then
   res2@gsnLeftString = "P2 - P1"
@@ -298,16 +333,18 @@ resk@gsnPaperOrientation = "portrait"   ; force portrait
 resk@lbBoxEndCapStyle = "TriangleBothEnds"
 resk@lbOrientation = "Horizontal"
 resk@lbBoxLinesOn = False
+resk@lbTitleString    = "gph"                ; title string
+resk@lbTitlePosition  = "Right"              ; title position
+resk@lbTitleDirection = "Across"
+resk@lbTitleFontHeightF= .015                ; make title smaller
 ;resk@lbBoxMinorExtentF = 0.2
 resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ;resk@pmLabelBarWidthF = 0.1
 ;resk@pmLabelBarHeightF = 0.2
 ;resk@pmLabelBarParallelPosF = 0.3 ;default 0.5
 ;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
-resk@txString = " regression onto "+IND
-gsn_panel(wks,plot,(/3,2/),resk)
-gsn_panel(wks,plot1,(/3,1/),resk)
-gsn_panel(wks,plot2,(/2,2/),resk)
+resk@txString = " regression onto "+IND+" "+yrs+"-"+yrl
+gsn_panel(wks,plot,(/3,1/),resk)
 
 
 end

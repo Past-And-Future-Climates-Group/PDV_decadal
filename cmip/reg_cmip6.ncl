@@ -33,7 +33,7 @@ end do
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VAR = "pr" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
+VAR = "cloudeffect" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
 IND = "mmeeof2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA = "mme" ; "s";
@@ -94,7 +94,11 @@ do ia = 0,nsa-1
   ymlasts = ind(yyyymm2.eq.ymlast)
   print(ymstrts+" <--start end--> "+ymlasts)
 
+  if(VAR.eq."cloudeffect") then
+    xx  = f->ce(ymstrts:ymlasts,:,:);{85000},:,:);
+  else
     xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
+  end if
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 

@@ -4,7 +4,7 @@ dirip = "/glade/u/home/chenxing/enso/"
 
   yrs = 1861;1950;
   yrl = 2004
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip5/"
@@ -38,21 +38,21 @@ nm5 = dimsizes(MODEL5)
 i5y = new(dimsizes(M5_YES), "integer")
 do i = 0,dimsizes(M5_YES)-1
   i5y(i) = ind(MODEL5.eq.M5_YES(i))
-end do 
+end do
 i5n = new(dimsizes(M5_NO), "integer")
 do i = 0,dimsizes(M5_NO)-1
   i5n(i) = ind(MODEL5.eq.M5_NO(i))
-end do 
+end do
 i5le = new(dimsizes(MODEL5_LE), "integer")
 do i = 0,dimsizes(MODEL5_LE)-1
   i5le(i) = ind(MODEL5.eq.MODEL5_LE(i))
-end do 
-VARu = "rsus" ; 
+end do
+VARu = "rsus" ;
 VARd = "rsds" ;
 VARcu = "rsuscs" ;
 VARcd = "rsdscs" ;
 EXP = "historical"
-IND = "mmeeof2" ;"mmeeof2" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA"; 
+IND = "mmeeof2" ;"mmeeof2" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 
 nens_all = 10
 
@@ -66,7 +66,7 @@ print(locs)
 nsa = dimsizes(locs)
 
 do ia = 0,nsa-1
-  
+
  locs_str = str_split(locs(ia), "_"); "/")
  print("'" + locs_str + "'")
   ENSN  = locs_str(3)
@@ -86,11 +86,11 @@ do ia = 0,nsa-1
       print("not have OPeNDAP cabilities on this system.")
       continue
     else
-  
-  fu   = addfile(file_name1, "r") 
-  fd   = addfile(file_name2, "r") 
-  f3   = addfile(file_name3, "r") 
-  f4   = addfile(file_name4, "r") 
+
+  fu   = addfile(file_name1, "r")
+  fd   = addfile(file_name2, "r")
+  f3   = addfile(file_name3, "r")
+  f4   = addfile(file_name4, "r")
     end if
 
   TIME2=fu->time
@@ -105,29 +105,29 @@ do ia = 0,nsa-1
     x3  = f3->$VARcu$(ymstrts:ymlasts,:,:)
     x4  = f4->$VARcd$(ymstrts:ymlasts,:,:)
 
-    xx = xu 
-    xx = xd - xu 
-    xc = x3 
-    xc = x4 - x3 
+    xx = xu
+    xx = xd - xu
+    xc = x3
+    xc = x4 - x3
   delete([/fu,fd,TIME2,yyyymm2,xu,xd,x3,x4/]);,lat,lon
-    
-    ce = xx 
+
+    ce = xx
     ce = xx - xc
     ce@long_name = "cloud effect (SW - clear sky)"
-  
+
 ;--------output-------------
-fon=diri3+EXP+"/cloudeffect/"+MODEL5(im)+"_cloudeffect_"+EXP+"_"+ENSN+"_"+yrs+"-"+yrl+".nc";
+fon=diri3+EXP+"/cloudeffect/"+MODEL5(im)+"_cloudeffect_"+EXP+"_"+ENSN+".nc";_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->ce = ce
 
 delete([/locs_str,ce,xx,xc/]);,pc_sea2,xa
-end do 
+end do
 
 
 delete([/locs/]);,x_Lead1
 
-end do 
+end do
 
 
 

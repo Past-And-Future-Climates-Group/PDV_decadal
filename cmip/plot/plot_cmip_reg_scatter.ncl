@@ -148,24 +148,32 @@ c5  = f1->ccr1
 f2   = addfile(diri+"cmip6_reg_"+IND+"_"+EXP+"_rsdscs-rsuscs_1850-2014.nc", "r")
 c6  = f2->ccr1
 
+; from reg_cmip5.ncl reg_cmip6.ncl
+f1   = addfile(diri+"cmip5_reg_"+IND+"_"+EXP+"_cloudeffect_1861-2004.nc", "r")
+d5  = f1->ccr1
+
+f2   = addfile(diri+"cmip6_reg_"+IND+"_"+EXP+"_cloudeffect_1850-2014.nc", "r")
+d6  = f2->ccr1
+
 printVarSummary(r5)
 printVarSummary(r6)
 printVarSummary(c5)
 printVarSummary(c6)
 
-;cloud effect: all - clearsky
-d5 = r5
-d6 = r6
-d5 = r5 - c5
-d6 = r6 - c6
+
+; ;cloud effect: all - clearsky
+; d5 = r5
+; d6 = r6
+; d5 = r5 - c5
+; d6 = r6 - c6
 
 
 XX5 = t5
 XX6 = t6
-YY5 = c5 ;c5 ;d5 ;u5;
-YY6 = c6 ;c6 ;d6 ;u6;
+YY5 = u5 ;c5 ;d5 ;u5;
+YY6 = u6 ;c6 ;d6 ;u6;
 VX  = "TS"
-VY  = "clear sky rs" ;"cloud effect";"clear sky rs";"clt" ;"cloud effect";
+VY  = "cloud cover" ;"cloud effect";"clear sky rs";"cloud cover" ;
 ;---------------area average--------------------
 ; Pacific dipole (tripole) SST index2 (adapted from Dong et al. 2014 GRL):
 ;a 30-45N, 145E-180W b 10S-6N,160W-110W. b-a
@@ -205,6 +213,8 @@ y6 = z1
 
 printVarSummary(x5)
 printVarSummary(y6)
+print(y6)
+
 ; ;------------read global external forcing mode-----------
 ; ; from mme_eof_cmip6.ncl
 ;
@@ -280,10 +290,10 @@ res@xyMonoMarkerColor  = False ;True ;          ; Allow different colors for mar
   res@tiMainString             = ""
 
 
-res@trXMinF             = -0.3
-res@trXMaxF             =  0.3
-res@trYMinF             = -0.5 ;-0.2 ;-0.61 ;-0.5 ;
-res@trYMaxF             =  0.2 ; 0.6 ; 0.61 ; 0.2 ;
+res@trXMinF             = -0.5
+res@trXMaxF             =  0.5
+res@trYMinF             = -0.2 ;-0.2 ;-2.8 ;-0.5 ;
+res@trYMaxF             =  0.6 ; 0.6 ; 0.8 ; 0.2 ;
 
 res@tiXAxisString = VX
 res@tiYAxisString = VY
@@ -296,27 +306,31 @@ res@tiYAxisString = VY
 res@xyMarkerColor = "black"
 res@xyMarkerSizeF = 0.03
 
-res@gsnLeftString = "CMIP5"
-res@gsnRightString = "R="+sprintf("%3.2f", cor1)
+; res@gsnLeftString = "CMIP5"
+res@gsnLeftString = "R="+sprintf("%3.2f", cor1)
 plot(0) = gsn_csm_xy(wks, x5 , y5, res)
-res@gsnLeftString = "CMIP6"
+; res@gsnLeftString = "CMIP6"
 res@gsnRightString = "R="+sprintf("%3.2f", cor2)
-plot(1) = gsn_csm_xy(wks, x6 , y6,res)
+plota = gsn_csm_xy(wks, x6 , y6,res)
+overlay(plot(0),plota)
 
 
 ;;regression line
+XC = array_append_record (x5, x6, 0)
+YC = array_append_record (y5, y6, 0)
+
 res@gsnLeftString = ""
 res@gsnRightString = ""
 res@xyMarkLineMode = "Lines"
-rco = regline (x5 , y5)                  ; linear regression
-yregro = rco*x5 + rco@yintercept                               ; regression
-plot1 = gsn_csm_xy(wks, x5 , yregro,res)
+rco = regline (XC , YC)                  ; linear regression
+yregro = rco*XC + rco@yintercept                               ; regression
+plot1 = gsn_csm_xy(wks, XC , yregro,res)
 overlay(plot(0), plot1)
 
-rco6 = regline (x6 , y6)                  ; linear regression
-yregro6 = rco6*x6 + rco6@yintercept                               ; regression
-plot1 = gsn_csm_xy(wks, x6 , yregro6,res)
-overlay(plot(1), plot1)
+; rco6 = regline (x6 , y6)                  ; linear regression
+; yregro6 = rco6*x6 + rco6@yintercept                               ; regression
+; plot1 = gsn_csm_xy(wks, x6 , yregro6,res)
+; overlay(plot(0), plot1)
 
 
 ;************************************************
@@ -327,7 +341,7 @@ overlay(plot(1), plot1)
 
   txres@txFontColor = "grey55"
   ; text1  = gsn_add_text(wks,plot(0),MODEL5_LE,x5,y5,txres)
-  text2  = gsn_add_text(wks,plot(1),MODEL6_LE,x6,y6,txres)
+  text2  = gsn_add_text(wks,plot(0),MODEL6_LE,x6,y6,txres)
 
   txres@txFontColor = "red"
   text3  = gsn_add_text(wks,plot(0),M5_YES,x5(i5y),y5(i5y),txres)
@@ -337,9 +351,11 @@ overlay(plot(1), plot1)
 
   txres@txFontHeightF = 0.02                     ; font smaller. default big
   txres@txFontColor = "red"
-  text5  = gsn_add_text(wks,plot(0),"PLUS",res@trXMaxF-0.1,res@trYMinF+0.1,txres)
+  text5  = gsn_add_text(wks,plot(0),"PLUS(CMIP5)",res@trXMaxF-0.17,res@trYMaxF-0.05,txres)
   txres@txFontColor = "blue"
-  text6  = gsn_add_text(wks,plot(0),"MINUS",res@trXMaxF-0.1,res@trYMinF+0.05,txres)
+  text6  = gsn_add_text(wks,plot(0),"MINUS(CMIP5)",res@trXMaxF-0.17,res@trYMaxF-0.10,txres)
+  txres@txFontColor = "grey55"
+  text7  = gsn_add_text(wks,plot(0),"CMIP6",res@trXMaxF-0.17,res@trYMaxF-0.15,txres)
 
 
       resk = True
@@ -348,7 +364,7 @@ overlay(plot(1), plot1)
       resk@gsnPaperOrientation = "portrait"   ; force portrait
 
       resk@txString  = ""
-      gsn_panel(wks,plot,(/1,2/),resk);
+      gsn_panel(wks,plot,(/1,1/),resk);
 
 
 

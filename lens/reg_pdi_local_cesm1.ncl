@@ -44,25 +44,20 @@ printVarSummary(rco)
 
 diri1 = "/glade/work/chenxing/enso/E3SM/"
 diri2 = "/gpfs/fs1/collections/cdg/data/CLIVAR_LE/"
+diri3 = "/glade/scratch/chenxing/cesm1_le/"
 SEASON = (/"DJF","MAM","JJA","SON" /)
 
-; MODEL_LOCS = (/"cesm_lens","canesm2_lens","csiro_mk36_lens",\;"ec_earth_lens",
-;   "gfdl_cm3_lens","mpi_lens" /);"gfdl_esm2m_lens",
-; MODEL_NAME = (/"CESM1-CAM5","CanESM2","CSIRO-Mk3-6-0",\;"EC-EARTH",
-;   "GFDL-CM3","MPI-ESM" /);"GFDL-ESM2M",
-;
-  MODEL_LOCS = (/"cesm_lens"/)
-  MODEL_NAME = (/"CESM1-CAM5" /)
+MODEL = (/"CESM1-CAM5"/);"GFDL-ESM2M",
 
-nm = dimsizes(MODEL_LOCS)
+nm = dimsizes(MODEL)
 
-VAR  = (/"ua","va"/) ;"zg";(/"ts","pr" ,"psl"/);"cloudeffect" ;"pr" ;"psl" ; (/"ts"/);"ua" ;"od550aer" ;"cloudeffect";"ts" ;
-VARn = (/"ua200","va200"/) ;"zg300";(/"ts","pr" ,"psl"/);"cloudeffect";"pr";"psl" ;(/"ts"/); "ua200"
+VAR  = (/"FSNS","FSNSC"/);"cloudeffect" ;(/"SWCF","LWCF"/)
+VARn = (/"FSNS","FSNSC"/);"cloudeffect" ;(/"SWCF","LWCF"/)
 EXP = "historical"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
-yrs1 = 1990 ;1950 ;(/1950,1991 /) ;1950;1950 ;1991;
+yrs1 = 1990;1950 ;(/1950,1991 /) ;1950;1950 ;1991;
 yrl1 = 2014 ;(/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
@@ -71,14 +66,15 @@ do i = 0,dimsizes(yrs1)-1
 
 do im = 0,0;nm-1
 
-diri3 = diri2+MODEL_LOCS(im)+"/Amon/"+VAR(iv)+"/"
-
-locs = systemfunc("ls "+diri3+"*rcp85*")
+;CESM1-CAM5_036_cloudeffect_192001-200512.nc
+;b.e11.B20TRC5CNBDRD.f09_g16.002.cam.h0.LWCF.192001-200512.nc
+;;;~~~~~~~~~~~
+locs = systemfunc("ls "+diri3+"*."+VAR(iv)+".*.nc")
+; locs = systemfunc("ls "+diri3+"*_"+VAR(iv)+"_*.nc")
 printVarSummary(locs)
 print(locs)
 nsa = dimsizes(locs)
 
-MODEL = new(nsa, "string")
 ENSN  = new(nsa, "string")
 
 aa = new((/nsa, 72,144 /), "float")
@@ -87,43 +83,41 @@ rp1 = new(nsa, "float")
 istart = 0
 do ia = istart,nsa-1
 
- locs_str0 = str_split(locs(ia), "/")
- locs_str = str_split(locs_str0(9), "_"); "/")
+  ;;;~~~~~~~~~~~
+ locs_str = str_split(locs(ia), ".") ;"." for all except "_" for cloud effect
  print("'" + locs_str + "'")
 
 
-MODEL(ia) = locs_str(2)
-ENSN(ia)  = locs_str(5)
-
-bb = str_split(locs_str(6), "-")
+ENSN(ia)  = locs_str(4) ;4 for all except 2 for cloud effect
 
   yrl0 = 2014
   ymlast= yrl0*100+12
-if(ia.eq.0) then
-  ymstrt= bb(0)
-  yrs0 = toint(tofloat(bb(0))/100.)
-end if
+  ymstrt= 192001
+  yrs0 = 1920
+
 
 print(ymstrt+", "+yrs0)
-print(MODEL(ia)+" ens "+ENSN(ia))
+print(" ens "+ENSN(ia))
 
-  fils = systemfunc("ls "+locs(ia));+"/*.nc")
+;;;~~~~~~~~~~~
+fils = systemfunc("ls "+diri3+"*."+ENSN(ia)+"*"+VAR(iv)+".*.nc");+"/*.nc")
+; fils = systemfunc("ls "+diri3+"*_"+ENSN(ia)+"*"+VAR(iv)+"_*.nc");+"/*.nc")
   print(fils)
   f   = addfiles(fils, "r")  ;multiple files
   ListSetType (f, "cat")        ; concatenate (=default)
+delete(fils)
 
 ;only do historical part here first
 TIME2=f[:]->time
 yyyymm2=cd_calendar(TIME2, -1)
 printMinMax(yyyymm2, True)
-ymstrts = ind(yyyymm2.eq.ymstrt)
-ymlasts = ind(yyyymm2.eq.ymlast)
-ycstrts = ind(yyyymm2.eq.197501)
-yclasts = ind(yyyymm2.eq.200412)
+ymstrts = ind(yyyymm2.eq.ymstrt+1)
+ymlasts = ind(yyyymm2.eq.ymlast+89)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-  xx  = f[:]->$VAR(iv)$(ymstrts:ymlasts,{30000},:,:);{20000},:,:);ce;
-  ; xx  = f[:]->ce(ymstrts:ymlasts,:,:)
+;;;~~~~~~~~~~~
+  xx  = f[:]->$VAR(iv)$(ymstrts:ymlasts,:,:);{20000},:,:);ce;
+  ; xx  = f[:]->ce(ymstrts:ymlasts,:,:);{20000},:,:);ce;
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -156,7 +150,7 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ;MME of index
-  ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL(ia)+"_"+EXP+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
+  ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL(im)+"_"+EXP+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
   f1   = addfiles(ff, "r")
   ListSetType (f1, "join")
   pc0  = f1[:]->index
@@ -207,7 +201,7 @@ delete([/pc2/])
 rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
 
 ;--------output-------------
-fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens5/"+MODEL(im)+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
 ; fon=diri+"lens5/"+MODEL(ia)+"_"+ENSN(ia)+"_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
@@ -229,7 +223,7 @@ rp1!0 = "ensemble"
 delete([/locs/]);,x_Lead1
 
 print("regression done for "+MODEL(0))
-delete([/MODEL,ENSN,aa,rp1/])
+delete([/ENSN,aa,rp1/])
 
 end do
 end do

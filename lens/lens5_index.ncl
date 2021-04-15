@@ -130,10 +130,10 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
   copy_VarCoords(xa_sea(0,:,0), clat)
   ; go = wgt_areaave_Wrap(x,clat, 1.0, 1)
 
-  NLAT1 =  5.
-  SLAT1 =  -5.
-  WLON1 =  360.-170.
-  ELON1 =  360.-120.;
+  NLAT1 =   90.
+  SLAT1 =  -90.
+  WLON1 =  0.
+  ELON1 =  360.;
 
   ; NLAT2 =  6.
   ; SLAT2 =  -10.
@@ -145,7 +145,7 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 
   gmst = gmst1
   ; gmst = gmst2 - gmst1
-  gmst@long_name = "nino34_ts" ;
+  gmst@long_name = "GMST" ;
 
 
 ; ;------------filter----------------------
@@ -164,7 +164,7 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 
 
 ;--------output-------------
-fon=diri+"lens5/nino34/"+MODEL(ie)+"_"+EXP+"_"+ENSN(ie)+"_nino34_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/GMST/"+MODEL(ie)+"_"+EXP+"_"+ENSN(ie)+"_GMST_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->index = gmst
@@ -174,5 +174,4 @@ delete([/xx, xa,xa_sea,clat,lat/])
 end do
 delete([/MODEL,ENSN,locs,gmst1,gmst /]);gmst2,
 end do
-
 end

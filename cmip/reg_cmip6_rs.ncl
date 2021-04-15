@@ -3,9 +3,9 @@ diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
 
-  yrs = 1850;1950; 
+  yrs = 1850;1950;
   yrl = 2014
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip6/"
@@ -28,15 +28,15 @@ nens6 = (/32,30,25,12,11, 10, 10,\;10,
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
   i6le(i) = ind(MODEL6.eq.MODEL6_LE(i))
-end do 
+end do
 
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VARu = "rsuscs" ;"rsus" ; 
+VARu = "rsuscs" ;"rsus" ;
 VARd = "rsdscs" ; "rsds" ;
 EXP = "historical"
-IND = "mmeeof2";"mmeeof2" ;"pdv" ;"SLPAL" ;"TNA" ; "AR1varm"; "TNA"; "PDV"
+IND = "mmemmeeof2";"mmeeof2" ;"pdv" ;"SLPAL" ;"TNA" ; "AR1varm"; "TNA"; "PDV"
 
 ; note, the max lag should not be more than N/4
 ccr1 = new((/nm6, 72,144 /), "float") ;cross correlation pattern
@@ -50,10 +50,10 @@ printVarSummary(locs)
 print(locs)
 nsa = dimsizes(locs)
 
-  aa = new((/nens_all, 72,144 /), "float") 
+  aa = new((/nens_all, 72,144 /), "float")
 
 do ia = 0,nsa-1
-  
+
  locs_str = str_split(locs(ia), "_"); "/")
  print("'" + locs_str + "'")
   ENSN  = locs_str(3)
@@ -70,10 +70,10 @@ do ia = 0,nsa-1
       print("not have OPeNDAP cabilities on this system.")
       continue
     else
-  
-  fu   = addfile(file_name1, "r") 
-  fd   = addfile(file_name2, "r") 
-    end if   
+
+  fu   = addfile(file_name1, "r")
+  fd   = addfile(file_name2, "r")
+    end if
 
 
   TIME2=fu->time
@@ -86,14 +86,14 @@ do ia = 0,nsa-1
     xu  = fu->$VARu$(ymstrts:ymlasts,:,:)
     xd  = fd->$VARd$(ymstrts:ymlasts,:,:)
 
-    xx = xu 
-    xx = xd - xu 
+    xx = xu
+    xx = xd - xu
     xx@long_name = "surface net radiant"
     xx= dtrend_msg_n(xx&time,xx,False,False,0)
   delete([/fu,fd,TIME2,yyyymm2,xu,xd/]);,lat,lon
-   
+
   xa = rmMonAnnCycTLL(xx)
-  
+
   xa_annual = month_to_annual(xa, 1)
   xa_sea = month_to_seasonN(xa, SEASON)
   ;season, year --> season * year one dimension
@@ -103,22 +103,22 @@ do ia = 0,nsa-1
   copy_VarMeta(xa(0,:,:), xa_sea2(0,:,:))
 
   ;---------read output---------------
-  
+
   ; ;PDV
   ; ; from pdv_cmip6_hist.ncl
-  ; f1   = addfile(diri+"cmip6/pdv/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_pdv_1850-2014.nc", "r") 
+  ; f1   = addfile(diri+"cmip6/pdv/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_pdv_1850-2014.nc", "r")
   ; pc  = f1->pc(0,(yrs-1850)*12:)
 
   ; ;;some index
   ; ;from cmip_index.ncl
-  ; f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r") 
+  ; f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
   ; ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
   ; pc  = tofloat(f1->index((yrs-1850)*12:))
   ; ; pc  = dtrend(pc, 0)
 
   ;global external forcing mode
-  ; from mme_eof_cmip6.ncl 
-    f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r") 
+  ; from mme_eof_cmip6.ncl
+    f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
     pc  = f1->pc(1,:)
 
   pc_annual = month_to_annual(pc, 1)
@@ -126,7 +126,7 @@ do ia = 0,nsa-1
   ; pc_sea2 = ndtooned(pc_sea)
   ; pc_sea2!0 = "time"
   delete([/xx /])
-  
+
 ;------------filter----------------------
 fyr   = 8.
 ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
@@ -135,23 +135,23 @@ nWgt  = toint(fyr*12*1+1); fyr)+1 ;                           ; odd only
 fca   = 1./(fyr*12)
 fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
+pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
 
 ;-----------regression-------------
 aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
 
 copy_VarCoords(xa(0,:,:), aa(ia,:,:))
-  
+
 delete([/locs_str,pc,xa_sea2/]);,pc_sea2,xa_sea,pc_sea,xa
-end do 
+end do
 
 ;ensemble mean
 ccr1(im,:,:) = dim_avg_n_Wrap(aa, 0)
 
 delete([/locs/]);,x_Lead1
 
-end do 
+end do
 
 ccr1!0 = "model"
 printVarSummary(ccr1)

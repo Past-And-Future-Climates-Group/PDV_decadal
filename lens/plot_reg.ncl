@@ -12,10 +12,11 @@ SEASON = (/"DJF(-1)","MAM(-1)","JJA(-1)","SON(-1)","DJF(0)" /)
 EXP  = "historical"
 IND  = "PDI" ;"nino34";
 LEV  = "200";"200" ;
-VAR  = "zg300" ;"pr" ; "zg300" ;"psl" "ts"
+VAR  = "pr" ;"pr" ; "zg300" ;"psl" "ts"
+units = "mm/day"
 LR =  "reg_mme" ;"regLag" ;"reg"
 
-yrs = 1950 ; (/1950,1991/)
+yrs = 1950 ;1990; (/1950,1991/)
 yrl = 2014 ; (/1990,2014/)
 
 wks = gsn_open_wks("png", dirip+"reg_lens");
@@ -177,8 +178,8 @@ end if
 ; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
 
 ;--------------plot-------------------
-gsn_define_colormap(wks, "NCV_blu_red")
-; gsn_define_colormap(wks, "MPL_BrBG")
+; gsn_define_colormap(wks, "NCV_blu_red")
+gsn_define_colormap(wks, "MPL_BrBG")
 
 
 res2 = True
@@ -219,8 +220,8 @@ res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
 res2@cnLevelSelectionMode  = "ManualLevels"
-res2@cnMinLevelValF        = -20.;50.;20.;0.5;
-res2@cnMaxLevelValF        =  20.;50.;20.;0.5;
+res2@cnMinLevelValF        = -0.5;50.;20.;0.5;
+res2@cnMaxLevelValF        =  0.5;50.;20.;0.5;
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 ; vcres@vcGlyphStyle            = "Fillarrow"    ; turn on curly vectors
@@ -253,7 +254,7 @@ res3@cnLevelSpacingF = 0.2
 ; res3@cnLevels = (/-6.,-4.,-2.,2.,4.,6.,8.,10./)
 
 
-res2@gsnLeftString = "300hPa Zg"
+res2@gsnLeftString = "Pr"
     res2@gsnRightString = "CESM1"
     plot(i) = gsn_csm_contour_map_ce(wks, t1, res2)
     res2@gsnRightString = "CESM2 with CMIP5 forcing"
@@ -264,13 +265,13 @@ res2@gsnLeftString = "300hPa Zg"
 ;contour
 
     plota = gsn_csm_contour(wks, u1, res3)
-    plota = ColorNegDashZeroPosContour(plota,"brown",-1,"green")
+    plota = ColorNegDashZeroPosContour(plota,"blue",-1,"red")
     overlay(plot(i), plota)
     plota = gsn_csm_contour(wks, u0, res3)
-    plota = ColorNegDashZeroPosContour(plota,"brown",-1,"green")
+    plota = ColorNegDashZeroPosContour(plota,"blue",-1,"red")
     overlay(plot(i+1), plota)
     plota = gsn_csm_contour(wks, u2, res3)
-    plota = ColorNegDashZeroPosContour(plota,"brown",-1,"green")
+    plota = ColorNegDashZeroPosContour(plota,"blue",-1,"red")
     overlay(plot(i+2), plota)
 
 ; ;vector
@@ -333,7 +334,7 @@ resk@gsnPaperOrientation = "portrait"   ; force portrait
 resk@lbBoxEndCapStyle = "TriangleBothEnds"
 resk@lbOrientation = "Horizontal"
 resk@lbBoxLinesOn = False
-resk@lbTitleString    = "gph"                ; title string
+resk@lbTitleString    = units                ; title string
 resk@lbTitlePosition  = "Right"              ; title position
 resk@lbTitleDirection = "Across"
 resk@lbTitleFontHeightF= .015                ; make title smaller

@@ -11,8 +11,8 @@ fca   = 1./(fyr*12)
 fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/"
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/"
+diri = "/glade/work/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/data/" ;
+dirip = "/glade/u/home/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/pic/" ;
 
 neof = 1
 
@@ -160,9 +160,22 @@ std_cesm2 = dim_stddev_n_Wrap(pc_cesm2,0)
 pca_cesm2 = dim_avg_n_Wrap(pc_cesm2,0)
 pca_cesm2 = pca_cesm2 - avg(pca_cesm2(:(yr_calibrate-1850)*12)) ;consist the clm with other which started to yr_calibrate
 
+;----------------------------------
+
+fo = addfile(diri+"ts_clim_zonal_difference_cesm_1920-2014.nc","r")
+dclm1 = fo->dclm1
+dclm2 = fo->dclm2
+printVarSummary(dclm1)
+printVarSummary(dclm2)
+
+dc1 = dim_avg_n_Wrap(dclm1(:,{0:}),1)
+dc2 = dim_avg_n_Wrap(dclm2(:,{0:}),1)
+printVarSummary(dc1)
+x_axis2 = ispan(1920,2014,1)
+
 ;--------------plot-------------------
 
-wks = gsn_open_wks("ps", "./pic/lens5_xy");dirip+
+wks = gsn_open_wks("ps", dirip+"lens5_xy");"./pic/lens5_xy");
 plot1 = new(nml5,graphic)                ; create graphic array
 plot2 = new(10,graphic)                ; create graphic array
 plot3 = new(5,graphic)                ; create graphic array
@@ -293,8 +306,8 @@ res@gsnLeftString = ""
 
 ;;;;;;;;;;;; CESM playground;;;;;;;;;;;;;;
 
-res@trYMinF               = -1.0
-res@trYMaxF               =  1.0
+res@trYMinF               = -1.2
+res@trYMaxF               =  1.2
 
 res@xyLineThicknessF = 3.0
 ;CESM2 LE (pca_cesm2)
@@ -346,10 +359,13 @@ res@xyLineColors = "lightpink3"
 plotb = gsn_csm_xy (wks,x_axis,pca_lens5(0,:),res)
 overlay(plot3(1), plotb)
 
-
+res@xyDashPattern = 2
+res@xyLineColors = "coral1"
+plota = gsn_csm_xy (wks,x_axis2,dc2,res)
+overlay(plot3(2), plota)
 ;---------shading of STD---------
 
-  ; delete(res@xyDashPattern)
+  delete(res@xyDashPattern)
   delete(res@xyLineColors)
   res@xyLineColor     = -1                           ; We don't want the line, so make it trax_axisparent.
   mmz = pca_lens5(0:1,:)
@@ -470,27 +486,32 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   lbid1 = gsn_create_legend(wks,nitems1,labels1,lgres)
 
   lgres@lgLineColors       = (/"green","blue" ,"lightpink3"/)
-  labels2 = (/"Difference(Aerosol)","CESM1(NoAerosol| 20)","CESM1(40)" /)
+  labels2 = (/"Diff(Aerosol)","CESM1(NoAerosol| 20)","CESM1(40)" /)
   nitems2 = dimsizes(labels2)                 ; number of legend items
   lbid2 = gsn_create_legend(wks,nitems2,labels2,lgres)
 
-  lgres@lgLineColors       = (/"green","gold1" ,"grey75"/)
-  labels3 = (/"Difference(CMIP6/5forcing)","CESM2(CMIP5forcing| 7)","CESM2(11)" /)
-  nitems3 = dimsizes(labels3)                 ; number of legend items
-  lbid3 = gsn_create_legend(wks,nitems3,labels3,lgres)
 
   lgres@lgLineColors       = (/"green","gold1" ,"pink"/)
-  labels4 = (/"Difference(CESM2/1physics)","CESM2(CMIP5forcing| 7)","CESM1(40)" /)
+  labels4 = (/"Diff(CESM2/1physics)","CESM2(CMIP5forcing| 7)","CESM1(40)" /)
   nitems4 = dimsizes(labels4)                 ; number of legend items
   lbid4 = gsn_create_legend(wks,nitems4,labels4,lgres)
 
   lgres@lgLineColors       = (/"green","blue" ,"red"/)
-  labels6 = (/"Difference(CESM2/1)","CESM2(11)","CESM1(40)" /)
+  labels6 = (/"Diff(CESM2/1)","CESM2(11)","CESM1(40)" /)
   nitems6 = dimsizes(labels6)                 ; number of legend items
   lbid6 = gsn_create_legend(wks,nitems6,labels6,lgres)
 
   delete(lgres@lgLineColors)
 
+  delete(lgres@lgDashIndexes)
+
+  lgres@lgDashIndexes = (/2,0,0,0/)
+  lgres@lgMonoDashIndex = False
+  lgres@lgLineColors       = (/"coral1","green","gold1" ,"grey75"/)
+  labels3 = (/"NH TS Diff(CMIP6/5forcing)","Diff(CMIP6/5forcing)","CESM2(CMIP5forcing| 7)","CESM2(11)" /)
+  nitems3 = dimsizes(labels3)                 ; number of legend items
+  lbid3 = gsn_create_legend(wks,nitems3,labels3,lgres)
+  delete(lgres@lgLineColors)
 
 ; Use gsn_add_annotation to attach this legend to our existing plot.
 ; This way, if we resize the plot, the legend will stay with the
@@ -558,7 +579,7 @@ resk@txString = IND
 
 gsn_panel(wks,plot1,(/3,2/),resk)
 gsn_panel(wks,plot2,(/3,2/),resk)
-gsn_panel(wks,plot3,(/2,2/),resk)
+gsn_panel(wks,plot3,(/4,1/),resk)
 gsn_panel(wks,plot5,(/1,1/),resk)
 
 

@@ -15,8 +15,8 @@ diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 
 VAR = "TS" ;"netsw" ;"ts" ;"netcssw" ;"cloudeffect" ;"psl" ; "tas"
 
-MODEL = "cesm2_cmip5_forcing" ;"cesm1_le";
-EXP =  "" ;(/"xghg", "xaer" , "xlulc", "xbmb"/);
+MODEL = "cesm1_le";"cesm2_cmip5_forcing" ;
+EXP =  (/"xghg", "xaer" , "xlulc", "xbmb"/);"" ;
 
 nm = dimsizes(EXP)
 
@@ -124,10 +124,10 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
   copy_VarCoords(xa_sea(0,:,0), clat)
   ; go = wgt_areaave_Wrap(x,clat, 1.0, 1)
 
-  NLAT1 =  5.
-  SLAT1 =  -5.
-  WLON1 =  360.-170.
-  ELON1 =  360.-120.;
+  NLAT1 =   90.
+  SLAT1 =  -90.
+  WLON1 =  0.
+  ELON1 =  360.;
 
   ; NLAT2 =  6.
   ; SLAT2 =  -10.
@@ -139,7 +139,7 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 
   gmst = gmst1
   ; gmst = gmst2 - gmst1
-  gmst@long_name = "nino34_ts" ;
+  gmst@long_name = "GMST" ;
 
 
 ; ;------------filter----------------------
@@ -159,9 +159,9 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 
 ;--------output-------------
 if (MODEL.eq."cesm2_cmip5_forcing") then
-fon=diri+"lens5/nino34/"+MODEL+"_"+ENSN(ie)+"_nino34_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/GMST/"+MODEL+"_"+ENSN(ie)+"_GMST_"+yrs+"-"+yrl+".nc";
 else
-fon=diri+"lens5/nino34/"+MODEL+"_"+EXP(im)+"_"+ENSN(ie)+"_nino34_"+yrs+"-"+yrl+".nc";
+fon=diri+"lens5/GMST/"+MODEL+"_"+EXP(im)+"_"+ENSN(ie)+"_GMST_"+yrs+"-"+yrl+".nc";
 end if
 system("rm -f "+fon)
 fo=addfile(fon,"c")

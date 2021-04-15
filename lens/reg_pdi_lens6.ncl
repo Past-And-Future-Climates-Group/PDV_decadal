@@ -53,26 +53,26 @@ diri3 = "/glade/scratch/chenxing/cmip6/"
 ;         "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
 ;         "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
 
-MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
-  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR"/);,"MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
+; MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
+  ; "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR"/);,"MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
 ; nens6 = (/32,30,25,12,11, 10,\;10,
-;       10,10,7,5,5 /) ;ensemble number 5,
+; ;       10,10,7,5,5 /) ;ensemble number 5,
 
-; MODEL6 = (/ "CESM2"/)
+MODEL6 = (/ "CESM2"/)
 
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VAR = (/"clt"/); ;"ua" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
-VARn = (/"clt"/); (/"ts","psl"/) ; "ua200"
+VAR = (/"zg"/)  ;(/"ua","va"/) ;(/"ts","pr" ,"psl","rsds","rsdscs"/); "pr" ;"cloudeffect";(/"rsds","rsdscs"/) ;"psl" ; ;"ua" ;"od550aer"
+VARn =(/"zg300"/);(/"ua200","va200"/) ;(/"ts","pr" ,"psl","rsds","rsdscs"/);"pr" ;"cloudeffect";(/"rsds","rsdscs"/) ;;"psl" ;  (/"ts","psl"/)
 EXP = "historical"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 
-yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
-yrl1 = (/1990,2014/) ;1990;1990 ;2014;
+yrs1 = 1990;1950;(/1950,1991 /) ;1950;1950 ;1991;
+yrl1 = 2014;(/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
-do i = 0,1
+do i = 0,dimsizes(yrs1)-1
 
 
 ; note, the max lag should not be more than N/4
@@ -121,7 +121,8 @@ do ia = 0,nsa-1
   ymlasts = ind(yyyymm2.eq.ymlast)
   print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f->$VAR(iv)$(ymstrts:ymlasts,:,:);{20000},:,:);
+  xx  = f->$VAR(iv)$(ymstrts:ymlasts,{30000},:,:);{20000},:,:);
+  ; xx  = f->ce(ymstrts:ymlasts,:,:)
 
   delete([/f,TIME2,yyyymm2/]);,lat,lon
 
@@ -143,26 +144,26 @@ do ia = 0,nsa-1
   ; f1   = addfile(diri+"cmip6/pdv/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_pdv_1850-2014.nc", "r")
   ; pc  = f1->pc(0,(yrs-1850)*12:)
 
-  ;;some index
-  ;from cmip_index.ncl
-  f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
-  ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
-  pc  = tofloat(f1->index((yrs0-1850)*12:))
-  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
+  ; ;;some index
+  ; ;from cmip_index.ncl
+  ; f1   = addfile(diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_"+ENSN+"_"+IND+"_1850-2014.nc", "r")
+  ; ; pc  = tofloat(f1->gmst((yrs-1850)*12:))
+  ; pc  = tofloat(f1->index((yrs0-1850)*12:))
+  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
   ; ;global external forcing mode
   ; ; from mme_eof_cmip6.ncl
   ;   f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
   ;   pc  = f1->pc(1,:)
 
-  ; ;Each model's MME index
-  ; ff = systemfunc("ls "+diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_*_"+IND+"_1850-2014.nc")
-  ; f1   = addfiles(ff, "r")
-  ; ListSetType (f1, "join")
-  ; pc0  = f1[:]->index
-  ; pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions
-  ; pc_ft = dim_avg_n_Wrap(pc, 0)
-  ; delete([/ff,pc0/])
+  ;Each model's MME index
+  ff = systemfunc("ls "+diri+"cmip6/"+IND+"/cmip6_"+EXP+"_"+MODEL6(im)+"_*_"+IND+"_1850-2014.nc")
+  f1   = addfiles(ff, "r")
+  ListSetType (f1, "join")
+  pc0  = f1[:]->index
+  pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions
+  pc_ft = dim_avg_n_Wrap(pc, 0)
+  delete([/ff,pc0/])
 
   ; pc_sea = month_to_seasonN(pc, SEASON)
   ; pc_sea2 = ndtooned(pc_sea)
@@ -177,6 +178,8 @@ pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
 a1 = (yrs1(i)-yrs0)*12
 b1 = (yrl1(i)-yrs0+1)*12-1
 pc2 = pc_ft(a1:b1) ;pc3(yrs1(i)-yrs0:yrl1(i)-yrs0+1)
+print(a1+" - "+ b1)
+printVarSummary(xa)
 
 aa(ia,:,:) = regCoef(pc2,xa(lat|:,lon|:,time|a1:b1));, tval, df);Y
 
@@ -187,14 +190,14 @@ delete([/pc2/])
 rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
 
 ;--------output-------------
-; fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_mme_"+IND+"_"+EXP+"_"+VARn+"_"+yrs+"-"+yrl+".nc";
-fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_mme_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+; fon=diri+"lens6/"+MODEL6(im)+"_"+ENSN+"_reg_"+IND+"_"+EXP+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->rc = aa(ia,:,:)
 fo->par = rp1(ia)
 
-delete([/locs_str,pc/]);,pc_sea2,xa_sea,pc_sea,xa
+delete([/locs_str,pc,xa/]);,pc_sea2,xa_sea,pc_sea,xa
 end do
 
 

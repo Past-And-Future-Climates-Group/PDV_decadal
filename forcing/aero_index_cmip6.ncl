@@ -12,7 +12,7 @@ diri1 = "/glade/scratch/chenxing/aerosol/"
 ;CMIP5 aerosols
 ;IPCC_emissions_BC_anthropogenic_1860_0.5x0.5_v1_21_05_2009.nc
 
-BB = "yes"
+BB = "no"
 AER = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
 ;0: Agriculture; 1: Energy; 2: Industrial; 3: Transportation; 4: Residential, Commercial, Other
 ;5: Solvents production and application; 6: Waste; 7: International Shipping
@@ -29,13 +29,13 @@ nm = dimsizes(AER)
 do im = 0,nm-1
 
 if (BB.eq."yes") then
-  if (AER.eq."NMVOC") then
-    fils = systemfunc("ls "+diri1+"cmip6/"+AER(im)+"-bulk-em-biomassburning_input4MIPs_emissions_CMIP*")
+  if (AER(im).eq."NMVOC") then
+    fils = systemfunc("ls "+diri1+"cmip6/remap/"+AER(im)+"-bulk-em-biomassburning_input4MIPs_emissions_CMIP*")
   else
-    fils = systemfunc("ls "+diri1+"cmip6/"+AER(im)+"-em-biomassburning_input4MIPs_emissions_CMIP*")
+    fils = systemfunc("ls "+diri1+"cmip6/remap/"+AER(im)+"-em-biomassburning_input4MIPs_emissions_CMIP*")
   end if
 else
-  fils = systemfunc("ls "+diri1+"cmip6/"+AER(im)+"-em-anthro_input4MIPs_emissions_CMIP*")
+  fils = systemfunc("ls "+diri1+"cmip6/remap/"+AER(im)+"-em-anthro_input4MIPs_emissions_CMIP*")
 end if
 print(fils)
  f   = addfiles(fils, "r")  ;multiple files

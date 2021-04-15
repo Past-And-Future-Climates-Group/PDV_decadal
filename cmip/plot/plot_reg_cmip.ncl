@@ -122,6 +122,8 @@ f1   = addfile(diri+"cmip5_reg_"+IND+"_historical_va_1861-2004.nc", "r")
 v5  = f1->ccr1
 f1   = addfile(diri+"cmip5_reg_"+IND+"_historical_pr_1861-2004.nc", "r")
 c5  = f1->ccr1
+f1   = addfile(diri+"cmip5_reg_"+IND+"_historical_psl_1861-2004.nc", "r")
+l5  = f1->ccr1
 
 f2   = addfile(diri+"cmip6_reg_"+IND+"_historical_ts_1850-2014.nc", "r")
 t6  = f2->ccr1
@@ -131,6 +133,8 @@ f2   = addfile(diri+"cmip6_reg_"+IND+"_historical_va_1850-2014.nc", "r")
 v6  = f2->ccr1
 f2   = addfile(diri+"cmip6_reg_"+IND+"_historical_pr_1850-2014.nc", "r")
 c6  = f2->ccr1
+f2   = addfile(diri+"cmip6_reg_"+IND+"_historical_psl_1850-2014.nc", "r")
+l6  = f2->ccr1
 
 if (IND.eq."SLPAL") then
     t5 = t5*-1
@@ -179,12 +183,14 @@ com_u5_n = dim_avg_n_Wrap(u5(i5n,:,:) , 0)
 com_v5 = dim_avg_n_Wrap(v5(i5le,:,:) , 0)
 com_v5_y = dim_avg_n_Wrap(v5(i5y,:,:) , 0)
 com_v5_n = dim_avg_n_Wrap(v5(i5n,:,:) , 0)
+com_l5 = dim_avg_n_Wrap(l5(i5le,:,:) , 0)
 
 ;CMIP6
 com_t6 = dim_avg_n_Wrap(t6(i6le,:,:) , 0)
 com_u6 = dim_avg_n_Wrap(u6(i6le,:,:) , 0)
 com_v6 = dim_avg_n_Wrap(v6(i6le,:,:) , 0)
 com_c6 = dim_avg_n_Wrap(c6(i6le,:,:) , 0)
+com_l6 = dim_avg_n_Wrap(l6(i6le,:,:) , 0)
 
 printMinMax(com_t6, 0)
 ; ;-------t-test---------------------------------
@@ -210,7 +216,7 @@ plot = new(30,graphic)                ; create graphic array
 plot1 = new(30,graphic)                ; create graphic array
 plot2 = new(30,graphic)                ; create graphic array
 plot3 = new(30,graphic)                ; create graphic array
-gsn_define_colormap(wks, "MPL_BrBG")
+gsn_define_colormap(wks, "NCV_blu_red") ;NCV_blu_red ;MPL_BrBG
 
 
 res2 = True
@@ -221,6 +227,7 @@ res2@gsnRightString = ""
 res2@vpWidthF  = 0.6
 
 vcres = res2
+res3 = res2
 
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
@@ -255,6 +262,20 @@ res2@cnMinLevelValF        = -0.4
 res2@cnMaxLevelValF        =  0.4
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
+res3@cnFillOn  = False
+res3@cnInfoLabelOn            = False
+;res3@cnLinesOn = True
+;res3@cnLineLabelsOn = True ;
+res3@cnLevelFlags = "LineAndLabel" ;control over whether a line and/or a line label is to appear at each contour level
+res3@cnLineLabelBackgroundColor = -1
+res3@cnLineLabelInterval = 1
+res3@cnLineLabelPlacementMode = "constant"
+res3@cnLineThicknessF = 2.0
+res3@cnLineLabelFontHeightF = 0.01
+res3@cnLevelSpacingF = 0.05
+; res3@cnLevelSelectionMode = "ExplicitLevels"   ; set explicit contour levels
+; res3@cnLevels = (/-6.,-4.,-2.,2.,4.,6.,8.,10./)
+
 
 res2@gsnLeftString = ""
     res2@gsnRightString = "CMIP5"
@@ -274,12 +295,18 @@ res2@gsnLeftString = ""
     res2@gsnLeftString = "TS & 850hPa wind"
     plotb = gsn_csm_contour_map_ce(wks, com_t6, res2)
 
-    res2@cnMinLevelValF        = -0.3;30.0;0.4
-    res2@cnMaxLevelValF        =  0.3;30.0;0.4
+    res2@cnMinLevelValF        = -30.0;0.3;30.0;0.4
+    res2@cnMaxLevelValF        =  30.0;0.3;30.0;0.4
     res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
-    res2@gsnLeftString = "Pr" ;"SLP" ;"cloud cover"
-    res2@lbTitleString    = "mm/day" ;"Pa" ;"%"                ; title string
-    plota = gsn_csm_contour_map_ce(wks, com_c6, res2)
+    res2@gsnLeftString = "SLP & Pr" ;"cloud cover"
+    res2@lbTitleString    = "Pa" ;"%"                ; title string
+    plota = gsn_csm_contour_map_ce(wks, com_l6, res2)
+
+    ;contour
+    plotc = gsn_csm_contour(wks, com_c6, res3)
+    plotc = ColorNegDashZeroPosContour(plotc,"brown",-1,"green")
+    overlay(plota,plotc)
+
 
   ; vcres@vcGlyphStyle            = "Fillarrow"    ; turn on curly vectors
   vcres@vcMinFracLengthF        = 0.2

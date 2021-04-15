@@ -49,17 +49,18 @@ diri1 = "/glade/scratch/chenxing/cesm1_le/"
 ;cesm2 with CMIP5 forcing
 diri2 = "/glade/scratch/chenxing/cesm2_cmip5_forcing/"
 ;b.e21.BHIST.f09_g17.cesm2_cmip5_forcing.002.cam.h0.TS.185001-200512.nc
+;cesm2_cmip5_forcing.004.cloudeffect.200601-209912.nc
 
-VAR  = (/"PRECT"/) ;(/"Z3"/) ; (/"U","V"/) ;"TS" ; "va" ;"PSL" ;"CLDTOT"
-VARn = (/"pr"/) ;(/"zg300"/) ; (/"ua200","va200"/) ;"va850";"clt"
+VAR  = "cloudeffect";(/"U","V"/) ;"Z3";(/"TS","PRECT" ,"PSL","FSNS","FSNSC"/);(/"FSNS","FSNSC"/);(/"LWCF","SWCF"/) ;"PSL" ;(/"PRECT"/) ;"TS" ;  "va" ;"CLDTOT"
+VARn = "cloudeffect";(/"ua200","va200"/) ;"zg300";(/"ts","pr" ,"psl","FSNS","FSNSC"/);(/"FSNS","FSNSC"/);(/"LWCF","SWCF"/) ;"psl" ;(/"pr"/) ;"ts" ; "va850";"clt"
 IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
-yrs1 = (/1950,1991 /) ;1950;1950 ;1991;
-yrl1 = (/1990,2014/) ;1990;1990 ;2014;
+yrs1 = 1990;1950 ;(/1950,1991 /) ;1950;1950 ;1991;
+yrl1 = 2014 ;(/1990,2014/) ;1990;1990 ;2014;
 
 do iv = 0,dimsizes(VAR)-1
-do i = 0,1
+do i = 0,dimsizes(yrs1)-1
 
 MODEL = "cesm2_cmip5_forcing" ;"cesm1_le";
 EXP =  "" ;(/"xghg", "xaer" , "xlulc", "xbmb"/);
@@ -69,10 +70,10 @@ nm = dimsizes(EXP)
 do im = 0,nm-1
 
 if (MODEL.eq."cesm2_cmip5_forcing") then
-  locs = systemfunc("ls "+diri2+"*"+MODEL+"*"+VAR(iv)+"*.nc")
+  locs = systemfunc("ls "+diri2+"*"+MODEL+"*."+VAR(iv)+".*.nc")
   diri0 = diri2
   else
-  locs = systemfunc("ls "+diri1+"*"+EXP(im)+"*"+VAR(iv)+"*.nc")
+  locs = systemfunc("ls "+diri1+"*"+EXP(im)+"*."+VAR(iv)+".*.nc")
   diri0 = diri1
 end if
 print(locs)
@@ -91,9 +92,9 @@ do ia = istart,nsa-1
  print("'" + locs_str + "'")
 
 
-ENSN(ia)  = locs_str(5)
+ENSN(ia)  = locs_str(1) ;5 for all except 1 cloudeffect
 
-bb = str_split(locs_str(9), "-")
+bb = str_split(locs_str(3), "-");9 for all except 3 for cloudeffect
 
   yrl0 = 2014
   ymlast= yrl0*100+12
@@ -107,7 +108,7 @@ print(MODEL+" ens "+ENSN(ia))
 
   ;b.e11.B20TRLENS_RCP85.f09_g16.xaer.014.cam.h0.TS.192001-200512.nc
   ;b.e11.B20TRLENS_RCP85.f09_g16.xaer.013.cam.h0.TS.200601-208012.nc
-  fils = systemfunc("ls "+diri0+"*"+EXP(im)+"."+ENSN(ia)+"*"+VAR(iv)+"*"); +locs(ie));+"/*.nc")
+  fils = systemfunc("ls "+diri0+"*"+EXP(im)+"."+ENSN(ia)+"*."+VAR(iv)+".*"); +locs(ie));+"/*.nc")
   print(fils)
   f   = addfiles(fils, "r")  ;multiple files
   ListSetType (f, "cat")        ; concatenate (=default)
@@ -122,8 +123,9 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
-    xx  = f[:]->$VAR(iv)$(0:ymlasts+1,:,:);{200},:,:) ;(ymstrts:ymlasts,:,:);
-    if (MODEL.eq."cesm2_cmip5_forcing".and.VAR.eq."PRECT") then
+  ; xx  = f[:]->$VAR(iv)$(0:ymlasts+1,{200},:,:) ;{850},:,:);(ymstrts:ymlasts,:,:);
+  xx  = f[:]->ce(0:ymlasts+1,:,:) ;{850},:,:);(ymstrts:ymlasts,:,:);
+    if (MODEL.eq."cesm2_cmip5_forcing".and.VAR(iv).eq."PRECT") then
       xx = xx *1000
       xx@units = "kg m-2 s-1"
     end if
@@ -151,29 +153,28 @@ wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   ;---------read output---------------
 
 
-  ;;some index
-  ;from lens5_index.ncl
-  if (MODEL.eq."cesm2_cmip5_forcing") then
-    f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
-  else
-    f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
-  end if
-  pc  = f1->index
-  pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
-
-  ; ;global external forcing mode
-  ; ;from mme_eof_cmip6.ncl
+  ; ;;some index
+  ; ;from lens5_index.ncl
   ; if (MODEL.eq."cesm2_cmip5_forcing") then
-  ;   ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
+  ;   f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
   ; else
-  ;   ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
+  ;   f1   = addfile(diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_PDI_"+yrs0+"-"+yrl0+".nc", "r")
   ; end if
-  ; f1   = addfiles(ff, "r")
-  ; ListSetType (f1, "join")
-  ; pc0  = f1[:]->index
-  ; pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions
-  ; pc_ft = dim_avg_n_Wrap(pc, 0)
-  ; delete([/ff,pc0/])
+  ; pc  = f1->index
+  ; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
+
+  ;MME of index
+  if (MODEL.eq."cesm2_cmip5_forcing") then
+    ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
+  else
+    ff = systemfunc("ls "+diri+"lens5/PDI/"+MODEL+"_"+EXP(im)+"_*_PDI_"+yrs0+"-"+yrl0+".nc")
+  end if
+  f1   = addfiles(ff, "r")
+  ListSetType (f1, "join")
+  pc0  = f1[:]->index
+  pc = wgt_runave_n_Wrap( pc0, wgt,  0, 1 )   ;opt < 0 : utilize cyclic conditions
+  pc_ft = dim_avg_n_Wrap(pc, 0)
+  delete([/ff,pc0/])
 
   ; pc_annual = month_to_annual(pc, 1)
   ; pc_sea = month_to_seasonN(pc, SEASON)
@@ -228,9 +229,9 @@ rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:EL
 
 ;--------output-------------
 if (MODEL.eq."cesm2_cmip5_forcing") then
-fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_reg_"+IND+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens5/"+MODEL+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
 else
-fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_reg_"+IND+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
+fon=diri+"lens5/"+MODEL+"_"+EXP(im)+"_"+ENSN(ia)+"_reg_mme_"+IND+"_"+VARn(iv)+"_"+yrs1(i)+"-"+yrl1(i)+".nc";
 end if
 system("rm -f "+fon)
 fo=addfile(fon,"c")

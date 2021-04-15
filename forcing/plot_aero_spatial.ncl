@@ -18,9 +18,11 @@ dirip = "/glade/u/home/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/p
 ;============read==============================
 ;------anthropogenic emission---------------
 
-AER = (/"BC","CO","NH3","NMVOC","NO","OC","SO2" /);"CH4",
+; AER = (/"BC","CO","NH3","NMVOC","NO","OC","SO2" /);"CH4",
 EMI = (/"emiss_awb","emiss_wst","emiss_dom","emiss_ene","emiss_ind","emiss_tra"/) ;
-AER2 = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
+; AER2 = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
+AER = (/"BC","SO2" /);"CH4",
+AER2 = (/"BC","SO2" /); "CH4",
 ;0: Agriculture; 1: Energy; 2: Industrial; 3: Transportation; 4: Residential, Commercial, Other
 ;5: Solvents production and application; 6: Waste; 7: International Shipping
 
@@ -30,23 +32,26 @@ yrs0 = 1850
 yrl0 = 2014
 ntime = (yrl0-yrs0+1)*12
 
-aer5 = new((/na,16,360,720/), "float")
-aer6 = new((/na,165,360,720/), "float");1850-2014 (bb BC 1850-2015)
+aer5 = new((/na,16,72,144/), "float") ;360,720
+aer6 = new((/na,165,72,144/), "float");1850-2014 (bb BC 1850-2015)
 
 do im = 0,na-1
 
 ;from aero_index_cmip5.ncl
   f1   = addfile(diri+"aerosol/cmip5_"+AER(im)+"_anthropogenic.nc", "r")
-  aer5(im,:,:,:)  = dim_avg_n_Wrap( f1->emiss,1)
+  aa = dim_avg_n_Wrap( f1->emiss,1)
+  aer5(im,:,:,:)  = month_to_annual(aa,0)
 
   ; system("cdo remapbil,r720,360 "+diri+"aerosol/cmip6_"+AER2(im)+"_anthropogenic.nc "+diri+"aerosol/aa.nc")
   ; f1   = addfile(diri+"aerosol/aa.nc", "r")
   f1   = addfile(diri+"aerosol/cmip6_"+AER2(im)+"_anthropogenic.nc", "r")
-  if(AER2(im).eq."SO2") then
-    aer6(im,:,:,:)  =  f1->emiss
-  else
-    aer6(im,:,:,:)  = dim_avg_n_Wrap( f1->emiss,1)
-  end if
+  ; if(AER2(im).eq."SO2") then
+  ;   printVarSummary(f1->emiss)
+  ;   aer6(im,:,:,:)  =  f1->emiss
+  ; else
+    bb = dim_avg_n_Wrap( f1->emiss,1)
+    aer6(im,:,:,:)  = month_to_annual(bb,0)
+  ; end if
 
   print(AER(im)+" is done in AA")
 end do
@@ -63,51 +68,57 @@ year1 = 1950
 year2 = 1980
 year3 = 2000
 
-dif_a1 = aer5(:,0,:,:)
-dif_a1 = aer6(:,toint((year1-yrs0)),:,:) - aer5(:,toint((year1-yrs0)/10),:,:)
-dif_a2 = aer5(:,0,:,:)
-dif_a2 = aer6(:,toint((year2-yrs0)),:,:) - aer5(:,toint((year2-yrs0)/10),:,:)
-dif_a3 = aer5(:,0,:,:)
-dif_a3 = aer6(:,toint((year3-yrs0)),:,:) - aer5(:,toint((year3-yrs0)/10),:,:)
+a5_1 = dim_avg_n_Wrap(aer5(:,0:toint((year1-yrs0)/10),:,:),1)
+a5_2 = dim_avg_n_Wrap(aer5(:,toint((year1-yrs0)/10):toint((year2-yrs0)/10),:,:),1)
+a5_3 = dim_avg_n_Wrap(aer5(:,toint((year2-yrs0)/10):toint((year3-yrs0)/10),:,:),1)
+a6_1 = dim_avg_n_Wrap(aer6(:,0:toint((year1-yrs0)),:,:),1)
+a6_2 = dim_avg_n_Wrap(aer6(:,toint((year1-yrs0)):toint((year2-yrs0)),:,:),1)
+a6_3 = dim_avg_n_Wrap(aer6(:,toint((year2-yrs0)):toint((year3-yrs0)),:,:),1)
+dif_a1 = a5_1
+dif_a1 = a5_1 - a6_1
+dif_a2 = a5_2
+dif_a2 = a5_2 - a6_2
+dif_a3 = a5_3
+dif_a3 = a5_3 - a6_3
 
-;----------------Biomass burning---------------
-
-BBV = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2"/) ;"CH4",
-BBV2 = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
-; EMI = (/"grassfire","forestfire"/);
-
-nab = dimsizes(BBV)
-bb5 = new((/nab,16,360,720/), "float")
-bb6 = new((/nab,166,720,1440/), "float");1850-2014 (bb BC 1850-2015)
-
-do im = 0,nab-1
-
-
-;from aero_index_cmip5.ncl
-  f1   = addfile(diri+"aerosol/cmip5_"+BBV(im)+"_biomassburning.nc", "r")
-  bb5(im,:,:,:)  = dim_avg_n_Wrap( f1->emiss,1)
-
-  ; system("cdo remapbil,r720x360 "+diri+"aerosol/cmip6_"+BBV2(im)+"_biomassburning.nc "+diri+"aerosol/aa.nc")
-  ; f1   = addfile(diri+"aerosol/aa.nc", "r")
-  f1   = addfile(diri+"aerosol/cmip6_"+BBV2(im)+"_biomassburning.nc", "r")
-  bb6(im,:,:,:)  = f1->emiss
-
-  print(BBV(im)+" is done in BB")
-
-end do
-printVarSummary(bb5)
-printVarSummary(bb6)
-bb5 = bb5 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5*111000*111000
-bb5@units = "Gg/year"
-bb6 = bb6 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5*111000*111000
-bb6@units = "Gg/year"
-
-; dif_b1 = bb5(:,0,:,:)
-; dif_b1 = bb6(:,toint((year1-yrs0)),:,:) - bb5(:,toint((year1-yrs0)/10),:,:)
-; dif_b2 = bb5(:,0,:,:)
-; dif_b2 = bb6(:,toint((year2-yrs0)),:,:) - bb5(:,toint((year2-yrs0)/10),:,:)
-; dif_b3 = bb5(:,0,:,:)
-; dif_b3 = bb6(:,toint((year3-yrs0)),:,:) - bb5(:,toint((year3-yrs0)/10),:,:)
+; ;----------------Biomass burning---------------
+;
+; BBV = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2"/) ;"CH4",
+; BBV2 = (/"BC","CO","NH3","NMVOC","NOx","OC","SO2" /); "CH4",
+; ; EMI = (/"grassfire","forestfire"/);
+;
+; nab = dimsizes(BBV)
+; bb5 = new((/nab,16,360,720/), "float")
+; bb6 = new((/nab,166,720,1440/), "float");1850-2014 (bb BC 1850-2015)
+;
+; do im = 0,nab-1
+;
+;
+; ;from aero_index_cmip5.ncl
+;   f1   = addfile(diri+"aerosol/cmip5_"+BBV(im)+"_biomassburning.nc", "r")
+;   bb5(im,:,:,:)  = dim_avg_n_Wrap( f1->emiss,1)
+;
+;   ; system("cdo remapbil,r720x360 "+diri+"aerosol/cmip6_"+BBV2(im)+"_biomassburning.nc "+diri+"aerosol/aa.nc")
+;   ; f1   = addfile(diri+"aerosol/aa.nc", "r")
+;   f1   = addfile(diri+"aerosol/cmip6_"+BBV2(im)+"_biomassburning.nc", "r")
+;   bb6(im,:,:,:)  = f1->emiss
+;
+;   print(BBV(im)+" is done in BB")
+;
+; end do
+; printVarSummary(bb5)
+; printVarSummary(bb6)
+; bb5 = bb5 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5*111000*111000
+; bb5@units = "Gg/year"
+; bb6 = bb6 * 0.000001 * 3600 * 24 * 365 * 0.5*0.5*111000*111000
+; bb6@units = "Gg/year"
+;
+; ; dif_b1 = bb5(:,0,:,:)
+; ; dif_b1 = bb6(:,toint((year1-yrs0)),:,:) - bb5(:,toint((year1-yrs0)/10),:,:)
+; ; dif_b2 = bb5(:,0,:,:)
+; ; dif_b2 = bb6(:,toint((year2-yrs0)),:,:) - bb5(:,toint((year2-yrs0)/10),:,:)
+; ; dif_b3 = bb5(:,0,:,:)
+; ; dif_b3 = bb6(:,toint((year3-yrs0)),:,:) - bb5(:,toint((year3-yrs0)/10),:,:)
 
 ;--------------plot-------------------
 
@@ -140,46 +151,50 @@ res2@cnLineLabelsOn = False
 
 res2@gsnLeftStringFontHeightF = 0.03
 res2@gsnRightStringFontHeightF = res2@gsnLeftStringFontHeightF
-res2@lbLabelBarOn = False;
-res2@lbOrientation = "Horizontal"
+res2@lbLabelBarOn = True;
+res2@lbOrientation = "Vertical"
 res2@lbBoxLinesOn  = False
 res2@lbTitleOn        =  True                ; turn on title
 res2@lbLabelStride    = 2
 res2@lbTitleString    = aer5@units                ; title string
-res2@lbTitlePosition  = "Right"              ; title position
+res2@lbTitlePosition  = "Top"              ; title position
 res2@lbTitleFontHeightF= .015                ; make title smaller
 ; res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
 res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
-res2@cnLevelSelectionMode  = "ManualLevels"
-res2@cnMinLevelValF        = -50.
-res2@cnMaxLevelValF        =  50.
-res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
-
+rl = (/0.5,10./)
 do i = 0,na-1
+
+  res2@cnLevelSelectionMode  = "ManualLevels"
+  res2@cnMinLevelValF        = -1*rl(i);-1*ceil(max(abs(a6_1(i,:,:)))/20.) ;-50.
+  res2@cnMaxLevelValF        =  rl(i);   ceil(max(abs(a6_1(i,:,:)))/20.) ; 50.
+  res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
+  print(res2@cnMinLevelValF)
+  print(res2@cnLevelSpacingF)
+
   res2@gsnRightString = AER2(i);BBV2(i);
   res2@gsnLeftString = "CMIP5"
-  plot1(i*3) = gsn_csm_contour_map_ce(wks, aer5(i,toint((year1-yrs0)/10),:,:), res2) ;aer5 ;bb5
+  plot1(i*3) = gsn_csm_contour_map_ce(wks, a5_1(i,:,:), res2) ;aer5 ;bb5
   res2@gsnLeftString = "CMIP6"
-  plot1(i*3+1) = gsn_csm_contour_map_ce(wks, aer6(i,toint((year1-yrs0)),:,:), res2)
+  plot1(i*3+1) = gsn_csm_contour_map_ce(wks, a6_1(i,:,:), res2)
   res2@gsnLeftString = "Dif"
   plot1(i*3+2) = gsn_csm_contour_map_ce(wks, dif_a1(i,:,:), res2)
 
   res2@gsnRightString = AER2(i);BBV2(i);
   res2@gsnLeftString = "CMIP5"
-  plot2(i*3) = gsn_csm_contour_map_ce(wks, aer5(i,toint((year2-yrs0)/10),:,:), res2)
+  plot2(i*3) = gsn_csm_contour_map_ce(wks, a5_2(i,:,:), res2)
   res2@gsnLeftString = "CMIP6"
-  plot2(i*3+1) = gsn_csm_contour_map_ce(wks, aer6(i,toint((year2-yrs0)),:,:), res2)
+  plot2(i*3+1) = gsn_csm_contour_map_ce(wks, a6_2(i,:,:), res2)
   res2@gsnLeftString = "Dif"
   plot2(i*3+2) = gsn_csm_contour_map_ce(wks, dif_a2(i,:,:), res2)
 
   res2@gsnRightString = AER2(i);BBV2(i);
   res2@gsnLeftString = "CMIP5"
-  plot3(i*3) = gsn_csm_contour_map_ce(wks, aer5(i,toint((year3-yrs0)/10),:,:), res2)
+  plot3(i*3) = gsn_csm_contour_map_ce(wks, a5_3(i,:,:), res2)
   res2@gsnLeftString = "CMIP6"
-  plot3(i*3+1) = gsn_csm_contour_map_ce(wks, aer6(i,toint((year3-yrs0)),:,:), res2)
+  plot3(i*3+1) = gsn_csm_contour_map_ce(wks, a6_3(i,:,:), res2)
   res2@gsnLeftString = "Dif"
   plot3(i*3+2) = gsn_csm_contour_map_ce(wks, dif_a3(i,:,:), res2)
 end do
@@ -187,7 +202,7 @@ end do
 ;------------------------------------------------
 resk = True
 ;resk@txFontHeightF = 0.03
-resk@gsnPanelLabelBar   = True                 ; add common colorbar
+; resk@gsnPanelLabelBar   = True                 ; add common colorbar
 resk@lbBoxEndCapStyle = "TriangleBothEnds"
 resk@lbOrientation = "Horizontal"
 resk@lbBoxLinesOn = False
@@ -195,13 +210,13 @@ resk@lbBoxLinesOn = False
 resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 resk@gsnMaximize = True
 resk@gsnPaperOrientation = "portrait"   ; force portrait
-resk@txString = "Anthropogenic aerosol emissions in "+year1
+resk@txString = "Anthropogenic aerosol emissions in 1850-"+year1
 ; resk@txString = "Biomass burning in "+year1
 
 gsn_panel(wks,plot1,(/na,3/),resk)
-resk@txString = "Anthropogenic aerosol emissions in "+year2
+resk@txString = "Anthropogenic aerosol emissions in "+year1+"-"+year2
 gsn_panel(wks,plot2,(/na,3/),resk)
-resk@txString = "Anthropogenic aerosol emissions in "+year3
+resk@txString = "Anthropogenic aerosol emissions in "+year2+"-"+year3
 gsn_panel(wks,plot3,(/na,3/),resk)
 
 end

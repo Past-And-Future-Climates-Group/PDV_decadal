@@ -33,10 +33,10 @@ nv = dimsizes(EMI)
 do im = 0,nm-1
 
   if (BB.eq."yes") then
-    fils = systemfunc("ls "+diri1+"cmip5/IPCC_GriddedBiomassBurningEmissions_"+AER(im)+"_decadalmonthlymean*");+"/*.nc")
+    fils = systemfunc("ls "+diri1+"cmip5/remap/IPCC_GriddedBiomassBurningEmissions_"+AER(im)+"_decadalmonthlymean*");+"/*.nc")
   else
-  fils = systemfunc("ls "+diri1+"cmip5/IPCC_emissions_"+AER(im)+"_anthropogenic*");+"/*.nc")
-end if
+  fils = systemfunc("ls "+diri1+"cmip5/remap/IPCC_emissions_"+AER(im)+"_anthropogenic*");+"/*.nc")
+  end if
  print(fils)
  f   = addfiles(fils, "r")  ;multiple files
  ListSetType (f, "cat")        ; concatenate (=default)
@@ -48,10 +48,10 @@ end if
 ; ymstrts = ind(yyyymm2.eq.ymstrt)
 ; ymlasts = ind(yyyymm2.eq.ymlast)
 ; print(ymstrts+" <--start end--> "+ymlasts)
-xx = new((/192,360,720/),"float")
+xx = new((/192,72,144/),"float") ;360,720
 xx = 0.
 x = xx
-x_all = new((/192,nv,360,720/),"float")
+x_all = new((/192,nv,72,144/),"float")
 do iv = 0,nv-1
   x = 0.
   if (AER(im).eq."CO".and.EMI(iv).eq."emiss_ene") then
@@ -139,7 +139,7 @@ fo->emiss = x_all
   dydx = dy * dx                  ; dydx(nlat)
 
   wgt  = new((/dimsizes(lat), dimsizes(lon)/), typeof(xx1))
-  wgt  = conform(wgt, dydx, 0)
+  wgt  = conform(wgt, tofloat(dydx), 0)
 
   copy_VarCoords(xx1(0,:,:), wgt)
 

@@ -73,12 +73,21 @@ yrl5 = 2004;
 
 ;-------GMST----------------------------
 
-  f1   = addfile(diri+"cmip5_historical_GMST_mme.nc", "r") 
+  f1   = addfile(diri+"cmip5_historical_GMST_mme.nc", "r")
   gmst5  = f1->cp5_a
-  f1   = addfile(diri+"cmip6_historical_GMST_mme.nc", "r") 
+  f1   = addfile(diri+"cmip6_historical_GMST_mme.nc", "r")
   gmst6  = f1->cp6_a
 
 printVarSummary(gmst5)
+
+;-------ASRHD----------------------------
+
+  f1   = addfile(diri+"cmip5_historical_ASRHD_mme.nc", "r")
+  asrhd5  = f1->cp5_a
+  f1   = addfile(diri+"cmip6_historical_ASRHD_mme.nc", "r")
+  asrhd6  = f1->cp6_a
+
+printVarSummary(asrhd5)
 
 ;--------------plot-------------------
 wks = gsn_open_wks("png", dirip+"mme_eof");
@@ -94,11 +103,11 @@ res2@gsnRightString = ""
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
-;  res2@mpMaxLatF                   = NLAT         ; choose subregion           
+;  res2@mpMaxLatF                   = NLAT         ; choose subregion
 ;  res2@mpMinLatF                   = SLAT
 ;  res2@mpMaxLonF                   = ELON
 ;  res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False         
+res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
 res2@cnLineLabelsOn = False
@@ -113,14 +122,14 @@ res2@lbLabelStride    = 2
 res2@lbTitleString    = "K"                ; title string
 res2@lbTitlePosition  = "Top"              ; title position
 res2@lbTitleFontHeightF= .01                ; make title smaller
-; res2@lbTitleDirection = "Across"             
+; res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
 res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 res2@pmLabelBarWidthF = 0.05
 
-res2@cnLevelSelectionMode  = "ManualLevels"    
+res2@cnLevelSelectionMode  = "ManualLevels"
 res2@cnMinLevelValF        = -0.40
-res2@cnMaxLevelValF        =  0.40 
+res2@cnMaxLevelValF        =  0.40
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 do i = 0,neof-1
@@ -132,7 +141,7 @@ plot(i*2) = gsn_csm_contour_map_ce(wks, rca5(i,:,:), res2)
 res2@gsnLeftString = "CMIP6 MME (EOF"+(i+1)+")"
 res2@gsnRightString = sprintf("%5.1f", pcvar6(i)) +"%"
 plot(i*2+1) = gsn_csm_contour_map_ce(wks, rca6(i,:,:), res2)
-end do 
+end do
 
 resk = True
 ;resk@txFontHeightF = 0.03
@@ -149,7 +158,7 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
 ; resk@txString = MODEL(im)
 
-; gsn_panel(wks,plot,(/2,1/),resk)    
+; gsn_panel(wks,plot,(/2,1/),resk)
 
 res2@lbLabelBarOn = False;
 
@@ -168,27 +177,28 @@ gsn_panel(wks,plot,(/2,2/),resk)
   res@gsnFrame = False        ;dont advance frame
   res@gsnLeftString = ""
   res@gsnRightString = ""
-res@tiYAxisString = ""
+  res@tiYAxisString = ""
   res@vpHeightF = 0.30        ; Changes the aspect ratio
   res@vpWidthF  = 0.6
- 
+
   res@tmXTOn    = False
 
-  ;res2@gsnScale  = True        ; force text scaling               
+  ;res2@gsnScale  = True        ; force text scaling
   ;res@gsnXYBarChart            = True              ; Create bar plot
   ;res@gsnXYBarChartOutlineOnly = True
 
 
-  res@gsnYRefLine           = 0.0             ; reference line   
+  res@gsnYRefLine           = 0.0             ; reference line
   ; res@gsnAboveYRefLineColor = "red"           ; above ref line fill red
   ; res@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
-  res@gsnLeftStringFontHeightF  = 0.03
-  res@gsnRightStringFontHeightF = 0.03
-  
+  res@gsnLeftStringFontHeightF  = 0.025
+  res@gsnRightStringFontHeightF = 0.025
+  res@gsnLeftStringOrthogonalPosF = -0.005
+
   res@trXMinF               = 1850
   res@trXMaxF               = 2015
 
-  res3 = res 
+  res3 = res
 
   res@trYMinF               = -3.
   res@trYMaxF               =  3.
@@ -197,7 +207,7 @@ res@tiYAxisString = ""
   x_axis5 = fspan(yrs5, yrl5+1, ndim5(1))
     ndim6  = dimsizes(pca6)
   x_axis6 = fspan(yrs6, yrl6+1, ndim6(1))
-  ;res@tmXBMode   = "Explicit"                                                
+  ;res@tmXBMode   = "Explicit"
   ;res@tmXBValues = x_axis;-1
   ;res@tmXBLabels = model
   ;res@tmXBLabelAngleF = 45.
@@ -205,17 +215,17 @@ res@tiYAxisString = ""
 ; res@tiXAxisString = "year"
 
 res@xyLineThicknessF = 3.0
-res@gsnLeftString = ""
+res@gsnRightString = ""
 do i = 0,neof-1
 
-  res@gsnRightString = "PC"+(i+1)
+  res@gsnLeftString = "PC"+(i+1)
   res@xyLineColor = "red"
   plot2(i) = gsn_csm_xy (wks,x_axis5,pca5(i,:),res) ;pca
   res@xyLineColor = "black"
   plota = gsn_csm_xy (wks,x_axis6,pca6(i,:),res) ;pca
   overlay(plot2(i), plota)
 
-end do 
+end do
 
 
 ;************************************************
@@ -224,11 +234,11 @@ end do
   txres               = True                     ; text mods desired
   txres@txFontHeightF = 0.015                     ; font smaller. default big
   txres@txFontColor   = "red"
-  dum  = gsn_add_text(wks,plot2(0),"CMIP5",1870,2.5,txres) 
-  dum2 = gsn_add_text(wks,plot2(1),"CMIP5",1870,2.5,txres) 
+  dum  = gsn_add_text(wks,plot2(0),"CMIP5",1870,2.5,txres)
+  dum2 = gsn_add_text(wks,plot2(1),"CMIP5",1870,2.5,txres)
   txres@txFontColor   = "black"
-  dum1 = gsn_add_text(wks,plot2(0),"CMIP6",1870,2.0,txres) 
-  dum3 = gsn_add_text(wks,plot2(1),"CMIP6",1870,2.0,txres) 
+  dum1 = gsn_add_text(wks,plot2(0),"CMIP6",1870,2.0,txres)
+  dum3 = gsn_add_text(wks,plot2(1),"CMIP6",1870,2.0,txres)
 
 
 resk@gsnPanelLabelBar   = False                 ; add common colorbar
@@ -236,7 +246,7 @@ gsn_panel(wks,plot2,(/2,1/),resk)
 
 
 ;-------------------------------------------------
-;    extra lines adding GMST and AOD on PCs 
+;    extra lines adding GMST and AOD on PCs
 ;-------------------------------------------------
 
 cor1 = escorc(gmst6, pca6(0,:))
@@ -251,34 +261,35 @@ delete(  res@gsnYRefLine )
   res@xyLineColor = "black"
   res3@xyLineThicknessF = 3.0
   res3@xyLineColor = "blue"
-  res@gsnRightString = "PC1"
+  res@gsnLeftString = "PC1"
   plot2(0) = gsn_csm_xy2 (wks,x_axis6,pca6(0,:),gmst6,res,res3)
-  res3@trYMinF               = -5.
-  res3@trYMaxF               =  5.
-  res@gsnRightString = "PC2"
-  plot2(1) = gsn_csm_xy2 (wks,x_axis6,pca6(1,:),ado6,res,res3)
+  res3@trYMinF               = -2.
+  res3@trYMaxF               =  2.
+  res@gsnLeftString = "PC2"
+  plot2(1) = gsn_csm_xy2 (wks,x_axis6,pca6(1,:),asrhd6,res,res3);asrhd6;ado6,
   ; res3@xyLineColor = "lightblue"
   ; plota = gsn_csm_xy (wks,x_axis5,gmst5,res3) ;pca
   ; overlay(plot2(0), plota)
-  res@gsnRightString = ""
+  res@gsnLeftString = ""
 
+;add CMIP5 mme_eof PCs
 do i = 0,neof-1
   res@xyLineColor = "red"
   plota = gsn_csm_xy (wks,x_axis5,pca5(i,:),res) ;pca
   overlay(plot2(i), plota)
 
-end do 
+end do
 
   txres@txFontColor   = "red"
-  dum  = gsn_add_text(wks,plot2(0),"PC1(CMIP5)",1880,2.5,txres) 
-  dum2 = gsn_add_text(wks,plot2(1),"PC2(CMIP5)",1880,2.5,txres) 
+  dum  = gsn_add_text(wks,plot2(0),"PC1(CMIP5)",1880,2.5,txres)
+  dum2 = gsn_add_text(wks,plot2(1),"PC2(CMIP5)",1880,2.5,txres)
   txres@txFontColor   = "black"
-  dum1 = gsn_add_text(wks,plot2(0),"PC1(CMIP6)",1880,2.0,txres) 
-  dum3 = gsn_add_text(wks,plot2(1),"PC2(CMIP6)",1880,2.0,txres) 
+  dum1 = gsn_add_text(wks,plot2(0),"PC1(CMIP6)",1880,2.0,txres)
+  dum3 = gsn_add_text(wks,plot2(1),"PC2(CMIP6)",1880,2.0,txres)
 
   txres@txFontColor   = "blue"
-  dum  = gsn_add_text(wks,plot2(0),"GMST R="+sprintf("%5.2f", cor1),1880,1.5,txres) 
-  dum2 = gsn_add_text(wks,plot2(1),"AOD(PC1) R="+sprintf("%5.2f", cor2),1880,1.5,txres) 
+  dum  = gsn_add_text(wks,plot2(0),"GMST R="+sprintf("%5.2f", cor1),1880,1.5,txres)
+  dum2 = gsn_add_text(wks,plot2(1),"SWHD R="+sprintf("%5.2f", cor2),1880,1.5,txres)
 
 
 gsn_panel(wks,plot2,(/2,1/),resk)

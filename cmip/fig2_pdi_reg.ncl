@@ -25,12 +25,12 @@ printVarSummary(rco)
    ; r_lon = 360./dimsizes(xam&lon)
     ; r_lat = 180./dimsizes(xam&lat)
     lat = aa&lat
-    lon = aa&lon 
+    lon = aa&lon
     nlat = dimsizes(rref&lat) ;target dimension size
     nlon = dimsizes(rref&lon) ;target dimension size
-    klon = fspan(WLON, ELON, nlon) ;target dimension 
+    klon = fspan(WLON, ELON, nlon) ;target dimension
     klat = fspan(SLAT, NLAT, nlat) ;target dimension
-    rco_r= linint2_Wrap(lon, lat, aa, True, klon, klat, 0) 
+    rco_r= linint2_Wrap(lon, lat, aa, True, klon, klat, 0)
     rco_r&LAT@units="degrees_north"
     rco_r&LON@units="degrees_east"
     printVarSummary(rco_r)
@@ -38,7 +38,7 @@ printVarSummary(rco)
 
   yrs = 1861;1950;
   yrl = 2004
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip5/"
@@ -99,25 +99,25 @@ nm5 = dimsizes(MODEL5)
 i5y = new(dimsizes(MODEL5_PLUS), "integer")
 do i = 0,dimsizes(MODEL5_PLUS)-1
   i5y(i) = ind(MODEL5.eq.MODEL5_PLUS(i))
-end do 
+end do
 i5n = new(dimsizes(MODEL5_MINUS), "integer")
 do i = 0,dimsizes(MODEL5_MINUS)-1
   i5n(i) = ind(MODEL5.eq.MODEL5_MINUS(i))
-end do 
+end do
 i5le = new(dimsizes(MODEL5_LE), "integer")
 do i = 0,dimsizes(MODEL5_LE)-1
   i5le(i) = ind(MODEL5.eq.MODEL5_LE(i))
-end do 
+end do
 nm5 = dimsizes(MODEL5)
 
-VAR = "tas" ;"od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ; 
+VAR = "tas" ;"od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
-IND = "PDI2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA"; 
+IND = "PDI2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
 AA =  ""
 
 nens_all = 10
 
-;from reg_cmip5_pdi_0.ncl 
+;from reg_cmip5_pdi_0.ncl
 
 ; ; note, the max lag should not be more than N/4
 ; ccr1 = new((/nm5, 72,144 /), "float") ;cross correlation pattern
@@ -132,11 +132,11 @@ nens_all = 10
 ; print(locs)
 ; nsa = dimsizes(locs)
 
-;   aa = new((/nens_all, 72,144 /), "float") 
+;   aa = new((/nens_all, 72,144 /), "float")
 ; rp1 = new(nens_all, "float")
 
 ; do ia = 0,nsa-1
-  
+
 ;  locs_str = str_split(locs(ia), "_"); "/")
 ;  print("'" + locs_str + "'")
 ;   ENSN  = locs_str(3)
@@ -152,8 +152,8 @@ nens_all = 10
 ;       print("not have OPeNDAP cabilities on this system.")
 ;       continue
 ;     else
-  
-;     f   = addfile(file_name, "r") 
+
+;     f   = addfile(file_name, "r")
 ;     end if
 
 ;   TIME2=f->time
@@ -166,9 +166,9 @@ nens_all = 10
 ;     xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
 
 ;   delete([/f,TIME2,yyyymm2/]);,lat,lon
-   
+
 ;   xa = rmMonAnnCycTLL(xx)
-  
+
 ;   xa_annual = month_to_annual(xa, 1)
 ;   xa_sea = month_to_seasonN(xa, SEASON)
 ;   ;season, year --> season * year one dimension
@@ -178,18 +178,18 @@ nens_all = 10
 ;   copy_VarMeta(xa(0,:,:), xa_sea2(0,:,:))
 
 ;   ;---------read output---------------
-  
+
 
 ;   ;;some index
 ;   ;from cmip_index.ncl
-;   f1   = addfile(diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc", "r") 
+;   f1   = addfile(diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc", "r")
 ;   ; pc  = tofloat(f1->gmst((yrs-1861)*12:))
 ;   pc  = tofloat(f1->index((yrs-1861)*12:))
 ;   ; pc  = dtrend(pc, 0)
 
 ;   ; ;global external forcing mode
-;   ; ;from mme_eof_cmip6.ncl 
-;   ; f1   = addfile(diri+"cmip5/cmip5_historical_mme.eof_1861-2004.nc", "r") 
+;   ; ;from mme_eof_cmip6.ncl
+;   ; f1   = addfile(diri+"cmip5/cmip5_historical_mme.eof_1861-2004.nc", "r")
 ;   ; pc  = f1->pc(1,:)
 
 
@@ -198,7 +198,7 @@ nens_all = 10
 ;   ; pc_sea2 = ndtooned(pc_sea)
 ;   ; pc_sea2!0 = "time"
 ;   delete([/xx/]);,xa_sea,pc_sea /])
-  
+
 ; ;------------filter----------------------
 ; fyr   = 8.
 ; ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
@@ -207,7 +207,7 @@ nens_all = 10
 ; fca   = 1./(fyr*12)
 ; fcb   = -999.
 ; wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
+; pc_ft = wgt_runave_n_Wrap( pc, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 
 ; ; ???
 ; pc_ft = dim_standardize_n_Wrap(pc_ft, 0, 0)
@@ -216,12 +216,12 @@ nens_all = 10
 ; aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
 
 ; copy_VarCoords(xa(0,:,:), aa(ia,:,:))
- 
+
 ; ;----pattern correlation---------
 ; rp1(ia) = pattern_cor(aa(ia,{SLAT:NLAT},{WLON:ELON}), rco_r({SLAT:NLAT},{WLON:ELON}), 1.0, 0)
 
 ; delete([/locs_str,pc,xa_sea2/]);,pc_sea2,xa
-; end do 
+; end do
 
 ; ;ensemble mean
 ; ccr1(im,:,:) = dim_avg_n_Wrap(aa, 0)
@@ -229,7 +229,7 @@ nens_all = 10
 
 ; delete([/locs/]);,x_Lead1
 
-; end do 
+; end do
 
 ; ccr1!0 = "model"
 ; par!0 = "model"
@@ -293,7 +293,7 @@ printMinMax(com_mcr, 0)
 ; delete([/df,b/])
 
 ; sig_pra1 = pra_avg_p1
-; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue) 
+; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
 
 ;--------------plot-------------------
 wks = gsn_open_wks("ps", dirip+"fig2_pdi_reg");
@@ -314,11 +314,11 @@ res2@vpWidthF  = 0.6
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
- ; res2@mpMaxLatF                   = NLAT         ; choose subregion           
+ ; res2@mpMaxLatF                   = NLAT         ; choose subregion
  ; res2@mpMinLatF                   = SLAT
  ; res2@mpMaxLonF                   = ELON
  ; res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False         
+res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
 res2@cnLineLabelsOn = False
@@ -333,12 +333,12 @@ res2@lbLabelStride    = 2
 res2@lbTitleString    = ""                ; title string
 res2@lbTitlePosition  = "Right"              ; title position
 res2@lbTitleFontHeightF= .015                ; make title smaller
-; res2@lbTitleDirection = "Across"             
+; res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
 res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
-res2@cnLevelSelectionMode  = "ManualLevels"    
+res2@cnLevelSelectionMode  = "ManualLevels"
 res2@cnMinLevelValF        = -0.5
 res2@cnMaxLevelValF        =  0.5
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
@@ -372,7 +372,7 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ;resk@pmLabelBarParallelPosF = 0.3 ;default 0.5
 ;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
 ; resk@txString = VAR+" regressed onto "+IND+" "+yrs+"-"+yrl
-gsn_panel(wks,plot,(/1,2/),resk)
+gsn_panel(wks,(/plot,plot1/),(/2,2/),resk)
 gsn_panel(wks,plot1,(/1,2/),resk)
 ; gsn_panel(wks,plot,(/2,1/),resk)
 ; gsn_panel(wks,plot1,(/2,1/),resk)

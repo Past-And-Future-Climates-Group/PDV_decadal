@@ -1,9 +1,9 @@
 ; load "./function_bootstrap_mme.ncl"
-load "/Users/xingchen/Documents/project/ENSO/program/function_bootstrap_mme.ncl"
+load "/Users/xingchen/Documents/project/PDV/program/function_bootstrap_mme.ncl"
 begin
 
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/";
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/";
+diri = "/Users/xingchen/Documents/project/PDV/data/" ;"/glade/work/chenxing/enso/";
+dirip = "/Users/xingchen/Documents/project/PDV/pic/" ;"/glade/u/home/chenxing/enso/";
 
 ;CMIP5 MODELS
 MODEL5 = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","BNU-ESM","CanESM2","CCSM4","CESM1-BGC",\;
@@ -280,7 +280,7 @@ plot4 = new(10,graphic)                ; create graphic array
   res@gsnLeftString = ""
   res@gsnRightString = ""
   res@vpHeightF = 0.3
-  res@vpWidthF  = 0.6
+  res@vpWidthF  = 0.8
 
   res@tmXTOn    = False
   res@tmYROn    = False

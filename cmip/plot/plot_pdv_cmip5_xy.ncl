@@ -1,7 +1,7 @@
 begin
 
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/"
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/"
+diri = "/Users/xingchen/Documents/project/PDV/data/" ;"/glade/work/chenxing/enso/"
+dirip = "/Users/xingchen/Documents/project/PDV/pic/" ;"/glade/u/home/chenxing/enso/"
 
 neof = 1
 
@@ -128,39 +128,39 @@ nm6 = dimsizes(MODEL6)
 i5y = new(dimsizes(MODEL5_PLUS), "integer")
 do i = 0,dimsizes(MODEL5_PLUS)-1
   i5y(i) = ind(MODEL5.eq.MODEL5_PLUS(i))
-end do 
+end do
 i5n = new(dimsizes(MODEL5_MINUS), "integer")
 do i = 0,dimsizes(MODEL5_MINUS)-1
   i5n(i) = ind(MODEL5.eq.MODEL5_MINUS(i))
-end do 
+end do
 print("say yes "+i5y)
 print("say no "+i5n)
 i5le = new(dimsizes(MODEL5_LE), "integer")
 do i = 0,dimsizes(MODEL5_LE)-1
   i5le(i) = ind(MODEL5.eq.MODEL5_LE(i))
-end do 
+end do
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
   i6le(i) = ind(MODEL6.eq.MODEL6_LE(i))
-end do 
+end do
 
 i5esm = new(dimsizes(MODEL5_ESM), "integer")
 do i = 0,dimsizes(MODEL5_ESM)-1
   i5esm(i) = ind(MODEL5.eq.MODEL5_ESM(i))
-end do 
+end do
 i5cm = new(dimsizes(MODEL5_CM), "integer")
 do i = 0,dimsizes(MODEL5_CM)-1
   i5cm(i) = ind(MODEL5.eq.MODEL5_CM(i))
-end do 
+end do
 
 i6esm = new(dimsizes(MODEL6_ESM), "integer")
 do i = 0,dimsizes(MODEL6_ESM)-1
   i6esm(i) = ind(MODEL6.eq.MODEL6_ESM(i))
-end do 
+end do
 i6cm = new(dimsizes(MODEL6_CM), "integer")
 do i = 0,dimsizes(MODEL6_CM)-1
   i6cm(i) = ind(MODEL6.eq.MODEL6_CM(i))
-end do 
+end do
 
 yrs5 = 1861
 yrl5 = 2004
@@ -207,27 +207,27 @@ print("MODEL "+MODEL(im))
   ;from gmst_index_cmip5.ncl
   fils = systemfunc("ls "+diri+"cmip5/gmst/cmip5_historical_"+MODEL(im)+"_*_gmst_1861-2004.nc")
   ; print(fils)
-  f   = addfiles(fils, "r") 
-  ListSetType (f, "join")   
+  f   = addfiles(fils, "r")
+  ListSetType (f, "join")
   gmst0  = f[:]->gmst
 
   ;from roll_trend_cmip.ncl
   fils = systemfunc("ls "+diri+"cmip5/roll.trend/cmip5_historical_"+MODEL(im)+"_*_rt_pdv_1861-2004.nc")
-  f   = addfiles(fils, "r") 
-  ListSetType (f, "join")   
+  f   = addfiles(fils, "r")
+  ListSetType (f, "join")
   rt_pdv  = f[:]->rt
 
   fils = systemfunc("ls "+diri+"cmip5/roll.trend/cmip5_historical_"+MODEL(im)+"_*_rt_gmst_1861-2004.nc")
-  f   = addfiles(fils, "r") 
-  ListSetType (f, "join")   
+  f   = addfiles(fils, "r")
+  ListSetType (f, "join")
   rt_gmst  = f[:]->rt
-  
-  if(ndimf(0).ge.2) then 
+
+  if(ndimf(0).ge.2) then
   gmst = gmst0(:,::12)
   ndim = dimsizes(gmst0)
     do i = 0,ndim(0)-1
        gmst(i,:) = month_to_annual(gmst0(i,:), 1)
-    end do 
+    end do
 
   ndim1 = dimsizes(pc)
 ;;----------composite ensemble-----------------
@@ -250,20 +250,20 @@ com_rt_gmst(im,:) = dim_avg_n_Wrap(rt_gmst, 0)
     com_gmst(im,:) = gmst
     com_std(im,:) = pc(0,:)
     com_g_std(im,:) = gmst
-    
+
     pc_all(im,0,:) = pc(0,:)
     acu_pc = acu_pc + pc(0,:)
     nacu = nacu + 1
-    
-  end if 
+
+  end if
   delete([/fils,rc,pc,gmst0,gmst,rt_pdv,rt_gmst/] )
-end do 
+end do
 print(nacu)
 printVarSummary(com_pc)
 printVarSummary(com_gmst)
 
 ;MME
-;ignore model bias 
+;ignore model bias
 ; ndimp = dimsizes(pc_all)
 ; aa = reshape(pc_all, (/ndimp(0)*ndimp(1),ndimp(2)/))
 ; cp_a = dim_avg_n_Wrap(aa, 0)
@@ -289,12 +289,12 @@ cg_a = dim_avg_n_Wrap(com_gmst, 0)
 crt_p_a = dim_avg_n_Wrap(com_rt_pdv, 0)
 crt_g_a = dim_avg_n_Wrap(com_rt_gmst, 0)
 
-; ;1. averaged STD across ensembles 
+; ;1. averaged STD across ensembles
 cs_a = dim_avg_n_Wrap(com_std, 0)
 cs_plus_a = dim_avg_n_Wrap(com_std(i5y,:), 0) ;plus group STD
 cs_minus_a = dim_avg_n_Wrap(com_std(i5n,:), 0) ;minus group STD
 csg_a = dim_avg_n_Wrap(com_g_std, 0)
-;2. STD across 8 model mean 
+;2. STD across 8 model mean
 ; cs_a = dim_stddev_n_Wrap(com_pc, 0)
 printVarSummary(crt_p_a)
 printVarSummary(cp_a)
@@ -330,14 +330,14 @@ plot1 = new(nmo,graphic)                ; create graphic array
   res@gsnRightString = ""
   res@vpHeightF = 0.3
   res@vpWidthF  = 0.6
- 
+
   res@tmXTOn    = False
   res@tmYROn    = False
   ;res@gsnXYBarChart            = True              ; Create bar plot
   ;res@gsnXYBarChartOutlineOnly = True
 
 
-  res@gsnYRefLine           = 0.0             ; reference line   
+  res@gsnYRefLine           = 0.0             ; reference line
   ; res@gsnAboveYRefLineColor = "red"           ; above ref line fill red
   ; res@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
   ; res@gsnLeftStringFontHeightF  = 0.03
@@ -346,14 +346,14 @@ plot1 = new(nmo,graphic)                ; create graphic array
   ndim  = dimsizes(com_pc)
   x_axis2 = fspan(yrs, yrl, ndim(1))
   x_axis1 = ispan(yrs, yrl, 1)
-  ;res@tmXBMode   = "Explicit"                                                
+  ;res@tmXBMode   = "Explicit"
   ;res@tmXBValues = x_axis;-1
   ;res@tmXBLabels = model
   ;res@tmXBLabelAngleF = 45.
   ;res@tmXBLabelFontHeightF = 0.02
   res@tiYAxisString = ""
   res@tiXAxisString = "year"
-  
+
   res@xyMonoLineColor = False
   res@xyMonoDashPattern = True
 
@@ -402,10 +402,10 @@ res@xyLineColors = "blue"
 plota = gsn_csm_xy (wks,x_axis2,cp_minus_a,res) ;x_axis2, cp_a ;cp_minus_a
 overlay(plot(0), plota)
 
-do im = 0,nmo-1 
+do im = 0,nmo-1
   res@gsnLeftString = MODEL5_LE(im)+" ("+nens5(im)+")"
   plot1(im) = gsn_csm_xy (wks,x_axis2,com_pc(im,:),res)
-end do 
+end do
 res@gsnLeftString = ""
 
 ;---------shading of STD---------
@@ -414,7 +414,7 @@ res@gsnLeftString = ""
   delete(res@xyLineColors)
   res@xyLineColor     = -1                           ; We don't want the line, so make it trax_axisparent.
   mmz = com_pc(0:1,:)
-  
+
   ;ESM STD shading
   mmz(0,:) = cp_plus_a+cs_plus_a ;cp_a-cs_a
   mmz(1,:) = cp_plus_a-cs_plus_a ;cp_a+cs_a
@@ -440,7 +440,7 @@ res@gsnLeftString = ""
 
 ; ;;legend
 ;   gres = True
-;   gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+;   gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend
 ;                             ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
 ;   gres@XPosPercent = 5      ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
 

@@ -1,8 +1,8 @@
-load "./function_bootstrap_mme.ncl"
+load "/Users/xingchen/Documents/project/PDV/program/function_bootstrap_mme.ncl"
 begin
 
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/";
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/";
+diri = "/Users/xingchen/Documents/project/PDV/data/" ;"/glade/work/chenxing/enso/";
+dirip = "/Users/xingchen/Documents/project/PDV/pic/" ;"/glade/u/home/chenxing/enso/";
 
 neof = 1
 
@@ -131,39 +131,39 @@ nm6 = dimsizes(MODEL6)
 i5y = new(dimsizes(MODEL5_PLUS), "integer")
 do i = 0,dimsizes(MODEL5_PLUS)-1
   i5y(i) = ind(MODEL5.eq.MODEL5_PLUS(i))
-end do 
+end do
 i5n = new(dimsizes(MODEL5_MINUS), "integer")
 do i = 0,dimsizes(MODEL5_MINUS)-1
   i5n(i) = ind(MODEL5.eq.MODEL5_MINUS(i))
-end do 
+end do
 print("say yes "+i5y)
 print("say no "+i5n)
 i5le = new(dimsizes(MODEL5_LE), "integer")
 do i = 0,dimsizes(MODEL5_LE)-1
   i5le(i) = ind(MODEL5.eq.MODEL5_LE(i))
-end do 
+end do
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
   i6le(i) = ind(MODEL6.eq.MODEL6_LE(i))
-end do 
+end do
 
 i5esm = new(dimsizes(MODEL5_ESM), "integer")
 do i = 0,dimsizes(MODEL5_ESM)-1
   i5esm(i) = ind(MODEL5.eq.MODEL5_ESM(i))
-end do 
+end do
 i5cm = new(dimsizes(MODEL5_CM), "integer")
 do i = 0,dimsizes(MODEL5_CM)-1
   i5cm(i) = ind(MODEL5.eq.MODEL5_CM(i))
-end do 
+end do
 
 i6esm = new(dimsizes(MODEL6_ESM), "integer")
 do i = 0,dimsizes(MODEL6_ESM)-1
   i6esm(i) = ind(MODEL6.eq.MODEL6_ESM(i))
-end do 
+end do
 i6cm = new(dimsizes(MODEL6_CM), "integer")
 do i = 0,dimsizes(MODEL6_CM)-1
   i6cm(i) = ind(MODEL6.eq.MODEL6_CM(i))
-end do 
+end do
 
 yrs5 = 1861
 yrl5 = 2004
@@ -178,12 +178,12 @@ EXP6 = "historical";"hist-aer";"hist-Nat" ;"hist-GHG" ;
 
 ;don't filter pdv pc, it's already filtered, double filter will shortern data...
 IND = "PDI2" ;"EACSS" ;"EAS" ;"PDI2" ; "NPCSS" ;"NPC" ;"NPS" ;"NPAOD" ;"PDI2";"TPI" ;"NPI" ;"AMO" ;"pdo" ;"nh-sh" ;"GMAOD" ;"GMSW" ;
-MODEL = MODEL5;MODEL6; 
+MODEL = MODEL5;MODEL6;
 nens = nens6
-icmip = 5;6 ; 
+icmip = 5;6 ;
 nens_all = 10;32 ;
 
-yrs = 1861; 
+yrs = 1861;
 yrl = 2004; 2014;
 
 
@@ -220,17 +220,17 @@ do ia = 0,nsa-1
      continue
    else
     ; print(file_name)
-   f   = addfile(file_name, "r") 
+   f   = addfile(file_name, "r")
    end if
 
   pc5_all(im,ia,:)  = f->index;pc(0,:);gmst;
 
 ; print(""+pc5_all(im,ia,(1890-1861)*12))
 
-end do 
-; end if 
+end do
+; end if
 delete(locs)
-end do 
+end do
 printVarSummary(pc5_all)
 
 
@@ -265,16 +265,16 @@ do ia = 0,nsa-1
      continue
    else
     print(file_name)
-   f   = addfile(file_name, "r") 
+   f   = addfile(file_name, "r")
    end if
 
   pc6_all(im,ia,:)  = f->index;pc(0,:);gmst;
 
-end do 
-; end if 
+end do
+; end if
 delete(locs)
 
-end do 
+end do
 
 printVarSummary(pc6_all)
 
@@ -287,13 +287,13 @@ nWgt  = toint(fyr*12*1+1); fyr)+1 ;                           ; odd only
 fca   = 1./(fyr*12)
 fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-pc5_all = wgt_runave_n_Wrap( pc5_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions 
-pc6_all = wgt_runave_n_Wrap( pc6_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions 
+pc5_all = wgt_runave_n_Wrap( pc5_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
+pc6_all = wgt_runave_n_Wrap( pc6_all, wgt,  0, 2 )   ;opt < 0 : utilize cyclic conditions
 
 
 ;----------composite-------------------
 ;MME
-;ignore model bias 
+;ignore model bias
 ; ndimp = dimsizes(pc5_all)
 ; aa = reshape(pc5_all, (/ndimp(0)*ndimp(1),ndimp(2)/))
 cp5_a = dim_avg_n_Wrap(pc5_all,(/0,1/)); aa, 0)
@@ -309,7 +309,7 @@ cp5_minus_a = dim_avg_n_Wrap(pc5_all(i5n,:,:), (/0,1/)) ;dim_avg_n_Wrap(dim_avg_
 cp6_esm_a = dim_avg_n_Wrap(pc6_all(i6esm,:,:), (/0,1/)) ;dim_avg_n_Wrap(dim_avg_n_Wrap(pc6_all(i6esm,:,:), 1),0) ;PLUS group MME
 cp6_cm_a = dim_avg_n_Wrap(pc6_all(i6cm,:,:), (/0,1/)) ;dim_avg_n_Wrap(dim_avg_n_Wrap(pc6_all(i6cm,:,:), 1),0) ;MINUS group MME
 
-; ;1. averaged STD across ensembles 
+; ;1. averaged STD across ensembles
 cs_a = dim_stddev_n_Wrap(pc5_all, (/0,1/)) ;com_std, 0)
 
 d1 = cp5_plus_a
@@ -345,12 +345,11 @@ fo->std_6 = std_6
 ;   asciiwrite (diri+"cmip5_"+EXP5+"_"+IND+"_std.txt", std_5)
 ;   asciiwrite (diri+"cmip6_"+EXP6+"_"+IND+"_std.txt", std_6)
 
-exit
 ; ;-----------BootStrap---------------------
-; function_bootstrap_mme.ncl 
+; function_bootstrap_mme.ncl
 
-N = 1000 
-nBoot =   10000    
+N = 1000
+nBoot =   10000
 
 
 nem5y = num(.not.ismissing(ndtooned(pc5_all(i5y,:,500))))
@@ -433,14 +432,14 @@ plot2 = new(10,graphic)                ; create graphic array
   res@gsnRightString = ""
   res@vpHeightF = 0.3
   res@vpWidthF  = 0.6
- 
+
   res@tmXTOn    = False
   res@tmYROn    = False
   ;res@gsnXYBarChart            = True              ; Create bar plot
   ;res@gsnXYBarChartOutlineOnly = True
 
 
-  res@gsnYRefLine           = 0.0             ; reference line   
+  res@gsnYRefLine           = 0.0             ; reference line
   ; res@gsnAboveYRefLineColor = "red"           ; above ref line fill red
   ; res@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
   ; res@gsnLeftStringFontHeightF  = 0.03
@@ -451,14 +450,14 @@ plot2 = new(10,graphic)                ; create graphic array
   ndim6  = dimsizes(pc6_all)
   x_axis6 = fspan(yrs6, yrl6, ndim6(2))
   x_axis1 = ispan(yrs, yrl, 1)
-  ;res@tmXBMode   = "Explicit"                                                
+  ;res@tmXBMode   = "Explicit"
   ;res@tmXBValues = x_axis;-1
   ;res@tmXBLabels = model
   ;res@tmXBLabelAngleF = 45.
   ;res@tmXBLabelFontHeightF = 0.02
   res@tiYAxisString = ""
   res@tiXAxisString = "year"
-  
+
   res@xyMonoLineColor = False
   res@xyMonoDashPattern = True
 
@@ -544,14 +543,14 @@ delete(res@trYMaxF)
 ; res@xyLineThicknessF = 3.0
 ; res@xyLineColors = "black"
 ; res@gsnLeftString = "surface-TOA SW in CMIP5"
-; plot2(0) = gsn_csm_xy (wks2,x_axis5,dst5,res) 
+; plot2(0) = gsn_csm_xy (wks2,x_axis5,dst5,res)
 ; res@gsnLeftString = "surface-TOA SW in CMIP6"
-; plot2(1) = gsn_csm_xy (wks2,x_axis6,dst6,res) 
+; plot2(1) = gsn_csm_xy (wks2,x_axis6,dst6,res)
 
 res@gsnLeftString = "trend in CMIP5"
-plot2(0) = gsn_csm_xy (wks2,x_axis5,cd5,res) 
+plot2(0) = gsn_csm_xy (wks2,x_axis5,cd5,res)
 res@gsnLeftString = "trend in CMIP6"
-plot2(1) = gsn_csm_xy (wks2,x_axis6,cd6,res) 
+plot2(1) = gsn_csm_xy (wks2,x_axis6,cd6,res)
 
 ;------------------------------------------------
 resk = True

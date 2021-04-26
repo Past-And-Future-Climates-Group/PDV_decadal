@@ -1,8 +1,8 @@
-load "./function_bootstrap_mme.ncl"
+load "/Users/xingchen/Documents/project/PDV/program/function_bootstrap_mme.ncl"
 begin
 
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/";
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/";
+diri = "/Users/xingchen/Documents/project/PDV/data/" ;"/glade/work/chenxing/enso/";
+dirip = "/Users/xingchen/Documents/project/PDV/pic/" ;"/glade/u/home/chenxing/enso/";
 
 neof = 1
 
@@ -27,47 +27,47 @@ EXP6 = "historical";"hist-aer";"hist-Nat" ;"hist-GHG" ;
 
 ;don't filter pdv pc, it's already filtered, double filter will shortern data...
 
-yrs = 1861; 
+yrs = 1861;
 yrl = 2004; 2014;
 
 
 ;--------read-------------
 ; f1 = addfile(diri+"cmip6_historical_PDI2_mme.nc" , "r" )
-; pdi6 = f1->cp6_a 
+; pdi6 = f1->cp6_a
 f1 = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc" , "r" )
 pdi6 = f1->pc(1,:)
 
 
 ;"EACSS" ;"EAS" ;"PDI2" ; "NPCSS" ;"NPC" ;"NPS" ;"NPAOD" ;"PDI2";"TPI" ;"NPI" ;"AMO" ;"pdo" ;"nh-sh" ;"GMAOD" ;"GMSW" ;
-IND1 = "SWHD" 
-IND1_fullname = "SW of Hemisphere difference (surface" 
+IND1 = "SWHD"
+IND1_fullname = "SW of Hemisphere difference (surface"
 f1 = addfile(diri+"cmip5_"+EXP5+"_"+IND1+"_mme.nc" , "r" )
-e51 = f1->cp5_a 
-s51 = f1->std_5 
+e51 = f1->cp5_a
+s51 = f1->std_5
 
 f1 = addfile(diri+"cmip6_"+EXP6+"_"+IND1+"_mme.nc" , "r" )
-e61 = f1->cp6_a 
-s61 = f1->std_6 
+e61 = f1->cp6_a
+s61 = f1->std_6
 
-IND2 = "ASRHD" 
-IND2_fullname = "SW of Hemisphere difference (TOA" 
+IND2 = "ASRHD"
+IND2_fullname = "SW of Hemisphere difference (TOA"
 f2 = addfile(diri+"cmip5_"+EXP5+"_"+IND2+"_mme.nc" , "r" )
-e52 = f2->cp5_a 
-s52 = f2->std_5 
+e52 = f2->cp5_a
+s52 = f2->std_5
 
 f2 = addfile(diri+"cmip6_"+EXP6+"_"+IND2+"_mme.nc" , "r" )
-e62 = f2->cp6_a 
-s62 = f2->std_6 
+e62 = f2->cp6_a
+s62 = f2->std_6
 
-IND3 = "NPC" 
-IND3_fullname = "cloud effect over the North Pacific" 
+IND3 = "NPC"
+IND3_fullname = "cloud effect over the North Pacific"
 f3 = addfile(diri+"cmip5_"+EXP5+"_"+IND3+"_mme.nc" , "r" )
-e53 = f3->cp5_a 
-s53 = f3->std_5 
+e53 = f3->cp5_a
+s53 = f3->std_5
 
 f3 = addfile(diri+"cmip6_"+EXP6+"_"+IND3+"_mme.nc" , "r" )
-e63 = f3->cp6_a 
-s63 = f3->std_6 
+e63 = f3->cp6_a
+s63 = f3->std_6
 
 printVarSummary(e53)
 printVarSummary(pdi6)
@@ -122,14 +122,14 @@ plot2 = new(10,graphic)                ; create graphic array
   res@gsnRightString = ""
   res@vpHeightF = 0.3
   res@vpWidthF  = 0.6
- 
+
   res@tmXTOn    = False
   res@tmYROn    = False
   ;res@gsnXYBarChart            = True              ; Create bar plot
   ;res@gsnXYBarChartOutlineOnly = True
 
 
-  res@gsnYRefLine           = 0.0             ; reference line   
+  res@gsnYRefLine           = 0.0             ; reference line
   ; res@gsnAboveYRefLineColor = "red"           ; above ref line fill red
   ; res@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
   ; res@gsnLeftStringFontHeightF  = 0.03
@@ -140,14 +140,14 @@ plot2 = new(10,graphic)                ; create graphic array
   ndim6  = dimsizes(e61)
   x_axis6 = fspan(yrs6, yrl6, ndim6(0))
   x_axis1 = ispan(yrs, yrl, 1)
-  ;res@tmXBMode   = "Explicit"                                                
+  ;res@tmXBMode   = "Explicit"
   ;res@tmXBValues = x_axis;-1
   ;res@tmXBLabels = model
   ;res@tmXBLabelAngleF = 45.
   ;res@tmXBLabelFontHeightF = 0.02
   res@tiYAxisString = ""
   res@tiXAxisString = "year"
-  
+
   res@xyMonoLineColor = False
   res@xyMonoDashPattern = True
 
@@ -191,11 +191,11 @@ overlay(plot(2), plota)
 res@gsnLeftString = ""
 res@gsnRightString = ""
 
- res@xyLineColor     = -1                           ; We don't want the line, so make 
+ res@xyLineColor     = -1                           ; We don't want the line, so make
  res@gsnXYFillOpacities = 0.3
  res@gsnXYFillColors = "grey55"
  res@xyCurveDrawOrder = "PreDraw"
- 
+
  mmz6 = conform_dims((/2,dimsizes(e61)/), e61, 1)
  mmz5 = conform_dims((/2,dimsizes(e51)/), e51, 1)
  mmz6(0,:) = e61- s61

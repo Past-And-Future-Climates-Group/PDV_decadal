@@ -77,7 +77,8 @@ printVarSummary(pca_lens5)
 
 MODEL2 = (/"CESM1","CESM1","CESM1","CESM2 (CMIP5 forcing)"/);"CESM1",
 EXP2 =  (/ "xghg", "xaer" ,  "xbmb",""/);"xlulc",
-EXP2_name =  (/ "noGHG", "noAer" ,  "noBMB",""/);"xlulc",
+EXP2_name =  (/ "XGHG", "XAer" ,  "XBMB",""/);"xlulc",
+EXP2_ef_name =  (/ "GHG", "Aerosol" ,  "Biomass Burning",""/);"xlulc",
 lens2 = (/20,20,15,7 /) ;5,
 nec = dimsizes(EXP2)
 pca_cesm1 = new((/nec,ntime/), "float")
@@ -242,7 +243,7 @@ res@gsnRightString = pca_lens5@units
   res@xyLineColors = "black"
 
 do im = 0,nml5-1
-  res@gsnLeftString = MODEL(im)+" ("+nens5(im)+")"
+  res@gsnLeftString = MODEL(im);+" ("+nens5(im)+")"
   plot1(im) = gsn_csm_xy (wks,x_axis,pca_lens5(im,:),res)
   ; each ensemble
   ; plota = gsn_csm_xy (wks,x_axis,pc_lens5(im,:,:),res2)
@@ -255,7 +256,7 @@ res@xyLineColors = "blue"
 
 cesm1_le = pca_lens5(0,:)
 
-res@gsnLeftString = "CESM1(40) & CESM2(11)"
+res@gsnLeftString = "CESM1 & CESM2"
 plot2(0) = gsn_csm_xy(wks,x_axis,pca_cesm2, res)
 plota = gsn_csm_xy (wks,x_axis,cesm1_le,res2)
 overlay(plot2(0),plota)
@@ -269,11 +270,11 @@ dd = pca_cesm2
 dd = pca_cesm1@_FillValue
 dd = pca_cesm2 - cesm1_le
 plota = gsn_csm_xy (wks,x_axis,dd,res2)
-overlay(plot2(0),plota)
+; overlay(plot2(0),plota)
 
 
 do im = 0,nec-1
-  res@gsnLeftString = MODEL2(im)+" "+EXP2_name(im)+" ("+nens2(im)+")"
+  res@gsnLeftString = MODEL2(im)+" "+EXP2_name(im);+" ("+nens2(im)+")"
   plot2(im+1) = gsn_csm_xy (wks,x_axis,pca_cesm1(im,:),res)
 
   dd = pca_cesm1@_FillValue
@@ -480,24 +481,27 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   lgres@lgMonoDashIndex = True
   lgres@lgDashIndexes = 0;(/0,0,0,0,0,0,0,0/)
   lgres@lgLineColors       = (/"gold1","pink","grey75"/)
-  labels1 = (/"CESM2(CMIP5forcing| 7)","CESM1(40)","CESM2(11)" /)
+  labels1 = (/"CESM2(CMIP5forcing)  ","CESM1","CESM2" /)
   nitems1 = dimsizes(labels1)                 ; number of legend items
 
   lbid1 = gsn_create_legend(wks,nitems1,labels1,lgres)
 
   lgres@lgLineColors       = (/"green","blue" ,"lightpink3"/)
-  labels2 = (/"Diff(Aerosol)","CESM1(NoAerosol| 20)","CESM1(40)" /)
+  labels2 = (/"Diff(Aerosol)","CESM1(XAerosol)  ","CESM1 " /)
   nitems2 = dimsizes(labels2)                 ; number of legend items
   lbid2 = gsn_create_legend(wks,nitems2,labels2,lgres)
 
 
   lgres@lgLineColors       = (/"green","gold1" ,"pink"/)
-  labels4 = (/"Diff(CESM2/1physics)","CESM2(CMIP5forcing| 7)","CESM1(40)" /)
+  labels4 = (/"Diff(CESM2/1physics)","CESM2(CMIP5forcing)","CESM1" /)
   nitems4 = dimsizes(labels4)                 ; number of legend items
   lbid4 = gsn_create_legend(wks,nitems4,labels4,lgres)
 
-  lgres@lgLineColors       = (/"green","blue" ,"red"/)
-  labels6 = (/"Diff(CESM2/1)","CESM2(11)","CESM1(40)" /)
+  delete(lgres@lgLineColors)
+  delete(lgres@lgDashIndexes)
+
+  lgres@lgLineColors       = (/"blue" ,"red"/);"green",
+  labels6 = (/"CESM2         ","CESM1          " /) ;"Diff(CESM2/1)",
   nitems6 = dimsizes(labels6)                 ; number of legend items
   lbid6 = gsn_create_legend(wks,nitems6,labels6,lgres)
 
@@ -508,10 +512,12 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
   lgres@lgDashIndexes = (/2,0,0,0/)
   lgres@lgMonoDashIndex = False
   lgres@lgLineColors       = (/"coral1","green","gold1" ,"grey75"/)
-  labels3 = (/"NH TS Diff(CMIP6/5forcing)","Diff(CMIP6/5forcing)","CESM2(CMIP5forcing| 7)","CESM2(11)" /)
+  labels3 = (/"NH TS Diff(CMIP6/5forcing)","Diff(CMIP6/5forcing)","CESM2(CMIP5forcing)","CESM2" /)
   nitems3 = dimsizes(labels3)                 ; number of legend items
   lbid3 = gsn_create_legend(wks,nitems3,labels3,lgres)
   delete(lgres@lgLineColors)
+  lgres@lgDashIndexes = (/0,0,0,0/)
+
 
 ; Use gsn_add_annotation to attach this legend to our existing plot.
 ; This way, if we resize the plot, the legend will stay with the
@@ -532,7 +538,7 @@ com_std_lens5 = dim_avg_n_Wrap(com_std,0)
 
   lgres@lgLineColors       = (/"green","black"/)
   do im = 0,nec-1
-    labels = (/"Difference with CESM1",EXP2_name(im)+"" /)
+    labels = (/EXP2_ef_name(im)+" effects",EXP2_name(im)+"         " /)
     nitemsa = dimsizes(labels)                 ; number of legend items
     label = unique_string("label")
     plot2@$label$ = gsn_create_legend(wks,nitemsa,labels,lgres)

@@ -37,7 +37,7 @@ yrl = 2004; 2014;
 f1 = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc" , "r" )
 pdi6 = f1->pc(1,:)
 
-
+; from plot_cmip_index_xy.ncl
 ;"EACSS" ;"EAS" ;"PDI2" ; "NPCSS" ;"NPC" ;"NPS" ;"NPAOD" ;"PDI2";"TPI" ;"NPI" ;"AMO" ;"pdo" ;"nh-sh" ;"GMAOD" ;"GMSW" ;
 IND1 = "SWHD"
 IND1_fullname = "SW of Hemisphere difference (surface"

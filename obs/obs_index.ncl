@@ -3,13 +3,21 @@ begin
 diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
+DATA = "ERSST" ;ERSST ; ICOADS ; HadISST
 
+if (DATA.eq."HadISST") then
+  yrs = 1870;1854
+else
   yrs = 1854
+end if
   yrl = 2019
-  ymstrt= yrs*100+1  
+  ymstrt= yrs*100+1
   ymlast= yrl*100+12
 
-  f   = addfile("/glade/work/chenxing/sst.ersst.v5.185401-201912.nc", "r")  ;multiple files
+  f   = addfile("/glade/work/chenxing/sst.ersst.v5.185401-201912.nc", "r")  ;
+  ; f   = addfile("/glade/work/chenxing/HadISST_sst.nc", "r")  ;1870-2021.2
+  ; f   = addfile("/glade/work/chenxing/sst.mean.ICOADS.nc", "r")  ;1800.1-2021.4
+
 
 ;only do historical part here first
 TIME2=f->time
@@ -21,35 +29,44 @@ ycstrts = ind(yyyymm2.eq.197501)
 yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
+if (DATA.eq."ICOADS") then
+    xx  = short2flt(f->sst(ymstrts:ymlasts,:,:));
+else
     xx  = f->sst(ymstrts:ymlasts,:,:);
+end if
 
- 
+if (DATA.eq."HadISST") then
+    xx = lonFlip(xx)
+end if
+
+    printVarSummary(xx)
+
 ; ;climatology is 1975-2005
 ; xc = clmMonTLL(f[:]->$VAR$(ycstrts:yclasts,:,:))
 ; xa = calcMonAnomTLL(xx, xc)
 xa = rmMonAnnCycTLL(xx)
 ; xa = dtrend_msg_n(xa&time, xa, True, False, 0)
 
-xa_sea = xa 
+xa_sea = xa
 ;-------------------------------------
 ;cover land data; do this first!!
 ;mask 0=ocean (land reserved), 1=land, 2=lake, 3=small island, 4=ice shelf.
 
  lland = addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")
- lsm0 = landsea_mask(lland->LSMASK,xa&lat,xa&lon)
+ lsm0 = landsea_mask(lland->LSMASK,xa&lat,xa&lon) ;latitude ;longitude
  xa_sea = mask(xa,lsm0.eq.1, False)      ; mask out land points
  copy_VarMeta(xa, xa_sea)
 
 delete(lsm0)
 
 ;-------------------------
-; Calculating index 
-; Nino 1+2 (0-10S, 90W-80W), Nino 3 (5N-5S, 150W-90W), 
+; Calculating index
+; Nino 1+2 (0-10S, 90W-80W), Nino 3 (5N-5S, 150W-90W),
 ; Nino 3.4/ONI (5N-5S, 170W-120W) and Nino 4 (5N-5S, 160E-150W)
 ; TNI is Nino 1+2 - Nino 4
-; 
-; TNA: Tropical Northern Atlantic Index* Anomaly of the average of the monthly SST from 5.5N to 23.5N and 15W to 57.5W. 
-; Enfield, D.B., A.M. Mestas, D.A. Mayer, and L. Cid-Serrano, 1999: How ubiquitous is the dipole relationship in 
+;
+; TNA: Tropical Northern Atlantic Index* Anomaly of the average of the monthly SST from 5.5N to 23.5N and 15W to 57.5W.
+; Enfield, D.B., A.M. Mestas, D.A. Mayer, and L. Cid-Serrano, 1999: How ubiquitous is the dipole relationship in
 ; tropical Atlantic sea surface temperatures? JGR-O, 104, 7841-7848.AOML and PSL
 
 ; NPGO index: SLP index is over the Hawaiian region (158W–135W;13N–24N)
@@ -61,19 +78,19 @@ delete(lsm0)
 ; NP cloud effect index: 30-50N, 120E-110W
 
 
-  lat = xa_sea&lat
+  lat = xa_sea&lat;itude
   rad    = 4.0*atan(1.0)/180.0
   clat   = cos(lat*rad)
   copy_VarCoords(xa_sea(0,:,0), clat)
   ; go = wgt_areaave_Wrap(x,clat, 1.0, 1)
 
-  NLAT1 =  50. 
-  SLAT1 =  30. 
+  NLAT1 =  45.
+  SLAT1 =  30.
   WLON1 =  145.
   ELON1 =  360-180.;
 
-  NLAT2 =  6. 
-  SLAT2 =  -10.  
+  NLAT2 =  6.
+  SLAT2 =  -10.
   WLON2 =  360-160.
   ELON2 =  360-110.
   gmst1 = wgt_areaave_Wrap(xa_sea(:,{SLAT1:NLAT1},{WLON1:ELON1}),clat({SLAT1:NLAT1}), 1.0, 1)
@@ -93,17 +110,17 @@ delete(lsm0)
 ; fcb   = -999.
 ; wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
-; gmst = wgt_runave_n_Wrap( gmst, wgt,  -1, 0 )   ;opt < 0 : utilize cyclic conditions 
+; gmst = wgt_runave_n_Wrap( gmst, wgt,  -1, 0 )   ;opt < 0 : utilize cyclic conditions
 
 
 ; gmst = dtrend_msg_n(gmst&time, gmst, True, False, 0)
 
 
 ;--------output-------------
-fon=diri+"obs_PDI2_"+yrs+"-"+yrl+".nc";
+fon=diri+"obs_"+DATA+"_PDI_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->index = gmst
 
 
-end 
+end

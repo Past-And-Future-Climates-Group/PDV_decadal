@@ -3,9 +3,7 @@ diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
   yrs = 1861;1920;1950;
-  yrl = 2004
   ymstrt= yrs*100+1
-  ymlast= yrl*100+12
 
 diri1 = "/glade/collections/cmip/cmip5/"
 diri2 = "/glade/work/chenxing/CMIP5/historical/remap/tos/"
@@ -122,13 +120,25 @@ nsa = dimsizes(locs)
 
 do ia = 0,nsa-1
 
+  yrl = 2014
+  ymlast= yrl*100+12
+
  locs_str = str_split(locs(ia), "_"); "/")
  print("'" + locs_str + "'")
   ENSN  = locs_str(3)
 
   print(MODEL5(im)+" ens "+ENSN)
+  file_name2 = diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc"
+
+;ACCESS1-0_tas_histrcp85_r1i1p1.nc
+file_name = diri3+"histrcp85/"+VAR+"/"+MODEL5(im)+"_"+VAR+"_histrcp85_"+ENSN+".nc"
+  exists = isfilepresent(diri3+"histrcp85/"+VAR+"/"+MODEL5(im)+"_"+VAR+"_histrcp85_"+ENSN+".nc")
+  if(.not.exists) then
       file_name = diri3+EXP+"/"+VAR+"/"+MODEL5(im)+"_"+VAR+"_historical_"+ENSN+".nc"
-      file_name2 = diri+"cmip5/"+IND+"/cmip5_"+EXP+"_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_1861-2004.nc"
+      yrl = 2004
+      ymlast= yrl*100+12
+  end if
+
     exists = isfilepresent(file_name)
     exists2 = isfilepresent(file_name2)
   if (AA.ne."mme") then
@@ -172,14 +182,6 @@ do ia = 0,nsa-1
 
   xa = rmMonAnnCycTLL(xx)
 
-  xa_annual = month_to_annual(xa, 1)
-  xa_sea = month_to_seasonN(xa, SEASON)
-  ;season, year --> season * year one dimension
-  ndim1 = dimsizes(xa_sea)
-  xa_sea2 = reshape(xa_sea, (/ndim1(0)*ndim1(1),ndim1(2),ndim1(3) /) )
-  xa_sea2!0 = "time"
-  copy_VarMeta(xa(0,:,:), xa_sea2(0,:,:))
-
   ;---------read output---------------
 
   ; ;PDV
@@ -203,17 +205,7 @@ do ia = 0,nsa-1
   ; ;MME index
   ;from plot_cmip_index_xy.ncl
   f1 = addfile(diri+"cmip5_"+EXP+"_"+IND+"_mme.nc","r")
-  ; if (.not.ismissing(ind(MODEL5_PLUS.eq.MODEL5(im))))then
-  ;     pc = f1->cp5_plus_a
-  ;     print(MODEL5(im)+" is PLUS ?")
-  ; else if (.not.ismissing(ind(MODEL5_MINUS.eq.MODEL5(im))))then
-  ;     pc = f1->cp5_minus_a
-  ;     print(MODEL5(im)+" is MINUS ?")
-  ;   else
-  ; pc = f1->cp5_a
-  ; end if
-  ; end if
-  pc = f1->cp5_a
+  pc = f1->cp5_a(:(yrl-yrs+1)*12-1)
 
   pc_annual = month_to_annual(pc, 1)
   ; pc_sea = month_to_seasonN(pc, SEASON)
@@ -239,7 +231,7 @@ aa(ia,:,:) = regCoef(pc_ft,xa(lat|:,lon|:,time|:));, tval, df);Y
 
 copy_VarCoords(xa(0,:,:), aa(ia,:,:))
 
-delete([/locs_str,pc,xa_sea2/]);,pc_sea2,xa
+delete([/locs_str,pc,xa,pc_annual,pc_ft/]);,pc_sea2,xa
 end do
 
 ;ensemble mean
@@ -252,173 +244,12 @@ end do
 ccr1!0 = "model"
 printVarSummary(ccr1)
 
+yrl = 2014
 ;--------output-------------
 ; fon=diri+"cmip5_reg_"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 fon=diri+"cmip5_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->ccr1 = ccr1
-
-exit
-;---------read output---------------
-f1   = addfile(diri+"cmip5_reg_mme"+IND+"_"+EXP+"_"+VAR+"_"+yrs+"-"+yrl+".nc", "r")
-ccr1  = f1->ccr1
-
-f2   = addfile(diri+"cmip6_reg_mme"+IND+"_"+EXP+"_ts_1850-2014.nc", "r")
-ccr2  = f2->ccr1
-
-
-f1   = addfile(diri+"cmip5_reg_mme"+IND+"_"+EXP+"_ua_"+yrs+"-"+yrl+".nc", "r")
-ua1  = f1->ccr1
-f2   = addfile(diri+"cmip6_reg_mme"+IND+"_"+EXP+"_ua_1850-2014.nc", "r")
-ua2  = f2->ccr1
-f1   = addfile(diri+"cmip5_reg_mme"+IND+"_"+EXP+"_va_"+yrs+"-"+yrl+".nc", "r")
-va1  = f1->ccr1
-f2   = addfile(diri+"cmip6_reg_mme"+IND+"_"+EXP+"_va_1850-2014.nc", "r")
-va2  = f2->ccr1
-
-;;----------composite-----------------
-;MME
-com_ccr = dim_avg_n_Wrap(ccr1 , 0)
-printVarSummary(com_ccr)
-com_ccr_y = dim_avg_n_Wrap(ccr1(i5y,:,:) , 0)
-com_ccr_n = dim_avg_n_Wrap(ccr1(i5n,:,:) , 0)
-; com_ccr_le = dim_avg_n_Wrap(ccr1(i5le,:,:) , 0)
-com_ua = dim_avg_n_Wrap(ua1 , 0)
-printVarSummary(com_ua)
-com_ua_y = dim_avg_n_Wrap(ua1(i5y,:,:) , 0)
-com_ua_n = dim_avg_n_Wrap(ua1(i5n,:,:) , 0)
-com_va = dim_avg_n_Wrap(va1 , 0)
-printVarSummary(com_va)
-com_va_y = dim_avg_n_Wrap(va1(i5y,:,:) , 0)
-com_va_n = dim_avg_n_Wrap(va1(i5n,:,:) , 0)
-
-;CMIP6
-com_ccr6 = dim_avg_n_Wrap(ccr2 , 0)
-com_ua6 = dim_avg_n_Wrap(ua2 , 0)
-com_va6 = dim_avg_n_Wrap(va2 , 0)
-
-printMinMax(com_ccr, 0)
-printMinMax(com_ua, 0)
-; ;-------t-test---------------------------------
-; pra_std = dim_stddev_n_Wrap(ccr, 0)
-
-; df = pra_avg_p1
-; df = nens(im)
-; b = pra_avg_p1
-; b = 0.5
-; pr_tval = pra_avg_p1
-; pr_tval = (pra_avg_p1-0)*sqrt(40)/pra_std
-; pr_prob = (1.-betainc( df/(df+pr_tval^2), df/2.0, b))*100.  ; probability in %
-; printMinMax(pr_prob, 0)
-
-; delete([/df,b/])
-
-; sig_pra1 = pra_avg_p1
-; sig_pra1 = where(pr_prob.ge.90., abs(pra_avg_p1), pra_avg_p1@_FillValue)
-
-;--------------plot-------------------
-wks = gsn_open_wks("ps", dirip+"cmip5_reg");
-plot = new(30,graphic)                ; create graphic array
-plot1 = new(30,graphic)                ; create graphic array
-plot2 = new(30,graphic)                ; create graphic array
-plot3 = new(30,graphic)                ; create graphic array
-gsn_define_colormap(wks, "NCV_blu_red")
-
-
-res2 = True
-res2@gsnDraw = False        ;dont draw
-res2@gsnFrame = False        ;dont advance frame
-res2@gsnLeftString = ""
-res2@gsnRightString = ""
-vcres = res2
-
-res2@vpWidthF  = 0.6
-
-res2@mpCenterLonF = 180.
-res2@mpFillOn = False
-res2@mpFillDrawOrder = "PostDraw"
- ; res2@mpMaxLatF                   = NLAT         ; choose subregion
- ; res2@mpMinLatF                   = SLAT
- ; res2@mpMaxLonF                   = ELON
- ; res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False
-res2@cnFillOn = True;False ;
-res2@cnLinesOn = False;True ;
-res2@cnLineLabelsOn = False
-
-res2@gsnLeftStringFontHeightF = 0.03
-res2@gsnRightStringFontHeightF = res2@gsnLeftStringFontHeightF
-res2@lbLabelBarOn = False;
-res2@lbOrientation = "Horizontal"
-res2@lbBoxLinesOn  = False
-res2@lbTitleOn        =  True                ; turn on title
-res2@lbLabelStride    = 2
-res2@lbTitleString    = ""                ; title string
-res2@lbTitlePosition  = "Right"              ; title position
-res2@lbTitleFontHeightF= .015                ; make title smaller
-; res2@lbTitleDirection = "Across"
-res2@lbTitleExtentF   = 0.01 ;Default: 0.15
-res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
-; res2@pmLabelBarWidthF = 0.05
-
-res2@cnLevelSelectionMode  = "ManualLevels"
-res2@cnMinLevelValF        = -2.0
-res2@cnMaxLevelValF        =  2.0
-res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
-
-
-res2@gsnLeftString = ""
-    res2@gsnRightString = "CMIP6"
-    plot(0) = gsn_csm_contour_map_ce(wks, com_ccr6, res2)
-    res2@gsnRightString = "CMIP5"
-    plot(1) = gsn_csm_contour_map_ce(wks, com_ccr, res2)
-    res2@gsnRightString = "CMIP5(plus)"
-    plot(2) = gsn_csm_contour_map_ce(wks, com_ccr_y, res2)
-    res2@gsnRightString = "CMIP5(minus)"
-    plot(3) = gsn_csm_contour_map_ce(wks, com_ccr_n, res2)
-
-  ; vcres@vcGlyphStyle            = "CurlyVector"    ; turn on curly vectors
-  ; vcres@vcMinFracLengthF        = 0.08
-  ; vcres@vcMinDistanceF          = 0.02
-  vcres@vcRefMagnitudeF         = 0.5            ; define vector ref mag
-  vcres@vcRefLengthF            = 0.02              ; define length of vec ref
-
-  vcres@vcRefAnnoOn             = True
-  vcres@vcRefAnnoPerimOn          = False          ;参考矢量的边框
-  vcres@vcRefAnnoString2          = "m/s"            ;not draw the word"reference vector"
-  vcres@vcRefAnnoOrthogonalPosF = -.15            ; move ref vector up
-
-
-  vcres@lbLabelBarOn = False
-  vcres@vcFillArrowFillColor = "black"
-
-  vector= gsn_csm_vector(wks,com_ua6,com_va6,vcres)
-  overlay(plot(0),vector)
-  vector= gsn_csm_vector(wks,com_ua,com_va,vcres)
-  overlay(plot(1),vector)
-  vector= gsn_csm_vector(wks,com_ua_y,com_va_y,vcres)
-  overlay(plot(2),vector)
-  vector= gsn_csm_vector(wks,com_ua_n,com_va_n,vcres)
-  overlay(plot(3),vector)
-
-resk = True
-;resk@txFontHeightF = 0.03
-resk@gsnPanelLabelBar   = True                 ; add common colorbar
-resk@gsnMaximize = True
-resk@gsnPaperOrientation = "portrait"   ; force portrait
-resk@lbBoxEndCapStyle = "TriangleBothEnds"
-resk@lbOrientation = "Horizontal"
-resk@lbBoxLinesOn = False
-; resk@lbTitleString = com_ccr@units
-;resk@lbBoxMinorExtentF = 0.2
-resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
-;resk@pmLabelBarWidthF = 0.1
-;resk@pmLabelBarHeightF = 0.2
-;resk@pmLabelBarParallelPosF = 0.3 ;default 0.5
-;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
-resk@txString = VAR+" regressed onto "+IND+" "+yrs+"-"+yrl
-gsn_panel(wks,plot,(/2,2/),resk)
-
 
 end

@@ -3,7 +3,7 @@ diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
 
-  yrs = 1850;1950;
+  yrs = 1850;1920;1950;
   yrl = 2014
   ymstrt= yrs*100+1
   ymlast= yrl*100+12
@@ -14,16 +14,31 @@ diri2 = "/glade/work/chenxing/CMIP6/historical/remap/tos/"
 diri3 = "/glade/scratch/chenxing/cmip6/"
 SEASON = (/"DJF","MAM","JJA","SON" /)
 
-MODEL6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5","BCC-ESM1",
+;; CMIP6 MODELS
+MODEL6 = (/"BCC-CSM2-MR","BCC-ESM1","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5",
         "CESM2","CESM2-WACCM-FV2",\
-        "CESM2-WACCM","E3SM-1-0","FIO-ESM-2-0","GFDL-CM4",\;"E3SM-1-1","FGOALS-f3-L","FGOALS-g3","GFDL-ESM4",
-        "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
-        "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
+        "CESM2-WACCM","E3SM-1-0","FGOALS-g3","FIO-ESM-2-0","GFDL-CM4","GFDL-ESM4",\;"E3SM-1-1","FGOALS-f3-L",
+        "GISS-E2-1-G","GISS-E2-1-H","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC",
+        "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NESM3","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM",
 
-MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
-  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
-nens6 = (/32,30,25,12,11, 10, 10,\;10,
-          10,7,5,5 /) ;ensemble number 5,
+MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0","GISS-E2-1-H",\;
+  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0","NESM3",\
+  "BCC-CSM2-MR","BCC-ESM1","CESM2-FV2","CESM2-WACCM-FV2","CESM2-WACCM","FGOALS-g3","FIO-ESM-2-0","NorESM2-LM" /) ;large ensemble model in CMIP6
+
+nens6 = (/32,30,25,12,11, 10, 10,10,\;
+          10,7,5,5,5,\
+          3,3, 3,3,3,3,3,3/) ;ensemble number 5,
+
+; MODEL6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5","BCC-ESM1",
+;         "CESM2","CESM2-WACCM-FV2",\
+;         "CESM2-WACCM","E3SM-1-0","FIO-ESM-2-0","GFDL-CM4",\;"E3SM-1-1","FGOALS-f3-L","FGOALS-g3","GFDL-ESM4",
+;         "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
+;         "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
+;
+; MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
+;   "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
+; nens6 = (/32,30,25,12,11, 10, 10,\;10,
+;           10,7,5,5 /) ;ensemble number 5,
 
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
@@ -119,7 +134,7 @@ do ia = 0,nsa-1
   ;global external forcing mode
   ; from mme_eof_cmip6.ncl
     f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
-    pc  = f1->pc(1,:)
+    pc  = f1->pc(1,(yrs-1850)*12:)
 
   pc_annual = month_to_annual(pc, 1)
   ; pc_sea = month_to_seasonN(pc, SEASON)

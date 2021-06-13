@@ -44,22 +44,20 @@ MODEL_cmip6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2
 
 ; MODEL6_CM = (/"GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MIROC6","NorCPM1" /)
 
-yrs6 = 1850;1930;
+yrs6 = 1850;1920;
 yrl6 = 2014;
-yrs5 = 1861;1930;
-yrl5 = 2004;
+yrs5 = 1861;1920;
+yrl5 = 2005;
 
 ;;;change here
-icmip = 6; 5 ;
-VAR = "ts" ;"tas";
-
-MODEL = MODEL_cmip6
-
-yrs = yrs6
-yrl = yrl6
+icmip = 5 ;6;
+VAR = "tas";"ts" ;
+MODEL = MODEL_cmip5;6
+yrs = yrs5;6
+yrl = yrl5;6
 
 
-ymstrt= yrs*100+1  
+ymstrt= yrs*100+1
 ymlast= yrl*100+12
 
 nyr = yrl - yrs +1
@@ -67,46 +65,51 @@ nyr = yrl - yrs +1
 
 ;from cdo_cmip_data.ncl
 diri3 = "/glade/scratch/chenxing/cmip"+icmip+"/historical/"+VAR+"/"
-; locs = systemfunc("find /glade/collections/cmip/cmip"+icmip+"/ -type d -name tos | grep historical") 
+; locs = systemfunc("find /glade/collections/cmip/cmip"+icmip+"/ -type d -name tos | grep historical")
 nsa = dimsizes(MODEL)
 
 xmodel = new((/nsa,nyr*12,72,144/), "float")
 xmodel = 0.
 
 do im = 0,nsa-1
-  
+
   fils = systemfunc("ls "+diri3+"*"+MODEL(im)+"*.nc")
   nf = dimsizes(fils)
   print(fils)
   ; f   = addfiles(fils, "r")  ;multiple files
   ; ListSetType (f, "join")        ; concatenate (=default)
 
-xa = new((/nf,nyr*12,72,144/), "float") 
+xa = new((/nf,nyr*12,72,144/), "float")
 do ii = 0,nf-1
   f   = addfile(fils(ii), "r")
   TIME2=f->time
   yyyymm2=cd_calendar(TIME2, -1)
   printMinMax(yyyymm2, True)
+  if(MODEL(im).eq."HadGEM2-CC".or.MODEL(im).eq."HadGEM2-ES") then
+    ymstrts = ind(yyyymm2.eq.ymstrt-89)
+    ymlasts = ind(yyyymm2.eq.ymlast-1)
+  else
   ymstrts = ind(yyyymm2.eq.ymstrt)
   ymlasts = ind(yyyymm2.eq.ymlast)
+end if
   print(ymstrts+" <--start end--> "+ymlasts)
-  
+
       xx  = f->$VAR$(ymstrts(0):ymlasts(0),:,:);
   ; printVarSummary(xx)
   delete([/f,TIME2,yyyymm2/]);,lat,lon
- 
-  xa(ii,:,:,:) = rmMonAnnCycTLL(xx)
-end do 
 
-;ensemble mean 
+  xa(ii,:,:,:) = rmMonAnnCycTLL(xx)
+end do
+
+;ensemble mean
 xe = dim_avg_n_Wrap(xa, 0)
 
-xmodel(im,:,:,:) = xe 
+xmodel(im,:,:,:) = xe
 copy_VarMeta(xx, xmodel(im,:,:,:))
 
 print(MODEL(im)+" is done")
 delete([/fils,xx,xa,xe/])
-end do 
+end do
 
 xmme = dim_avg_n_Wrap(xmodel, 0)
 printVarSummary(xmme)
@@ -120,7 +123,7 @@ fca   = 1./(fyr*12););
 fcb   = -999.
 wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
 
-xmme = wgt_runave_n_Wrap( xmme, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions 
+xmme = wgt_runave_n_Wrap( xmme, wgt,  0, 0 )   ;opt < 0 : utilize cyclic conditions
 delete(wgt)
 
 
@@ -131,28 +134,28 @@ delete(wgt)
 ; weight!!
 ; calculate the weights using the square root of the cosine of the latitude and
 ; also convert degrees to radians
-  wgt = sqrt(cos(xmme&lat*0.01745329)) 
-  
+  wgt = sqrt(cos(xmme&lat*0.01745329))
+
 ; reorder data so time is fastest varying
   pt  = xmme(lat|:,lon|:,time|:)         ; (lat,lon,time)
   ptw = pt                            ; create an array with metadata
 
-; weight each point prior to calculation. 
+; weight each point prior to calculation.
 ; conform is used to make wgt the same size as pt
 
   ptw = pt*tofloat(conform(pt, wgt, 0))
   delete([/pt,wgt/])
 
 optEof = False
-  
-X = ptw(lat|:,lon|:,time|:) 
+
+X = ptw(lat|:,lon|:,time|:)
 eof    = eofunc_Wrap(X({SLAT:NLAT},{WLON:ELON},:),neof,optEof)
 eof_ts = eofunc_ts_Wrap(X({SLAT:NLAT},{WLON:ELON},:),eof,False)
 pc = dim_standardize_n_Wrap(eof_ts,0,1) ;population standard
 pcvar = eof@pcvar
 copy_VarCoords(xmme(0,{SLAT:NLAT},{WLON:ELON}),eof(0,:,:))
 
- ; tval =new((/nlat,nlon/),typeof(xmme)) 
+ ; tval =new((/nlat,nlon/),typeof(xmme))
  ; df = new((/nlat,nlon/),"integer")
 
 rc = new((/neof,72,144/), typeof(xmme))
@@ -162,9 +165,9 @@ copy_VarCoords(xmme(0,:,:), rc(0,:,:))
 
 
 ;df = df-2
-;b1 = tval               ; b must be same size as tval (and df) 
-;b1 = 0.5 
-;prob(ia,i,:,:) = (1-(betainc(df/(df+tval^2),df/2.0,b1)))*100 
+;b1 = tval               ; b must be same size as tval (and df)
+;b1 = 0.5
+;prob(ia,i,:,:) = (1-(betainc(df/(df+tval^2),df/2.0,b1)))*100
 
 
 pc!0 = "eof"
@@ -209,11 +212,11 @@ res2@gsnRightString = ""
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
-;  res2@mpMaxLatF                   = NLAT         ; choose subregion           
+;  res2@mpMaxLatF                   = NLAT         ; choose subregion
 ;  res2@mpMinLatF                   = SLAT
 ;  res2@mpMaxLonF                   = ELON
 ;  res2@mpMinLonF                   = WLON
-res2@gsnAddCyclic = True ;False         
+res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
 res2@cnLineLabelsOn = False
@@ -228,14 +231,14 @@ res2@lbLabelStride    = 2
 res2@lbTitleString    = "K"                ; title string
 res2@lbTitlePosition  = "Top"              ; title position
 res2@lbTitleFontHeightF= .01                ; make title smaller
-; res2@lbTitleDirection = "Across"             
+; res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
 res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 res2@pmLabelBarWidthF = 0.05
 
-res2@cnLevelSelectionMode  = "ManualLevels"    
+res2@cnLevelSelectionMode  = "ManualLevels"
 res2@cnMinLevelValF        = -0.40
-res2@cnMaxLevelValF        =  0.40 
+res2@cnMaxLevelValF        =  0.40
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 do i = 0,neof-1
@@ -247,7 +250,7 @@ plot(i*2) = gsn_csm_contour_map_ce(wks, rca5(i,:,:), res2)
 res2@gsnLeftString = "CMIP6 MME (EOF"+(i+1)+")"
 res2@gsnRightString = sprintf("%5.1f", pcvar6(i)) +"%"
 plot(i*2+1) = gsn_csm_contour_map_ce(wks, rca6(i,:,:), res2)
-end do 
+end do
 
 resk = True
 ;resk@txFontHeightF = 0.03
@@ -264,7 +267,7 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ;resk@pmLabelBarOrthogonalPosF = 0.005 ;default 0.02
 ; resk@txString = MODEL(im)
 
-; gsn_panel(wks,plot,(/2,1/),resk)    
+; gsn_panel(wks,plot,(/2,1/),resk)
 
 res2@lbLabelBarOn = False;
 
@@ -285,20 +288,20 @@ gsn_panel(wks,plot,(/2,2/),resk)
   res@gsnRightString = ""
   res@vpHeightF = 0.30        ; Changes the aspect ratio
   res@vpWidthF  = 0.6
- 
+
   res@tmXTOn    = False
 
-  ;res2@gsnScale  = True        ; force text scaling               
+  ;res2@gsnScale  = True        ; force text scaling
   ;res@gsnXYBarChart            = True              ; Create bar plot
   ;res@gsnXYBarChartOutlineOnly = True
 
 
-  res@gsnYRefLine           = 0.0             ; reference line   
+  res@gsnYRefLine           = 0.0             ; reference line
   ; res@gsnAboveYRefLineColor = "red"           ; above ref line fill red
   ; res@gsnBelowYRefLineColor = "blue"          ; below ref line fill blue
   res@gsnLeftStringFontHeightF  = 0.03
   res@gsnRightStringFontHeightF = 0.03
-  
+
   res@trYMinF               = -3.
   res@trYMaxF               =  3.
   res@trXMinF               = 1850
@@ -308,7 +311,7 @@ gsn_panel(wks,plot,(/2,2/),resk)
   x_axis5 = fspan(yrs5, yrl5+1, ndim5(1))
     ndim6  = dimsizes(pca6)
   x_axis6 = fspan(yrs6, yrl6+1, ndim6(1))
-  ;res@tmXBMode   = "Explicit"                                                
+  ;res@tmXBMode   = "Explicit"
   ;res@tmXBValues = x_axis;-1
   ;res@tmXBLabels = model
   ;res@tmXBLabelAngleF = 45.
@@ -327,7 +330,7 @@ do i = 0,neof-1
   plota = gsn_csm_xy (wks,x_axis6,pca6(i,:),res) ;pca
   overlay(plot2(i), plota)
 
-end do 
+end do
 
 ;************************************************
 ; Attach text to plot using plot coordinates.
@@ -335,11 +338,11 @@ end do
   txres               = True                     ; text mods desired
   txres@txFontHeightF = 0.015                     ; font smaller. default big
   txres@txFontColor   = "red"
-  dum  = gsn_add_text(wks,plot2(0),"CMIP5",1870,2.0,txres) 
-  dum2 = gsn_add_text(wks,plot2(1),"CMIP5",1870,2.0,txres) 
+  dum  = gsn_add_text(wks,plot2(0),"CMIP5",1870,2.0,txres)
+  dum2 = gsn_add_text(wks,plot2(1),"CMIP5",1870,2.0,txres)
   txres@txFontColor   = "black"
-  dum1 = gsn_add_text(wks,plot2(0),"CMIP6",1870,1.5,txres) 
-  dum3 = gsn_add_text(wks,plot2(1),"CMIP6",1870,1.5,txres) 
+  dum1 = gsn_add_text(wks,plot2(0),"CMIP6",1870,1.5,txres)
+  dum3 = gsn_add_text(wks,plot2(1),"CMIP6",1870,1.5,txres)
 
 
 resk@gsnPanelLabelBar   = False                 ; add common colorbar

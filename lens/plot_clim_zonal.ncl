@@ -119,7 +119,7 @@ res2@gsnFrame = False        ;dont advance frame
 res2@gsnLeftString = ""
 res2@gsnRightString = ""
 res2@vpHeightF = 0.3
-res2@vpWidthF  = 0.6
+res2@vpWidthF  = 0.8
 
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
@@ -136,18 +136,19 @@ res2@cnInfoLabelOn = False
 
 res2@gsnLeftStringFontHeightF = 0.02
 res2@gsnRightStringFontHeightF = res2@gsnLeftStringFontHeightF
-res2@lbLabelBarOn = False;
-res2@lbOrientation = "Horizontal"
+res2@lbLabelBarOn = True;
+res2@lbOrientation = "Vertical"
 res2@lbBoxLinesOn  = False
 res2@lbTitleOn        =  True                ; turn on title
 res2@lbLabelStride    = 2
-res2@lbTitleString    = "K"                ; title string
-res2@lbTitlePosition  = "Right"              ; title position
+res2@lbTitleString    = "W/m2"                ; title string
+res2@lbTitlePosition  = "Top"              ; title position
 res2@lbTitleFontHeightF= .015                ; make title smaller
-; res2@lbTitleDirection = "Across"
+res2@lbTitleDirection = "Across"
 res2@lbTitleExtentF   = 0.01 ;Default: 0.15
-res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
+res2@lbLabelFontHeightF = 0.015  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
+res2@lbBoxEndCapStyle = "TriangleBothEnds"
 
 res2@tmXTOn = False
 res2@tmYROn = False
@@ -174,11 +175,26 @@ res2@cnMinLevelValF        = -5.0
 res2@cnMaxLevelValF        =  5.0
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
+; res2@tmYLLabelStride         = 1
+; res2@tmYLMaxTicks = 15 ;Used with Automatic mode. Sets the maximum number of tick marks that will be chosen.
+res2@tmYLMinorOn = False
+res2@tmYLMode            = "Explicit"
+res2@tmYLValues          = (/-80,-60,-40,-20,0,20,40,60,80/)
+res2@tmYLLabels          = (/"80S","60S","40S","20S","0","20N","40N","60N","80N"/)
+res2@tmYMajorGrid      = True
+res2@tmYMajorGridLineDashPattern = 2
+res2@tmYMajorGridLineColor = "grey55"
+res2@tmXMajorGrid      = res2@tmYMajorGrid
+res2@tmXMajorGridLineDashPattern = res2@tmYMajorGridLineDashPattern
+res2@tmXMajorGridLineColor = res2@tmYMajorGridLineColor
+res2@tmXBLabelFontHeightF = 0.015
+res2@tmYLLabelFontHeightF = res2@tmXBLabelFontHeightF
 
-  res2@gsnLeftString = "CESM2-CESM1"
+res2@gsnRightString = "SW"
+  res2@gsnLeftString = "CESM2 - CESM1"
   plot2(0) = gsn_csm_time_lat(wks, dclm1(lat|:,year|:), res2)
 
-  res2@gsnLeftString =  "CESM2-CESM2 with CMIP5 forcing"
+  res2@gsnLeftString =  "CESM2 - CESM2 with CMIP5 forcing"
   plot2(1) = gsn_csm_time_lat(wks, dclm2(lat|:,year|:), res2)
 
 delete(res2)
@@ -186,14 +202,14 @@ delete(res2)
 
 resk = True
 ;resk@txFontHeightF = 0.03
-resk@gsnPanelLabelBar   = True                 ; add common colorbar
+resk@gsnPanelLabelBar   = False                 ; add common colorbar
 resk@gsnMaximize = True
 resk@gsnPaperOrientation = "portrait"   ; force portrait
 resk@lbBoxEndCapStyle = "TriangleBothEnds"
-resk@lbOrientation = "Horizontal"
+resk@lbOrientation = "Vertical"
 resk@lbBoxLinesOn = False
 resk@lbTitleString    = "W/m2"                ; title string
-resk@lbTitlePosition  = "Right"              ; title position
+resk@lbTitlePosition  = "Top"              ; title position
 resk@lbLabelStride    = 2
 resk@lbTitleDirection = "Across"
 ;resk@lbBoxMinorExtentF = 0.2

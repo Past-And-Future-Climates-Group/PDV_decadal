@@ -1,61 +1,59 @@
-; load "./function_bootstrap_mme.ncl"
-load "/Users/xingchen/Documents/project/PDV/program/function_bootstrap_mme.ncl"
+load "./function_bootstrap_mme.ncl"
+; load "/Users/xingchen/Documents/project/PDV/program/function_bootstrap_mme.ncl"
 begin
 
-diri = "/Users/xingchen/Documents/project/PDV/data/" ;"/glade/work/chenxing/enso/";
-dirip = "/Users/xingchen/Documents/project/PDV/pic/" ;"/glade/u/home/chenxing/enso/";
+diri = "/glade/work/chenxing/enso/";"/Users/xingchen/Documents/project/PDV/data/" ;
+dirip = "/glade/u/home/chenxing/enso/";"/Users/xingchen/Documents/project/PDV/pic/" ;
 
 ;CMIP5 MODELS
-MODEL5 = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","BNU-ESM","CanESM2","CCSM4","CESM1-BGC",\;
-      "CESM1-CAM5","CESM1-FASTCHEM","CESM1-WACCM","CMCC-CESM","CMCC-CM","CMCC-CMS",\
-      "CNRM-CM5","CNRM-CM5-2","CSIRO-Mk3-6-0","FGOALS-g2","FGOALS-s2","FIO-ESM","GFDL-CM2p1","GFDL-CM3",\;
-      "GFDL-ESM2G","GFDL-ESM2M","GISS-E2-H-CC","GISS-E2-H","GISS-E2-R-CC","GISS-E2-R","HadCM3","HadGEM2-AO",\;
-      "HadGEM2-CC","HadGEM2-ES","inmcm4","IPSL-CM5A-LR","IPSL-CM5A-MR","IPSL-CM5B-LR","MIROC5",\
-      "MIROC-ESM-CHEM","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MPI-ESM-P","MRI-CGCM3","MRI-ESM1",\;
-      "NorESM1-ME","NorESM1-M"/)
+; MODEL5 = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","BNU-ESM","CanESM2","CCSM4","CESM1-BGC",\;
+;       "CESM1-CAM5","CESM1-FASTCHEM","CESM1-WACCM","CMCC-CESM","CMCC-CM","CMCC-CMS",\
+;       "CNRM-CM5","CNRM-CM5-2","CSIRO-Mk3-6-0","FGOALS-g2","FGOALS-s2","FIO-ESM","GFDL-CM2p1","GFDL-CM3",\;
+;       "GFDL-ESM2G","GFDL-ESM2M","GISS-E2-H-CC","GISS-E2-H","GISS-E2-R-CC","GISS-E2-R","HadCM3","HadGEM2-AO",\;
+;       "HadGEM2-CC","HadGEM2-ES","inmcm4","IPSL-CM5A-LR","IPSL-CM5A-MR","IPSL-CM5B-LR","MIROC5",\
+;       "MIROC-ESM-CHEM","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MPI-ESM-P","MRI-CGCM3","MRI-ESM1",\;
+;       "NorESM1-ME","NorESM1-M"/)
+
+MODEL5 = (/"CNRM-CM5", "CSIRO-Mk3-6-0", "GFDL-CM2p1","HadCM3", "CCSM4","GISS-E2-H","GISS-E2-R", \;
+             "IPSL-CM5A-LR", "CanESM2", "GFDL-CM3","MIROC5","CESM1-CAM5","HadGEM2-ES",\
+             "ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","CESM1-FASTCHEM","FGOALS-g2",\
+             "FGOALS-s2","FIO-ESM","IPSL-CM5A-MR","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MRI-CGCM3","NorESM1-M"/);"GFDL-CM3",
 
 
 ; CMIP6 MODELS
-MODEL6 = (/"BCC-CSM2-MR","BCC-ESM1","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5",
-        "CESM2","CESM2-WACCM-FV2",\
-        "CESM2-WACCM","E3SM-1-0","FGOALS-g3","FIO-ESM-2-0","GFDL-CM4","GFDL-ESM4",\;"E3SM-1-1","FGOALS-f3-L",
-        "GISS-E2-1-G","GISS-E2-1-H","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC",
-        "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NESM3","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM",
+; MODEL6 = (/"BCC-CSM2-MR","BCC-ESM1","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5",
+;         "CESM2","CESM2-WACCM-FV2",\
+;         "CESM2-WACCM","E3SM-1-0","FGOALS-g3","FIO-ESM-2-0","GFDL-CM4","GFDL-ESM4",\;"E3SM-1-1","FGOALS-f3-L",
+;         "GISS-E2-1-G","GISS-E2-1-H","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC",
+;         "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NESM3","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM",
+
+MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0","GISS-E2-1-H",\;
+  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0","NESM3",\
+  "BCC-CSM2-MR","BCC-ESM1","CESM2-FV2","CESM2-WACCM-FV2","CESM2-WACCM","FGOALS-g3","FIO-ESM-2-0","NorESM2-LM" /) ;large ensemble model in CMIP6
 
 
-; ;include all model even its ens is 1
-; MODEL5_PLUS = (/"ACCESS1-0","ACCESS1-3","CanESM2","CESM1-CAM5","CNRM-CM5","CSIRO-Mk3-6-0","FGOALS-g2", "HadGEM2-CC",\;,"GFDL-CM3"
-;           "HadGEM2-ES","IPSL-CM5A-LR","IPSL-CM5A-MR","MIROC5","MIROC-ESM-CHEM","MIROC-ESM",\
-;           "MRI-CGCM3","NorESM1-ME", "NorESM1-M"/) ;explicitly have aerosol interaction included in CMIP5
-;
-; MODEL5_MINUS = (/"bcc-csm1-1","BNU-ESM","CCSM4","CESM1-BGC","CESM1-FASTCHEM","CESM1-WACCM",\
-;               "CMCC-CESM","CMCC-CM","CMCC-CMS","FGOALS-s2","GFDL-CM2p1", "GFDL-ESM2G","MPI-ESM-LR",\
-;               "HadCM3","inmcm4","MPI-ESM-MR","MPI-ESM-P"  /) ;explicitly no aerosol interaction included in CMIP5 "GFDL-ESM2M",
-;
-; MODEL5 = (/"CNRM-CM5", "CSIRO-Mk3-6-0", "GFDL-CM2p1","HadCM3", "CCSM4", \;"GISS-E2-H","GISS-E2-R",
-;              "IPSL-CM5A-LR"/);, "CanESM2", "MIROC5","CESM1-CAM5","HadGEM2-ES",\
-;              ; "ACCESS1-0","ACCESS1-3","bcc-csm1-1","CESM1-FASTCHEM","FGOALS-g2",\
-;              ; "FGOALS-s2","FIO-ESM","IPSL-CM5A-MR","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MRI-CGCM3","NorESM1-M"/);"GFDL-CM3",
-; nens5 = (/10,10,10,8,6,\;6,6,
-;          6/);,5,5,4,4,\
-;          ; 3,3,3,3,3,3,3,\
-;          ; 3,3,3,3,3,3 /);5,
-;
-;
-;
-; MODEL6 = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0","MIROC6",\;"GISS-E2-1-H",
-;   "MPI-ESM1-2-LR","MPI-ESM1-2-HR"/);,"MRI-ESM2-0","E3SM-1-0",\
-;     ; "BCC-CSM2-MR","CESM2-FV2","CESM2-WACCM-FV2",\
-;     ;      "CESM2-WACCM","FIO-ESM-2-0","NorESM2-LM" /) ;large ensemble model in CMIP6 "NESM3",
-;
-; nens6 = (/32,30,25,12,11, 10, 10,\;10,
-;           10,7/);,5,5,\
-;           ; 3,3,3,\
-;           ; 3,3,3 /) ;ensemble number 5,
-;
+
+MODEL5_PLUS = (/"ACCESS1-0","ACCESS1-3","CanESM2","CESM1-CAM5","CNRM-CM5","CSIRO-Mk3-6-0","GFDL-CM3",\;
+          "HadGEM2-ES","IPSL-CM5A-LR","IPSL-CM5A-MR","MIROC5","MIROC-ESM",\
+          "MRI-CGCM3","NorESM1-M"/) ;explicitly have aerosol interaction included in CMIP5
+
+MODEL5_MINUS = (/"bcc-csm1-1","CCSM4","CESM1-FASTCHEM","FGOALS-s2","FIO-ESM","GFDL-CM2p1","HadCM3",\;
+          "MPI-ESM-LR","MPI-ESM-MR"  /) ;explicitly no aerosol interaction included in CMIP5 "GFDL-ESM2M",
+
+
+i5y = new(dimsizes(MODEL5_PLUS), "integer")
+do i = 0,dimsizes(MODEL5_PLUS)-1
+  i5y(i) = ind(MODEL5.eq.MODEL5_PLUS(i))
+end do
+i5n = new(dimsizes(MODEL5_MINUS), "integer")
+do i = 0,dimsizes(MODEL5_MINUS)-1
+  i5n(i) = ind(MODEL5.eq.MODEL5_MINUS(i))
+end do
+print("say yes "+i5y)
+print("say no "+i5n)
 
 yrs5 = 1861
-yrl5 = 2004
+yrl5 = 2005
 nyr5 = yrl5 - yrs5 +1
 yrs6 = 1850
 yrl6 = 2014
@@ -66,7 +64,7 @@ EXP5 = "historical";"historicalNat" ;"historicalGHG" ;
 EXP6 = "historical";"hist-aer";"hist-Nat" ;"hist-GHG" ;
 
 ;don't filter pdv pc, it's already filtered, double filter will shortern data...
-IND = "PDI2" ;"EACSS" ;"EAS" ;"PDI2" ; "NPCSS" ;"NPC" ;"NPS" ;"NPAOD" ;"PDI2";"TPI" ;"NPI" ;"AMO" ;"pdo" ;"nh-sh" ;"GMAOD" ;"GMSW" ;
+IND = "PDI" ;"EACSS" ;"EAS" ;"PDI2" ; "NPCSS" ;"NPC" ;"NPS" ;"NPAOD" ;"PDI2";"TPI" ;"NPI" ;"AMO" ;"pdo" ;"nh-sh" ;"GMAOD" ;"GMSW" ;
 MODEL = MODEL5;MODEL6;
 icmip = 5;6 ;
 
@@ -77,13 +75,13 @@ yrl = 2004; 2014;
 nmo5 = dimsizes(MODEL5)
 nmo6 = dimsizes(MODEL6)
 
-pc5_all = new((/nmo5,10,(yrl5-yrs5+1)*12/), "float")
+pc5_hist = new((/nmo5,10,(yrl5-yrs5+1)*12/), "float")
 
 do im = 0,nmo5-1
 
-;from pdv_cmip5_hist.ncl
+;from cmip_index.ncl
 ;cmip5_historical_CanESM2_r4i1p1_pdv_1861-2004.nc
-locs = systemfunc("ls "+diri+"cmip5/pdv/cmip5_historical_"+MODEL5(im)+"_*_pdv_"+yrs5+"-"+yrl5+".nc")
+locs = systemfunc("ls "+diri+"cmip5/PDI/cmip5_historical_"+MODEL5(im)+"_*_PDI_"+yrs5+"-"+yrl5+".nc")
 ; printVarSummary(locs)
 ; print(locs)
 nsa = dimsizes(locs)
@@ -110,24 +108,24 @@ do ia = 0,nsa-1
    f   = addfile(file_name, "r")
    end if
 
-  pc5_all(im,ia,:)  = f->index;pc(0,:);gmst;
+  pc5_hist(im,ia,:)  = f->index;pc(0,:);gmst;
 
-; print(""+pc5_all(im,ia,(1890-1861)*12))
+; print(""+pc5_hist(im,ia,(1890-1861)*12))
 
 end do
 ; end if
 delete(locs)
 end do
-printVarSummary(pc5_all)
+printVarSummary(pc5_hist)
 
 
 ;CMIP6
 pc6_all = new((/nmo6,32,(yrl6-yrs6+1)*12/), "float")
 do im = 0,nmo6-1
 
-;from pdv_cmip5_hist.ncl
+;from cmip_index.ncl
 ;cmip5_historical_CanESM2_r4i1p1_pdv_1861-2004.nc
-locs = systemfunc("ls "+diri+"cmip6/pdv/cmip6_historical_"+MODEL6(im)+"_*_pdv_"+yrs6+"-"+yrl6+".nc")
+locs = systemfunc("ls "+diri+"cmip6/PDI/cmip6_historical_"+MODEL6(im)+"_*_PDI_"+yrs6+"-"+yrl6+".nc")
 printVarSummary(locs)
 print(locs)
 nsa = dimsizes(locs)
@@ -165,6 +163,64 @@ end do
 
 printVarSummary(pc6_all)
 
+;;--- rcp85 for cmip5 -----
+;; append rcp85 (2006-2014) to historical for cmip5
+pc5_rcp = new((/nmo5,10,(2014-2006+1)*12/), "float")
+
+do im = 0,nmo5-1
+
+;from cmip_index.ncl
+exists = isfilepresent(diri+"cmip5/PDI/cmip5_rcp85_"+MODEL5(im)+"_r1i1p1_PDI_2006-2014.nc")
+if(.not.exists) then
+  continue
+else
+  locs = systemfunc("ls "+diri+"cmip5/PDI/cmip5_rcp85_"+MODEL5(im)+"_*_PDI_2006-2014.nc")
+
+nsa = dimsizes(locs)
+
+; if(.not.ismissing(locs)) then
+do ia = 0,nsa-1
+
+  ; print("MODEL5 "+MODEL5(im))
+  locs_str = str_split(locs(ia), "_"); "/")
+  ; print("'" + locs_str + "'")
+  ENSN  = locs_str(3)
+  print(MODEL5(im)+" ens "+ENSN)
+  delete(locs_str)
+
+   file_name = diri+"cmip5/"+IND+"/cmip5_rcp85_"+MODEL5(im)+"_"+ENSN+"_"+IND+"_2006-2014.nc"
+   exists = isfilepresent(file_name)
+   if(.not.exists) then
+     ; print(MODEL5(im)+" ens "+ENSN+" file not exist")
+     ; print("Either the file doesn't exist, or NCL does")
+     ; print("not have OPeNDAP cabilities on this system.")
+     continue
+   else
+    ; print(file_name)
+   f   = addfile(file_name, "r")
+   end if
+
+  pc5_rcp(im,ia,:)  = f->index;pc(0,:);index;gmst;
+
+; print(""+pc5_rcp(im,ia,(1890-1861)*12))
+
+end do
+end if
+delete(locs)
+end do
+printVarSummary(pc5_rcp)
+
+pc5_hist!0 = "model"
+pc5_hist!1 = "ensemble"
+pc5_rcp!0 = "model"
+pc5_rcp!1 = "ensemble"
+pc5_rcp = pc5_rcp + avg(pc5_hist(:,:,(2006-1861)*12-1)) - avg(pc5_rcp(:,:,0)) ;modify climatology
+pp = array_append_record(pc5_hist(time|:,model|:,ensemble|:),pc5_rcp(time|:,model|:,ensemble|:),0)
+printVarSummary(pp)
+pc5_all = pp(model|:,ensemble|:,time|:)
+printVarSummary(pc5_all)
+delete(pp)
+
 ;don't filter pdv index twice!!!
 ;------------filter----------------------
 fyr   = 8.
@@ -193,26 +249,33 @@ cp6 = dim_avg_n_Wrap(pc6_all,1)
 com_pc5 = dim_avg_n_Wrap(cp5,0)
 com_pc6 = dim_avg_n_Wrap(cp6,0)
 
+cp5_plus_a = dim_avg_n_Wrap(dim_avg_n_Wrap(pc5_all(i5y,:,:), 1),0) ;dim_avg_n_Wrap(pc5_all(i5y,:,:), (/0,1/)) ;PLUS group MME
+cp5_minus_a = dim_avg_n_Wrap(dim_avg_n_Wrap(pc5_all(i5n,:,:), 1),0) ;dim_avg_n_Wrap(pc5_all(i5n,:,:), (/0,1/)) ;MINUS group MME
+
+com_pc5 = com_pc5 + avg(com_pc5((2006-1861)*12-1)) - avg(com_pc5((2006-1861)*12)) ;modify climatology
+
 ; ;1. averaged STD across ensembles
 cs_a = dim_stddev_n_Wrap(pc5_all, (/0,1/)) ;com_std, 0)
 
 
 std_5 = dim_stddev_n_Wrap(pc5_all,(/1/))
 std_6 = dim_stddev_n_Wrap(pc6_all,(/1/))
-; ;--------output-------------
-; fon=diri+"cmip5_"+EXP5+"_"+IND+"_mme.nc";
-; system("rm -f "+fon)
-; fo=addfile(fon,"c")
-; fo->cp5_a = cp5_a
-; fo->cp5_a2 = cp5_a2
-; fo->std_5 = std_5
+;--------output-------------
+fon=diri+"cmip5_"+EXP5+"_"+IND+"_mme.nc";
+system("rm -f "+fon)
+fo=addfile(fon,"c")
+fo->cp5_a = cp5_a
+fo->cp5_a2 = com_pc5
+fo->cp5_plus_a = cp5_plus_a
+fo->cp5_minus_a = cp5_minus_a
+fo->std_5 = std_5
 
-; fon=diri+"cmip6_"+EXP6+"_"+IND+"_mme.nc";
-; system("rm -f "+fon)
-; fo=addfile(fon,"c")
-; fo->cp6_a = cp6_a
-; fo->cp6_a2 = cp6_a2
-; fo->std_6 = std_6
+fon=diri+"cmip6_"+EXP6+"_"+IND+"_mme.nc";
+system("rm -f "+fon)
+fo=addfile(fon,"c")
+fo->cp6_a = cp6_a
+fo->cp6_a2 = com_pc6
+fo->std_6 = std_6
 
 
 ; ; ;-----------BootStrap---------------------
@@ -253,7 +316,7 @@ std_6 = dim_stddev_n_Wrap(pc6_all,(/1/))
 
 ;--------------plot-------------------
 
-wks = gsn_open_wks("png", "./pic/cmip_xy");dirip
+wks = gsn_open_wks("png", dirip+"cmip_xy");
 wks2 = gsn_open_wks("png", dirip+"test");
 plot1 = new(10,graphic)                ; create graphic array
 plot2 = new(10,graphic)                ; create graphic array
@@ -295,7 +358,7 @@ plot4 = new(10,graphic)                ; create graphic array
   ; res@gsnRightStringFontHeightF = 0.03
 
   ndim5  = dimsizes(pc5_all)
-  x_axis5 = fspan(yrs5, yrl5, ndim5(2))
+  x_axis5 = fspan(yrs5, yrl6, ndim5(2))
   ndim6  = dimsizes(pc6_all)
   x_axis6 = fspan(yrs6, yrl6, ndim6(2))
   x_axis1 = ispan(yrs, yrl, 1)
@@ -326,8 +389,8 @@ res@gsnRightString = pc5_all@units
   ; MME
   ;---------------
 
-  res@trYMinF               = -0.4
-  res@trYMaxF               =  0.4
+  res@trYMinF               = -0.6
+  res@trYMaxF               =  0.6
 
   res@gsnLeftString = ""
   res@xyLineColors = "blue"

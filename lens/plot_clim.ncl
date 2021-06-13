@@ -5,8 +5,8 @@ dirip = "/glade/u/home/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/p
 setfileoption("nc","SuppressClose",False)
 sign = (/"a","b","c","d","e","f","g" /)
 
-VAR = "rsds";"rsds";"ts";"clt" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
-VAR1 ="FSNS"; "FSNS" ;"ts"; SWCF exactly the same as cloudeffect result; LWCF represent covective cloud effect the most, around the tropics
+VAR = "ts";"rsds";"ts";"clt" ;"od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
+VAR1 ="ts"; "FSNS" ;"ts"; SWCF exactly the same as cloudeffect result; LWCF represent covective cloud effect the most, around the tropics
 EXP = "historical"
 
 yrs = (/1950,1991/)
@@ -28,8 +28,6 @@ print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
 clm1  =  dim_avg_n_Wrap(f[:]->aclim, 0) ;clim
-; clm1 = clm1 - 273.15
-; clm1@units = "C"
 delete([/fils,f/])
 printVarSummary(clm1)
 ;;;CESM2 with CMIP5 forcing;;;;;;;;;;;;;;
@@ -41,8 +39,6 @@ print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
 clm3  = dim_avg_n_Wrap(f[:]->aclim, 0)
-; clm3 = clm3 - 273.15
-; clm3@units = "C"
 delete([/fils,f/])
 printVarSummary(clm3)
 
@@ -52,14 +48,18 @@ fils = systemfunc("ls "+diri+"lens6/CESM2*_clim_historical_"+VAR+"_"+yrs(i)+"-"+
 print(fils)
 f   = addfiles(fils, "r")  ;multiple files
 ListSetType (f, "join")
-; clm2  = dim_avg_n_Wrap(f[:]->aclim, 0)
-clm2_d  = dim_avg_n_Wrap(f[:]->aclim, 0)
-fils2 = systemfunc("ls "+diri+"lens6/CESM2*_clim_historical_rsus_"+yrs(i)+"-"+yrl(i)+".nc")
-f2   = addfiles(fils2, "r")  ;multiple files
-ListSetType (f2, "join")
-clm2_u  = dim_avg_n_Wrap(f2[:]->aclim, 0)
-clm2 = clm2_d
-clm2 = clm2_d - clm2_u
+
+; for single variable
+clm2  = dim_avg_n_Wrap(f[:]->aclim, 0)
+
+; ; for SW with rsds rsus ...
+; clm2_d  = dim_avg_n_Wrap(f[:]->aclim, 0)
+; fils2 = systemfunc("ls "+diri+"lens6/CESM2*_clim_historical_rsus_"+yrs(i)+"-"+yrl(i)+".nc")
+; f2   = addfiles(fils2, "r")  ;multiple files
+; ListSetType (f2, "join")
+; clm2_u  = dim_avg_n_Wrap(f2[:]->aclim, 0)
+; clm2 = clm2_d
+; clm2 = clm2_d - clm2_u
 
 delete([/fils,f/])
 
@@ -155,6 +155,12 @@ res2@mpFillDrawOrder = "PostDraw"
  ; res2@mpMinLatF                   = SLAT
  ; res2@mpMaxLonF                   = ELON
  ; res2@mpMinLonF                   = WLON
+ res2@gsnMajorLatSpacing = 20
+ res2@tmXBMinorOn        = False           ; no lon minor tickmarks
+ res2@tmXBLabelFontHeightF = 0.018         ; change maj lat tm spacing
+ res2@tmYLLabelFontHeightF = res2@tmXBLabelFontHeightF
+ res2@gsnMajorLonSpacing = 50              ; change maj lon tm spacing
+
 res2@gsnAddCyclic = True ;False
 res2@cnFillOn = True;False ;
 res2@cnLinesOn = False;True ;
@@ -177,8 +183,8 @@ res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 ; res2@pmLabelBarWidthF = 0.05
 
 res2@cnLevelSelectionMode  = "ManualLevels"
-res2@cnMinLevelValF        = -8.
-res2@cnMaxLevelValF        =  8.
+res2@cnMinLevelValF        = -1.
+res2@cnMaxLevelValF        =  1.
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 res2@gsnLeftString = "CESM1"
@@ -196,16 +202,16 @@ plot(i+4) = gsn_csm_contour_map_ce(wks, clm2, res2)
 ; res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 
-  res2@gsnLeftString = sign(i)+" CESM2-CESM1"
+  res2@gsnLeftString = " CESM2-CESM1";sign(i)+
   plot2(i+0) = gsn_csm_contour_map_ce(wks, dx1, res2)
 
-  res2@gsnLeftString =  sign(i+3)+" CMIP6-CMIP5 forcing (CESM2)"
+  res2@gsnLeftString =  " CMIP6-CMIP5 forcing (CESM2)";sign(i+3)+
   plot2(i+3) = gsn_csm_contour_map_ce(wks, dx2, res2)
 
   res2@gsnRightString = ""
-  res2@gsnLeftString = sign(2)+" (b)-(a)"
+  res2@gsnLeftString = " (b)-(a)";sign(2)+
   plot2(2) = gsn_csm_contour_map_ce(wks, dtx1, res2)
-  res2@gsnLeftString = sign(5)+" (e)-(d)"
+  res2@gsnLeftString = " (e)-(d)";sign(5)+
   plot2(5) = gsn_csm_contour_map_ce(wks, dtx2, res2)
 
 delete(res2)
@@ -220,7 +226,7 @@ resk@gsnPaperOrientation = "portrait"   ; force portrait
 resk@lbBoxEndCapStyle = "TriangleBothEnds"
 resk@lbOrientation = "Horizontal"
 resk@lbBoxLinesOn = False
-resk@lbTitleString    = "W/m2"                ; title string
+resk@lbTitleString    =  "K" ;"W/m2"                ; title string
 resk@lbTitlePosition  = "Right"              ; title position
 resk@lbLabelStride    = 2
 resk@lbTitleDirection = "Across"
@@ -234,6 +240,6 @@ resk@lbLabelFontHeightF = 0.01  ;Default: 0.02
 resk@txString = VAR+" period changes"
 gsn_panel(wks,plot,(/3,2/),resk)
 gsn_panel(wks,plot2,(/2,3/),resk)
-gsn_panel(wks,(/plot2(2),plot2(3)/),(/2,1/),resk)
+gsn_panel(wks,(/plot2(3),plot2(4)/),(/1,2/),resk)
 
 end

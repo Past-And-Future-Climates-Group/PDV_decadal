@@ -5,10 +5,10 @@ dirip = "/glade/u/home/chenxing/enso/"
 
 V_CMIP = 5
 VAR = "tas" ;"od550aer" ;"netsw" ;"ts" ;"netcssw" ;"cloudeffect" ;"psl" ; "tas"
-EXP = "histrcp85";"rcp85" ;"historical";"hist-nat" ;"hist-GHG" ;"hist-aer" ;"historicalGHG" ;"historicalNat" ;
+EXP = "rcp85";"rcp85" ;"historical";"hist-nat" ;"hist-GHG" ;"hist-aer" ;"historicalGHG" ;"historicalNat" ;
 
-  yrs = 1861;2006 ;1861;
-  yrl = 2014;2014 ;2005;
+  yrs = 2006 ; 2006 ;1861;
+  yrl = 2014 ; 2020 ;2004;
   ; yrs = 1850
   ; yrl = 2014
   ymstrt= yrs*100+1
@@ -51,15 +51,13 @@ print(MODEL(im)+" ens "+ENSN(im))
 TIME2=f[:]->time
 yyyymm2=cd_calendar(TIME2, -1)
 printMinMax(yyyymm2, True)
-if(MODEL(im).eq."HadGEM2-CC".or.MODEL(im).eq."HadGEM2-ES") then
+if(MODEL(im).eq."HadGEM2-CC".and.EXP.eq."historical".or.MODEL(im).eq."HadGEM2-ES") then
   ymstrts = ind(yyyymm2.eq.ymstrt-89)
   ymlasts = ind(yyyymm2.eq.ymlast-1)
 else
-  ymstrts = ind(yyyymm2.eq.ymstrt)
-  ymlasts = ind(yyyymm2.eq.ymlast)
+ymstrts = ind(yyyymm2.eq.ymstrt)
+ymlasts = ind(yyyymm2.eq.ymlast)
 end if
-; ycstrts = ind(yyyymm2.eq.197501)
-; yclasts = ind(yyyymm2.eq.200412)
 print(ymstrts+" <--start end--> "+ymlasts)
 
     xx  = f[:]->$VAR$(ymstrts:ymlasts,:,:);ce;
@@ -67,10 +65,10 @@ print(ymstrts+" <--start end--> "+ymlasts)
 ; ;climatology is 1975-2005
 ; xc = clmMonTLL(f[:]->$VAR$(ycstrts:yclasts,:,:))
 ; xa = calcMonAnomTLL(xx, xc)
-xa = rmMonAnnCycTLL(xx)
+; xa = rmMonAnnCycTLL(xx)
 ; xa = dtrend_msg_n(xa&time, xa, True, False, 0)
 
-xa_sea = xa
+xa_sea = xx
 delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
 ; ;-------------------------------------
 ; ;cover land data; do this first!!
@@ -130,27 +128,13 @@ delete([/fils,f,TIME2,yyyymm2/]);,lat,lon
   gmst@long_name = "PDI" ;
 
 
-; ;------------filter----------------------
-; fyr   = 8.
-; ihp   = 0                             ; low-pass filter: ihp = 0; high-pass ihp = 1; band-pass ihp = 2.
-; sigma = 1.0                           ; Lanczos sigma
-; nWgt  = toint(fyr*12*2+1) ;fyr)+1 ;                           ; odd only
-; fca   = 1./(fyr*12););
-; fcb   = -999.
-; wgt  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-
-; gmst = wgt_runave_n_Wrap( gmst, wgt,  -1, 0 )   ;opt < 0 : utilize cyclic conditions
-
-; gmst = dtrend_msg_n(gmst&time, gmst, True, False, 0)
-
-
 ;--------output-------------
 fon=diri+"cmip"+V_CMIP+"/PDI/cmip"+V_CMIP+"_"+EXP+"_"+MODEL(im)+"_"+ENSN(im)+"_PDI_"+yrs+"-"+yrl+".nc";
 system("rm -f "+fon)
 fo=addfile(fon,"c")
 fo->index = gmst
 
-delete([/xx, xa,xa_sea,clat,lat,gmst,gmst1,gmst2/])
+delete([/xx, xa,xa_sea,clat,lat/])
 
 end do
 

@@ -6,8 +6,8 @@ WLON =  0;120;
 ELON =  360;290;
 
 
-diri = "/Users/xingchen/Documents/project/ENSO/data/" ;"/glade/work/chenxing/enso/";
-dirip = "/Users/xingchen/Documents/project/ENSO/pic/" ;"/glade/u/home/chenxing/enso/";
+diri  = "/glade/work/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/data/" ;
+dirip = "/glade/u/home/chenxing/enso/";"/Users/xingchen/Documents/project/ENSO/pic/" ;
 neof = 2
 
 ;CMIP5 MODELS
@@ -44,15 +44,16 @@ MODEL_cmip6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2
 
 ; MODEL6_CM = (/"GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MIROC6","NorCPM1" /)
 
-yrs6 = 1850;1930;
+yrs6 = 1850;1920;
 yrl6 = 2014;
-yrs5 = 1861;1930;
+yrs5 = 1861;1920;
 yrl5 = 2004;
 
 
 ;---------read output---------------
-  f1   = addfile(diri+"cmip5/cmip5_historical_mme.eof_1861-2004.nc", "r")  ;multiple files
-  f2   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")  ;multiple files
+;from mme_eof_cmip.ncl
+  f1   = addfile(diri+"cmip5/cmip5_historical_mme.eof_"+yrs5+"-2005.nc", "r")  ;multiple files
+  f2   = addfile(diri+"cmip6/cmip6_historical_mme.eof_"+yrs6+"-2014.nc", "r")  ;multiple files
 
   rca5  = f1->rc
   pca5  = f1->pc
@@ -68,24 +69,24 @@ yrl5 = 2004;
   f1   = addfile(diri+"cmip5_historical_eof_global_od550aer_mme.nc", "r")  ;multiple files
   f2   = addfile(diri+"cmip6_historical_eof_global_od550aer_mme.nc", "r")  ;multiple files
 
-  ado5  = f1->pc(0,:)
-  ado6  = f2->pc(0,:)
+  ado5  = dim_rmvmean_Wrap( f1->pc(0,(yrs5-1861)*12:))
+  ado6  = dim_rmvmean_Wrap( f2->pc(0,(yrs6-1850)*12:))
 
 ;-------GMST----------------------------
 
   f1   = addfile(diri+"cmip5_historical_GMST_mme.nc", "r")
-  gmst5  = f1->cp5_a
+  gmst5  = dim_rmvmean_Wrap( f1->cp5_a((yrs5-1861)*12:))
   f1   = addfile(diri+"cmip6_historical_GMST_mme.nc", "r")
-  gmst6  = f1->cp6_a
+  gmst6  = dim_rmvmean_Wrap( f1->cp6_a((yrs6-1850)*12:))
 
 printVarSummary(gmst5)
 
 ;-------ASRHD----------------------------
 
   f1   = addfile(diri+"cmip5_historical_ASRHD_mme.nc", "r")
-  asrhd5  = f1->cp5_a
+  asrhd5  = dim_rmvmean_Wrap( f1->cp5_a((yrs5-1861)*12:))
   f1   = addfile(diri+"cmip6_historical_ASRHD_mme.nc", "r")
-  asrhd6  = f1->cp6_a
+  asrhd6  = dim_rmvmean_Wrap( f1->cp6_a((yrs6-1850)*12:))
 
 printVarSummary(asrhd5)
 
@@ -103,6 +104,9 @@ res2@gsnRightString = ""
 res2@mpCenterLonF = 180.
 res2@mpFillOn = False
 res2@mpFillDrawOrder = "PostDraw"
+res2@tmXBLabelFontHeightF = 0.02         ; change maj lat tm spacing
+res2@tmYLLabelFontHeightF = res2@tmXBLabelFontHeightF
+res2@gsnMajorLonSpacing = 50              ; change maj lon tm spacing
 ;  res2@mpMaxLatF                   = NLAT         ; choose subregion
 ;  res2@mpMinLatF                   = SLAT
 ;  res2@mpMaxLonF                   = ELON
@@ -128,8 +132,8 @@ res2@lbLabelFontHeightF = 0.01  ;Default: 0.02
 res2@pmLabelBarWidthF = 0.05
 
 res2@cnLevelSelectionMode  = "ManualLevels"
-res2@cnMinLevelValF        = -0.40
-res2@cnMaxLevelValF        =  0.40
+res2@cnMinLevelValF        = -0.50
+res2@cnMaxLevelValF        =  0.50
 res2@cnLevelSpacingF       =  res2@cnMaxLevelValF/10.
 
 do i = 0,neof-1
@@ -195,7 +199,7 @@ gsn_panel(wks,plot,(/2,2/),resk)
   res@gsnRightStringFontHeightF = 0.025
   res@gsnLeftStringOrthogonalPosF = -0.005
 
-  res@trXMinF               = 1850
+  res@trXMinF               = yrs6
   res@trXMaxF               = 2015
 
   res3 = res

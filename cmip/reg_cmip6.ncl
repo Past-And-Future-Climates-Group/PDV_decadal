@@ -3,7 +3,7 @@ diri = "/glade/work/chenxing/enso/"
 dirip = "/glade/u/home/chenxing/enso/"
 
 
-  yrs = 1850;1950;
+  yrs = 1850;1920;1950;
   yrl = 2014
   ymstrt= yrs*100+1
   ymlast= yrl*100+12
@@ -14,16 +14,57 @@ diri2 = "/glade/work/chenxing/CMIP6/historical/remap/tos/"
 diri3 = "/glade/scratch/chenxing/cmip6/"
 SEASON = (/"DJF","MAM","JJA","SON" /)
 
-MODEL6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5","BCC-ESM1",
-        "CESM2","CESM2-WACCM-FV2",\
-        "CESM2-WACCM","E3SM-1-0","FIO-ESM-2-0","GFDL-CM4",\;"E3SM-1-1","FGOALS-f3-L","FGOALS-g3","GFDL-ESM4",
-        "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
-        "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
+; MODEL6 = (/"BCC-CSM2-MR","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5","BCC-ESM1",
+;         "CESM2","CESM2-WACCM-FV2",\
+;         "CESM2-WACCM","E3SM-1-0","FIO-ESM-2-0","GFDL-CM4",\;"E3SM-1-1","FGOALS-f3-L","FGOALS-g3","GFDL-ESM4",
+;         "GISS-E2-1-G","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC","GISS-E2-1-H",
+;         "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM","NESM3",
+;
+; MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
+;   "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
+; nens6 = (/32,30,25,12,11, 10, 10,\;10,
+;           10,7,5,5 /) ;ensemble number 5,
 
-MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0",\;"GISS-E2-1-H",
-  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0" /) ;large ensemble model in CMIP6 "NESM3",
-nens6 = (/32,30,25,12,11, 10, 10,\;10,
-          10,7,5,5 /) ;ensemble number 5,
+; ;CMIP5 MODELS
+MODEL5 = (/"ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","BNU-ESM","CanESM2","CCSM4","CESM1-BGC",\;
+      "CESM1-CAM5","CESM1-FASTCHEM","CESM1-WACCM","CMCC-CESM","CMCC-CM","CMCC-CMS",\
+      "CNRM-CM5","CNRM-CM5-2","CSIRO-Mk3-6-0","FGOALS-g2","FGOALS-s2","FIO-ESM","GFDL-CM2p1","GFDL-CM3",\;
+      "GFDL-ESM2G","GFDL-ESM2M","GISS-E2-H-CC","GISS-E2-H","GISS-E2-R-CC","GISS-E2-R","HadCM3","HadGEM2-AO",\;
+      "HadGEM2-CC","HadGEM2-ES","inmcm4","IPSL-CM5A-LR","IPSL-CM5A-MR","IPSL-CM5B-LR","MIROC5",\
+      "MIROC-ESM-CHEM","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MPI-ESM-P","MRI-CGCM3","MRI-ESM1",\;
+      "NorESM1-ME","NorESM1-M"/)
+
+MODEL5_LE = (/"CNRM-CM5", "CSIRO-Mk3-6-0", "GFDL-CM2p1","HadCM3", "CCSM4","GISS-E2-H","GISS-E2-R", \;
+             "IPSL-CM5A-LR", "CanESM2", "GFDL-CM3","MIROC5","CESM1-CAM5","HadGEM2-ES",\
+             "ACCESS1-0","ACCESS1-3","bcc-csm1-1-m","bcc-csm1-1","CESM1-FASTCHEM","FGOALS-g2",\
+             "FGOALS-s2","FIO-ESM","IPSL-CM5A-MR","MIROC-ESM","MPI-ESM-LR","MPI-ESM-MR","MRI-CGCM3","NorESM1-M"/);
+nens5 = (/10,10,10,8,6,6,6,6,6,\
+         6,5,5,5,4,4,\
+         3,3,3,3,3,3,3,3,\
+         3,3,3,3,3,3 /);5,
+
+M5_YES = (/"ACCESS1-0","ACCESS1-3","CanESM2","CESM1-CAM5","CNRM-CM5","CSIRO-Mk3-6-0","GFDL-CM3",\;
+          "HadGEM2-ES","IPSL-CM5A-LR","IPSL-CM5A-MR","MIROC5","MIROC-ESM",\
+          "MRI-CGCM3","NorESM1-M"/) ;explicitly have aerosol interaction included in CMIP5
+
+M5_NO = (/"bcc-csm1-1","CCSM4","CESM1-FASTCHEM","FGOALS-s2","FIO-ESM","GFDL-CM2p1","HadCM3",\;
+          "MPI-ESM-LR","MPI-ESM-MR"  /) ;explicitly no aerosol interaction included in CMIP5 "GFDL-ESM2M",
+
+;; CMIP6 MODELS
+MODEL6 = (/"BCC-CSM2-MR","BCC-ESM1","CAMS-CSM1-0","CanESM5","CESM2-FV2",\ ;"ACCESS-CM2","ACCESS-ESM1-5",
+        "CESM2","CESM2-WACCM-FV2",\
+        "CESM2-WACCM","E3SM-1-0","FGOALS-g3","FIO-ESM-2-0","GFDL-CM4","GFDL-ESM4",\;"E3SM-1-1","FGOALS-f3-L",
+        "GISS-E2-1-G","GISS-E2-1-H","INM-CM5-0","IPSL-CM6A-LR","MCM-UA-1-0","MIROC6",\;"GISS-E2-1-G-CC",
+        "MPI-ESM1-2-HR","MPI-ESM1-2-LR","MRI-ESM2-0","NESM3","NorCPM1","NorESM2-LM","SAM0-UNICON"/);"MPI-ESM-1-2-HAM",
+
+MODEL6_LE = (/"IPSL-CM6A-LR","NorCPM1", "CanESM5", "GISS-E2-1-G","CESM2","INM-CM5-0","GISS-E2-1-H",\;
+  "MIROC6","MPI-ESM1-2-LR","MPI-ESM1-2-HR","MRI-ESM2-0","E3SM-1-0","NESM3",\
+  "BCC-CSM2-MR","BCC-ESM1","CESM2-FV2","CESM2-WACCM-FV2","CESM2-WACCM","FGOALS-g3","FIO-ESM-2-0","NorESM2-LM" /) ;large ensemble model in CMIP6
+
+nens6 = (/32,30,25,12,11, 10, 10,10,\;
+          10,7,5,5,5,\
+          3,3, 3,3,3,3,3,3/) ;ensemble number 5,
+
 
 i6le = new(dimsizes(MODEL6_LE), "integer")
 do i = 0,dimsizes(MODEL6_LE)-1
@@ -33,10 +74,10 @@ end do
 nm6 = dimsizes(MODEL6)
 nens_all = 32
 
-VAR = "cloudeffect" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"tas" ; "rsds" "va" ;"psl" ;
+VAR = "ts" ;"clt" ;"netsw" ;"netcssw","od550aer" ;"cloudeffect";"ts" ; "rsds" "va" ;"psl" ;
 EXP = "historical"
-IND = "mmeeof2" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
-AA = "mme" ; "s";
+IND = "PDI" ;"mmeeof2" ;"mmeeof1" ;"GMAOD" ;"PDI2" ;"PDI"; "AR1Di" ;"SLPAL" ;"pdv";"TNA"; "AR1varm"; "TNA";
+AA = "mme";"mme" ; "s";
 
 ; note, the max lag should not be more than N/4
 ccr1 = new((/nm6, 72,144 /), "float") ;cross correlation pattern
@@ -66,6 +107,8 @@ do ia = 0,nsa-1
     exists2 = isfilepresent(file_name2)
   if (AA.ne."mme") then
     if(.not.exists.or..not.exists2) then
+      print(file_name)
+      print(file_name2)
       print(MODEL6(im)+" ens "+ENSN+" file not exist")
       print("Either the file doesn't exist, or NCL does")
       print("not have OPeNDAP cabilities on this system.")
@@ -76,6 +119,8 @@ do ia = 0,nsa-1
     end if
   else
     if(.not.exists) then
+      print(file_name)
+      print(file_name2)
       print(MODEL6(im)+" ens "+ENSN+" file not exist")
       print("Either the file doesn't exist, or NCL does")
       print("not have OPeNDAP cabilities on this system.")
@@ -95,7 +140,7 @@ do ia = 0,nsa-1
   print(ymstrts+" <--start end--> "+ymlasts)
 
   if(VAR.eq."cloudeffect") then
-    xx  = f->ce(ymstrts:ymlasts,:,:);{85000},:,:);
+    xx  = f->ce(ymstrts:ymlasts,:,:);
   else
     xx  = f->$VAR$(ymstrts:ymlasts,:,:);{85000},:,:);
   end if
@@ -131,15 +176,15 @@ do ia = 0,nsa-1
   ; pc  = tofloat(f1->index((yrs-1850)*12:))
   ; ; pc  = dtrend(pc, 0)
 
-  ;global external forcing mode
-  ; from mme_eof_cmip6.ncl
-    f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
-    pc  = f1->pc(1,:)
+  ; ;global external forcing mode
+  ; ; from mme_eof_cmip6.ncl
+  ;   f1   = addfile(diri+"cmip6/cmip6_historical_mme.eof_1850-2014.nc", "r")
+  ;   pc  = f1->pc(1,(yrs-1850)*12:)
 
-  ; ; ;MME index
-  ; ;from plot_cmip_index_xy.ncl
-  ; f1 = addfile(diri+"cmip6_"+EXP+"_"+IND+"_mme.nc","r")
-  ; pc = f1->cp6_a
+  ; ;MME index
+  ;from plot_cmip_index_xy.ncl
+  f1 = addfile(diri+"cmip6_"+EXP+"_"+IND+"_mme.nc","r")
+  pc = f1->cp6_a
 
   pc_annual = month_to_annual(pc, 1)
   ; pc_sea = month_to_seasonN(pc, SEASON)

@@ -403,8 +403,8 @@ overlay(plot2(0), plota)
   lgres@vpHeightF          = 0.10           ; height of legend (NDC)
 
   lgres@lgDashIndexes = (/2,0,0,0/)
-  lgres@lgLineColors       = (/"coral1","grey55","gold1"/); ,"blue"/)
-  labels3 = (/" NH TS Diff(CMIP6/5forcing)"," Diff(CMIP6/5forcing)"," CESM2(CMIP5forcing|7)"/);,"CESM2(11)" /)
+  lgres@lgLineColors       = (/"coral1","green","gold1"/); ,"blue"/)
+  labels3 = (/" NH TS Diff(CMIP6/5forcing)"," Diff(CMIP6/5forcing)"," CESM2-CMIP5(7)"/);,"CESM2(11)" /)
   nitems3 = dimsizes(labels3)                 ; number of legend items
   lbid3 = gsn_create_legend(wks,nitems3,labels3,lgres)
   delete(lgres@lgLineColors)
